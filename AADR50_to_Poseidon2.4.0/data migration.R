@@ -1,14 +1,11 @@
-library(poseidonR)
 library(magrittr)
-library(readr)
-library(dplyr)
-library(tidyverse)
 
-anno <- readr::read_tsv("https://reichdata.hms.harvard.edu/pub/datasets/amh_repo/curated_releases/V50/V50.0/SHARE/public.dir/v50.0_1240K_public.anno",
-                        col_names = T ,
-                        show_col_types = F ,
-                        skip_empty_rows = F ,
-                        na = c("..", "", "n/a", "na")
+anno <- readr::read_tsv(
+  "https://reichdata.hms.harvard.edu/pub/datasets/amh_repo/curated_releases/V50/V50.0/SHARE/public.dir/v50.0_1240K_public.anno",
+  col_names = T ,
+  show_col_types = F ,
+  skip_empty_rows = F ,
+  na = c("..", "", "n/a", "na")
 )
 
 names(anno)[38] <- "contamLD"
@@ -20,35 +17,41 @@ names(anno)[11] <- "Full date"
 names(anno)[44] <- "Assesment reasoning"
 names(anno)[41] <- "Library type"
 
-#basic copy function
-`%copy%` <- function(dfnew, varr) {
+# basic column extraction function
+`%extract%` <- function(dfnew, varr) {
   if (varr %in% colnames(dfnew)) { dfnew[[varr]] } else { NA }
 }
 
-#replacing unnecessary strings with ""
+# replacing unnecessary strings with ""
 `%xcontam_parse%` <- function(dfnew,varr) {
-  if (varr %in% colnames(dfnew)) {as.numeric(gsub("n\\/a\\s\\(.*\\)",NA,dfnew[[varr]]))} else { NA }
+  if (varr %in% colnames(dfnew)) {
+    as.numeric(gsub("n\\/a\\s\\(.*\\)",NA,dfnew[[varr]]))
+  } else {
+    NA 
+  }
 }
 
-#simplifying data type
-'%data_type_parse%' <- function(dfnew,varr) {
-  if (varr %in% colnames(dfnew)) {ifelse(grepl("1240K",dfnew[[varr]],ignore.case=T),"1240K",
-                                         ifelse(grepl("^Shotgun",dfnew[[varr]]),"Shotgun",
-                                                ifelse(grepl("Reference.Genome",dfnew[[varr]],ignore.case=T),"Reference Genome",
-                                                       ifelse(grepl("^whole.genome.capture",dfnew[[varr]],ignore.case=T),"Whole Genome Capture","OtherCapture"))))}
-  else { NA }
+# helper function to compare to strings irrespective of case
+`%equalToLower%` <- function(a,b) {
+  tolower(a) == tolower(b)
 }
 
-#Above function using case_when
-'%data_type_parse2%' <- function(dfnew,varr) {
-  if(varr %in% colnames(dfnew))
-  {dplyr::case_when( dfnew[[varr]] == "^1240K" ~ "1240K",
-    dfnew[[varr]] == "^Shotgun" ~ "Shotgun",
-     dfnew[[varr]] == "Reference.Genome" ~ "Reference Genome" ,
-      dfnew[[varr]] == "^whole.genome.capture" ~ "Whole Genome Capture" ) }
+# translating the Data source column
+`%data_type_parse%` <- function(dfnew,varr) {
+  if(varr %in% colnames(dfnew)) {
+    dplyr::case_when( 
+      dfnew[[varr]] %equalToLower% "1240K" ~ "1240K",
+      dfnew[[varr]] %equalToLower% "Shotgun" ~ "Shotgun",
+      dfnew[[varr]] %equalToLower% "Reference.Genome" ~ "Reference Genome" ,
+      dfnew[[varr]] %equalToLower% "whole.genome.capture" ~ "Whole Genome Capture",
+      TRUE ~ "OtherCapture"
+    ) 
+  } else {
+    NA
+  }
 }
 
-#clean up library type and returns UGD value
+# clean up library type and returns UGD value
 '%Library_type_clean%' <- function(dfnew,varr) {
   if (varr %in% colnames(dfnew)) {
     newlist <- lapply(dfnew[[varr]] %>% strsplit(","), function(x) {unique(x)})
@@ -61,7 +64,7 @@ names(anno)[41] <- "Library type"
   if (varr %in% colnames(dfnew)) { ifelse(grepl("^ss.", dfnew[[varr]]),"ss","ds") } else { NA } 
 }
 
-#clean up the publication. split the string and get the publication name 
+# clean up the publication. split the string and get the publication name 
 '%Pub_clean%' <- function(dfnew, varr) {
   if (varr %in% colnames(dfnew)) {ifelse(grepl("^\\s*$", dfnew[[varr]]),strsplit(dfnew[[varr]]," ")[[1]][1], dfnew[[varr]]) } else { NA }
 } 
@@ -71,7 +74,7 @@ names(anno)[41] <- "Library type"
                                          ifelse(grepl("^.DG",dfnew[[varr]]),"Diploid","Diploid"))}
   else {NA}
 }
-#subseting nevcessary data from anno
+# subseting necessary data from anno
 dfnew <- subset(anno,Publication=="PapacScienceAdvances2021")
 
 #used theold table structure
@@ -123,25 +126,25 @@ test_pub <- tibble::tibble(
   Data_Preparation_Pipeline_URL =NA
 )
 
-test_pub$Individual_ID <- dfnew %copy% "Version ID"
-test_pub$Collection_ID <- dfnew %copy% "Skeletal code"
-test_pub$Country <- dfnew %copy% "Country"
-test_pub$Location <- dfnew %copy% "Locality"
-test_pub$Latitude <- dfnew %copy% "Lat."
-test_pub$Longitude <- dfnew %copy% "Long."
-test_pub$No_of_Libraries <- dfnew %copy% "No.Libraries"
-test_pub$Source_Tissue <- dfnew %copy% "Skeletal element"
-test_pub$No_of_Libraries <- dfnew %copy% "No. Libraries"
+test_pub$Individual_ID <- dfnew %extract% "Version ID"
+test_pub$Collection_ID <- dfnew %extract% "Skeletal code"
+test_pub$Country <- dfnew %extract% "Country"
+test_pub$Location <- dfnew %extract% "Locality"
+test_pub$Latitude <- dfnew %extract% "Lat."
+test_pub$Longitude <- dfnew %extract% "Long."
+test_pub$No_of_Libraries <- dfnew %extract% "No.Libraries"
+test_pub$Source_Tissue <- dfnew %extract% "Skeletal element"
+test_pub$No_of_Libraries <- dfnew %extract% "No. Libraries"
 test_pub$Data_Type <- dfnew %data_type_parse% "Data source"
-test_pub$Group_Name <- dfnew %copy% "Group ID"
-test_pub$Genetic_Sex <- dfnew %copy% "Sex"
-test_pub$Nr_autosomal_SNPs <- dfnew %copy% "SNPs hit on autosomal targets"
-test_pub$Coverage_1240K <- dfnew %copy% "Coverage on autosomal targets"
-test_pub$MT_Haplogroup <- dfnew %copy% "mtDNA haplogroup if ≥2 or published"
-test_pub$Y_Haplogroup<- dfnew %copy% "Y haplogroup in ISOGG v15.73 notation (automatically called)"
+test_pub$Group_Name <- dfnew %extract% "Group ID"
+test_pub$Genetic_Sex <- dfnew %extract% "Sex"
+test_pub$Nr_autosomal_SNPs <- dfnew %extract% "SNPs hit on autosomal targets"
+test_pub$Coverage_1240K <- dfnew %extract% "Coverage on autosomal targets"
+test_pub$MT_Haplogroup <- dfnew %extract% "mtDNA haplogroup if ≥2 or published"
+test_pub$Y_Haplogroup<- dfnew %extract% "Y haplogroup in ISOGG v15.73 notation (automatically called)"
 test_pub$UDG <- dfnew %Library_type_clean% "Library type"
 test_pub$Library_Built <- dfnew %Lib_type_to_Lib_built% "Library type"
-test_pub$Damage <- dfnew %copy% "Damage rate in first nucleotide on sequences overlapping 1240k targets (merged data)"
+test_pub$Damage <- dfnew %extract% "Damage rate in first nucleotide on sequences overlapping 1240k targets (merged data)"
 test_pub$Endogenous <- NA
 test_pub$Site <- NA
 test_pub$mtContam <- NA
@@ -153,7 +156,7 @@ test_pub$Data_Preparation_Pipeline_URL <- NA
 test_pub$Xcontam <- dfnew %xcontam_parse% "Xcontam ANGSD MOM point estimate (only if male and ≥200)"
 test_pub$Publication_Status <- dfnew %Pub_clean% "Publication"
 test_pub$Genotype_Ploidy <- dfnew %genotype% "Version ID"
-#Clemen's full date parsing function gose below
+# Clemens full date parsing function gose below
 dates <- split_age_string(dfnew$`Full date`)
 test_pub$Date_C14_Labnr <- dates$Date_C14_Labnr
 test_pub$Date_C14_Uncal_BP <- dates$Date_C14_Uncal_BP
@@ -161,10 +164,10 @@ test_pub$Date_C14_Uncal_BP_Err <- dates$Date_C14_Uncal_BP_Err
 test_pub$Date_BC_AD_Start <- dates$Date_BC_AD_Start
 test_pub$Date_BC_AD_Stop <- dates$Date_BC_AD_Stop
 test_pub$Date_Type <- dates$Date_Type
-#(Kept as NA for the moment) test_pub$Date_BC_AD_Median <- rowMeans(x <-tibble(dates$Date_BC_AD_Start,dates$Date_BC_AD_Stop))
+# (Kept as NA for the moment) test_pub$Date_BC_AD_Median <- rowMeans(x <-tibble(dates$Date_BC_AD_Start,dates$Date_BC_AD_Stop))
 test_pub$Date_BC_AD_Median <- NA
 
-#Used Clemen's old function
+# Used Clemens old function
 derive_standard_error <- function(anno, mean_var, err_var) {
   mean_val <- anno[[mean_var]]
   mean_val[mean_val == "n/a (<200 SNPs)"] <- NA
