@@ -1,4 +1,5 @@
 library(magrittr)
+source("AADR50_to_Poseidon2.4.0/age_string_parser.R")
 
 anno <- readr::read_tsv(
   "https://reichdata.hms.harvard.edu/pub/datasets/amh_repo/curated_releases/V50/V50.0/SHARE/public.dir/v50.0_1240K_public.anno",
@@ -52,6 +53,7 @@ names(anno)[41] <- "Library type"
 }
 
 # clean up library type and returns UGD value
+# This function is already capable to handle every entry in the anno file
 `%parse_udg_treatment%` <- function(dfnew, varr) {
   if (varr %in% colnames(dfnew)) {
     # split string list column into a proper list column
@@ -81,15 +83,55 @@ names(anno)[41] <- "Library type"
 }
 
 # clean up the publication. split the string and get the publication name 
-'%Pub_clean%' <- function(dfnew, varr) {
-  if (varr %in% colnames(dfnew)) {ifelse(grepl("^\\s*$", dfnew[[varr]]),strsplit(dfnew[[varr]]," ")[[1]][1], dfnew[[varr]]) } else { NA }
+`%Pub_clean%` <- function(dfnew, varr) {
+  if (varr %in% colnames(dfnew)) {
+    ifelse(
+      grepl("^\\s*$", dfnew[[varr]]), 
+      strsplit(dfnew[[varr]]," ")[[1]][1], 
+      dfnew[[varr]]
+    )
+  } else { 
+    NA 
+  }
 } 
 
-'%genotype%' <- function(dfnew, varr) {
-  if (varr %in% colnames(dfnew)) {ifelse(grepl("^.SG",dfnew[[varr]]),"Haploid",
-                                         ifelse(grepl("^.DG",dfnew[[varr]]),"Diploid","Diploid"))}
-  else {NA}
+`%genotype%` <- function(dfnew, varr) {
+  if (varr %in% colnames(dfnew)) {
+    ifelse(
+      grepl("^.SG",dfnew[[varr]]), 
+      "Haploid",
+      "Diploid"
+    )
+  } else {
+    NA
+  }
 }
+
+derive_standard_error <- function(anno, mean_var, err_var) {
+  mean_val <- anno[[mean_var]]
+  mean_val[mean_val == "n/a (<200 SNPs)"] <- NA
+  mean_val <- as.numeric(mean_val)
+  err_val <- anno[[err_var]]
+  err_val[err_val == "n/a (<200 SNPs)"] <- NA
+  range_list <- strsplit(gsub("\\[|\\]", "", err_val), ",")
+  unlist(Map(
+    function(mean_one, range_list_one) {
+      lower_range <- as.numeric(range_list_one[1])
+      upper_range <- as.numeric(range_list_one[2])
+      if (is.na(mean_one) || is.na(lower_range) || is.na(upper_range)) {
+        NA
+      } else if ( upper_range < 1 ) {
+        abs(upper_range - mean_one) / 1.65
+      } else if ( upper_range >= 1 & lower_range > 0 ) {
+        abs(mean_one - lower_range) / 1.65
+      } else {
+        NA
+      }
+    }, 
+    mean_val, range_list
+  ))
+}
+
 # subseting necessary data from anno
 dfnew <- subset(anno,Publication=="PapacScienceAdvances2021")
 
@@ -170,9 +212,11 @@ test_pub$Keywords <- NA
 test_pub$Genetic_Source_Accession_IDs <- NA
 test_pub$Data_Preparation_Pipeline_URL <- NA
 test_pub$Xcontam <- dfnew %xcontam_parse% "Xcontam ANGSD MOM point estimate (only if male and ≥200)"
+test_pub$Xcontam_stderr <- derive_standard_error(dfnew,"Xcontam ANGSD MOM point estimate (only if male and ≥200)","Xcontam ANGSD MOM 95% CI truncated at 0 (only if male and ≥200)")
 test_pub$Publication_Status <- dfnew %Pub_clean% "Publication"
 test_pub$Genotype_Ploidy <- dfnew %genotype% "Version ID"
-# Clemens full date parsing function gose below
+
+# Date parsing
 dates <- split_age_string(dfnew$`Full date`)
 test_pub$Date_C14_Labnr <- dates$Date_C14_Labnr
 test_pub$Date_C14_Uncal_BP <- dates$Date_C14_Uncal_BP
@@ -182,30 +226,3 @@ test_pub$Date_BC_AD_Stop <- dates$Date_BC_AD_Stop
 test_pub$Date_Type <- dates$Date_Type
 # (Kept as NA for the moment) test_pub$Date_BC_AD_Median <- rowMeans(x <-tibble(dates$Date_BC_AD_Start,dates$Date_BC_AD_Stop))
 test_pub$Date_BC_AD_Median <- NA
-
-# Used Clemens old function
-derive_standard_error <- function(anno, mean_var, err_var) {
-  mean_val <- anno[[mean_var]]
-  mean_val[mean_val == "n/a (<200 SNPs)"] <- NA
-  mean_val <- as.numeric(mean_val)
-  err_val <- anno[[err_var]]
-  err_val[err_val == "n/a (<200 SNPs)"] <- NA
-  range_list <- strsplit(gsub("\\[|\\]", "", err_val), ",")
-  unlist(Map(
-    function(mean_one, range_list_one) {
-      lower_range <- as.numeric(range_list_one[1])
-      upper_range <- as.numeric(range_list_one[2])
-      if (is.na(mean_one) || is.na(lower_range) || is.na(upper_range)) {
-        NA
-      } else if ( upper_range < 1 ) {
-        abs(upper_range - mean_one) / 1.65
-      } else if ( upper_range >= 1 & lower_range > 0 ) {
-        abs(mean_one - lower_range) / 1.65
-      } else {
-        NA
-      }
-    }, 
-    mean_val, range_list
-  ))
-}
-test_pub$Xcontam_stderr <- derive_standard_error(dfnew,"Xcontam ANGSD MOM point estimate (only if male and ≥200)","Xcontam ANGSD MOM 95% CI truncated at 0 (only if male and ≥200)")
