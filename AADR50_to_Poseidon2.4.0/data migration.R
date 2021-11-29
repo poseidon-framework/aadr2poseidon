@@ -23,7 +23,7 @@ names(anno)[41] <- "Library type"
 }
 
 # replacing unnecessary strings with ""
-`%xcontam_parse%` <- function(dfnew,varr) {
+`%xcontam_parse%` <- function(dfnew, varr) {
   if (varr %in% colnames(dfnew)) {
     as.numeric(gsub("n\\/a\\s\\(.*\\)",NA,dfnew[[varr]]))
   } else {
@@ -32,12 +32,12 @@ names(anno)[41] <- "Library type"
 }
 
 # helper function to compare to strings irrespective of case
-`%equalToLower%` <- function(a,b) {
+`%equalToLower%` <- function(a, b) {
   tolower(a) == tolower(b)
 }
 
 # translating the Data source column
-`%data_type_parse%` <- function(dfnew,varr) {
+`%data_type_parse%` <- function(dfnew, varr) {
   if(varr %in% colnames(dfnew)) {
     dplyr::case_when( 
       dfnew[[varr]] %equalToLower% "1240K" ~ "1240K",
@@ -52,13 +52,29 @@ names(anno)[41] <- "Library type"
 }
 
 # clean up library type and returns UGD value
-'%Library_type_clean%' <- function(dfnew,varr) {
+`%parse_udg_treatment%` <- function(dfnew, varr) {
   if (varr %in% colnames(dfnew)) {
-    newlist <- lapply(dfnew[[varr]] %>% strsplit(","), function(x) {unique(x)})
-    Cleaned_UDG <- dplyr::case_when(
-      length(newlist) > 1 || (!is.na(newlist)) && newlist == "Mix"~ "Mixed" , (!is.na(newlist)) && newlist == ".." ~ "NA"  )
-    return(Cleaned_UDG)
-  }}
+    # split string list column into a proper list column
+    dfnew[[varr]] %>% strsplit(",") %>%
+    # loop through list entries (one vector per entry)
+    lapply(function(x) { 
+      # make ".." to proper NA
+      ifelse(x == "..", NA_character_, x) %>%
+      # remove irrelevant parts of the string (before and after .)
+      gsub("^[a-z]*\\.", "", .) %>%
+      gsub("\\.[a-z]*$", "", .) %>%
+      trimws() %>%
+      unique
+    }) %>%
+    # make translation decision
+    purrr::map_chr(function(x) {
+      ifelse(length(x) > 1, "mixed", x) %>%
+      ifelse(. == "Mix", "mixed", .)
+    })
+  } else {
+    NA
+  }
+}
 
 `%Lib_type_to_Lib_built%` <- function(dfnew, varr) {
   if (varr %in% colnames(dfnew)) { ifelse(grepl("^ss.", dfnew[[varr]]),"ss","ds") } else { NA } 
@@ -69,7 +85,7 @@ names(anno)[41] <- "Library type"
   if (varr %in% colnames(dfnew)) {ifelse(grepl("^\\s*$", dfnew[[varr]]),strsplit(dfnew[[varr]]," ")[[1]][1], dfnew[[varr]]) } else { NA }
 } 
 
-'%genotype%' <- function(dfnew,varr) {
+'%genotype%' <- function(dfnew, varr) {
   if (varr %in% colnames(dfnew)) {ifelse(grepl("^.SG",dfnew[[varr]]),"Haploid",
                                          ifelse(grepl("^.DG",dfnew[[varr]]),"Diploid","Diploid"))}
   else {NA}
@@ -142,7 +158,7 @@ test_pub$Nr_autosomal_SNPs <- dfnew %extract% "SNPs hit on autosomal targets"
 test_pub$Coverage_1240K <- dfnew %extract% "Coverage on autosomal targets"
 test_pub$MT_Haplogroup <- dfnew %extract% "mtDNA haplogroup if ≥2 or published"
 test_pub$Y_Haplogroup<- dfnew %extract% "Y haplogroup in ISOGG v15.73 notation (automatically called)"
-test_pub$UDG <- dfnew %Library_type_clean% "Library type"
+test_pub$UDG <- dfnew %parse_udg_treatment% "Library type"
 test_pub$Library_Built <- dfnew %Lib_type_to_Lib_built% "Library type"
 test_pub$Damage <- dfnew %extract% "Damage rate in first nucleotide on sequences overlapping 1240k targets (merged data)"
 test_pub$Endogenous <- NA
