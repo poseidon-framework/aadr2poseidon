@@ -30,6 +30,9 @@ names(anno)[41] <- "Library type"
   } else {
     NA 
   }
+  dplyr::case_when(
+    dfnew[[varr]] < 0 ~ as.numeric("0")
+  )
 }
 
 # helper function to compare to strings irrespective of case
@@ -99,8 +102,8 @@ names(anno)[41] <- "Library type"
   if (varr %in% colnames(dfnew)) {
     ifelse(
       grepl("^.SG",dfnew[[varr]]), 
-      "Haploid",
-      "Diploid"
+      "haploid",
+      "diploid"
     )
   } else {
     NA
@@ -212,7 +215,7 @@ test_pub$Keywords <- NA
 test_pub$Genetic_Source_Accession_IDs <- NA
 test_pub$Data_Preparation_Pipeline_URL <- NA
 test_pub$Xcontam <- dfnew %xcontam_parse% "Xcontam ANGSD MOM point estimate (only if male and ≥200)"
-test_pub$Xcontam_stderr <- derive_standard_error(dfnew,"Xcontam ANGSD MOM point estimate (only if male and ≥200)","Xcontam ANGSD MOM 95% CI truncated at 0 (only if male and ≥200)")
+test_pub$Xcontam_stderr <- derive_standard_error(dfnew,"Xcontam ANGSD MOM point estimate (only if male and ≥200)","Xcontam ANGSD MOM 95% CI truncated at 0 (only if male and ≥200)") %>% round(digits = 5)
 test_pub$Publication_Status <- dfnew %Pub_clean% "Publication"
 test_pub$Genotype_Ploidy <- dfnew %genotype% "Version ID"
 
@@ -226,3 +229,13 @@ test_pub$Date_BC_AD_Stop <- dates$Date_BC_AD_Stop
 test_pub$Date_Type <- dates$Date_Type
 # (Kept as NA for the moment) test_pub$Date_BC_AD_Median <- rowMeans(x <-tibble(dates$Date_BC_AD_Start,dates$Date_BC_AD_Stop))
 test_pub$Date_BC_AD_Median <- NA
+
+class(test_pub) <- c("janno", class(test_pub))
+
+write_janno(test_pub, "/home/user/Poseidon_data/New.janno_packages/New.janno")
+
+poseidonR::read_janno("huhu.janno")
+
+writeLines(paste0("<",test_pub$Individual_ID,">"),con = "forge_list.txt")  
+
+                                
