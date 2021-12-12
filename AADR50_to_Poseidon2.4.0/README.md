@@ -45,14 +45,44 @@ The `--minimal` flag will keep the output package as simple as possible and only
 jannoFile: relative/path/to/yournewfile.janno
 ```
 
-The resulting package is minimal, but should be functionally complete. You can validate it with `trident validate`.
+You can validate this addition to the minimal package with `trident validate`.
 
-### How `data migration.R` works
+If you want to extract a certain subset of individuals from this package, you can follow these steps (this works already without step 4., if you for example want to create the `.janno` file only for one publication):
+
+A. Create a [forge file](https://poseidon-framework.github.io/#/trident?id=forge-command) with all the individuals you want to extract
+
+```
+<individual1>
+<individual2>
+<individual3>
+...
+```
+
+You can do that for example in R with:
+
+```r
+writeLines(paste0("<",individuals_vector,">"), con = "forge_list.txt") 
+```
+
+B. Run `trident forge` with this forge file. `-o` is the desired output directory where the new package should be created.
+
+```bash
+trident forge -d . \
+  --forgeFile forge_list.txt \
+  -o path/to/yournewpackage
+```
+
+The result will be a Poseidon package with only the individuals in the forge file. If you want the resulting package to be sufficiently complete to be considered for submission in the [public Poseidon repo](https://github.com/poseidon-framework/published_data) you should also do the following things:
+
+- Add bibliographic information in a `.bib` file (which also has to be referenced in the `POSEIDON.yml` file)
+- Run `trident update` to add checksums to the `POSEIDON.yml` file
+- Run `trident validate` to check wether everything is in the correct format
+
+### How does `data migration.R` work
 It makes a dummy dataframe called "test_pub" within your R working directoryaccording to Poseidon 2.40 standards.
 line 159 # subseting necessary data from anno is used to subset the data of the publication that you want to convert into a poseidon package.
 Then It uses built in functions to extract and parse data. 
 
-### Function Descriptions
 * Basic column extraction function : This is the primary function that used to extract data from relevent AADR v50 columns directly without any parsings.
 
 *Xcontam_parse : this function converts "Xcontam ANGSD MOM point estimate" into Poseidon "Xcontam" data. It replaces unncessary string values with NA values. As this measurement can only taken with male samples.
@@ -74,30 +104,10 @@ Its nested with supportive %equalToLower% function to get data into common forma
 
 1)Validate extracted data using PoseidonR
 #in R : PoseidonR::Validate_janno
-2)Create the forge file in R with all the individual names as a list with "<[individual name ]>" format
-#Dummy syntax in R : writeLines(paste0("<",data.field,">"),con = "file_name.txt") 
-3)Export seperated AADR data as a .janno file
-#In R : PoseidonR::write_janno
-4)Run Trident init
-#trident init \
-  --inFormat EIGENSTRAT \
-  --genoFile aadr_eig.geno \
-  --snpFile aadr_eig.snp \
-  --indFile aadr_eig.ind \
-  --snpSet 1240K \
-  -o new_package \
-  --minimal
-  
-5)Run Trident forge. "forge_list.txt" is the forge file created in step 2. -o is the desired location to make new package
-# trident forge -d . \
-  --forgeFile forge_list.txt \
-  -o /home/user/Poseidon_data/New.janno_packages
 
-Once the new packge is made ,
-6) Replace the dummy.janno file with the file created in step 3
-7) Make Bibiolethic data in ".bib" file.
-8) Run trident validate to check wether everything is in correct format
-9) Run Trident update
-10) Commit nd Push your new changes
+
+
+
+
 
 
