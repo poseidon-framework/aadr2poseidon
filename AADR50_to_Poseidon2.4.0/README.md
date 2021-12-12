@@ -1,16 +1,58 @@
-----------This this a walkthrough to convert AADR v50 to Poseidon v2.4.0----------------------
-Steps and Descriptions ::
-Clone the repository and open "data migration.R" script
-It gets a copy of AADR50 1240K data into your local R working directory with the correct formattings. 
-The it simplifies extra long column names which makes preview within R easy.
-This script parses AADR v50 data into there respective poseidone columns.Please refer the column guide to check which AADR v50 columns relevent to Poseidon standards. 
+## AADR v50 to Poseidon v2.4.0
 
----How this script works---
+Here we collect code to translate the AADR (specifically the 1240k dataset) to Poseidon format. The general workflow (on a Unix system) to run this is as follows:
+
+1. Download and untar the archive from the [AADR](https://reich.hms.harvard.edu/allen-ancient-dna-resource-aadr-downloadable-genotypes-present-day-and-ancient-dna-data) website [here](https://reichdata.hms.harvard.edu/pub/datasets/amh_repo/curated_releases/V50/V50.0/SHARE/public.dir/v50.0_1240K_public.tar).
+
+```bash
+wget https://reichdata.hms.harvard.edu/pub/datasets/amh_repo/curated_releases/V50/V50.0/SHARE/public.dir/v50.0_1240K_public.tar -O data/poseidon_data/aadrv50/tar_archive.tar
+tar -xvf data/poseidon_data/aadrv50/tar_archive.tar -C data/poseidon_data/aadrv50
+```
+
+2. Convert the genotype data to a format that is supported by Poseidon. This can be achieved with e.g. with [convertf](https://github.com/DReichLab/EIG/tree/master/CONVERTF) and a config file like this (where you have to replace `path/to/` with the paths relevant for you):
+
+```
+genotypename: path/to/v50.0_1240k_public.geno
+snpname: path/to/v50.0_1240k_public.snp
+indivname: path/to/v50.0_1240k_public.ind
+outputformat: EIGENSTRAT
+genotypeoutname: path/to/aadr_eig.geno
+snpoutname: path/to/aadr_eig.snp
+indivoutname: path/to/aadr_eig.ind
+```
+
+```bash
+convertf -p data/poseidon_data/aadrv50/convertf_parfile
+```
+3. Use [trident](https://poseidon-framework.github.io/#/trident) to embed the genotype data in the scaffold of a [Poseidon package](https://poseidon-framework.github.io/#/standard)
+
+```bash
+trident init \
+  --inFormat EIGENSTRAT \
+  --genoFile aadr_eig.geno \
+  --snpFile aadr_eig.snp \
+  --indFile aadr_eig.ind \
+  --snpSet 1240K \
+  -o new_package \
+  --minimal
+```
+
+The `--minimal` flag will keep the output package as simple as possible and only add a minimal `POSEIDON.yml file`.
+
+4. Run the script `data migration.R` to obtain a `.janno` file from the `.anno` file (more about this process below) and add it to the package by adding the following line to the `POSEIDON.yml` file.
+
+```
+jannoFile: relative/path/to/yournewfile.janno
+```
+
+The resulting package is minimal, but should be functionally complete. You can validate it with `trident validate`.
+
+### How `data migration.R` works
 It makes a dummy dataframe called "test_pub" within your R working directoryaccording to Poseidon 2.40 standards.
 line 159 # subseting necessary data from anno is used to subset the data of the publication that you want to convert into a poseidon package.
 Then It uses built in functions to extract and parse data. 
 
----Function Descriptions---
+### Function Descriptions
 * Basic column extraction function : This is the primary function that used to extract data from relevent AADR v50 columns directly without any parsings.
 
 *Xcontam_parse : this function converts "Xcontam ANGSD MOM point estimate" into Poseidon "Xcontam" data. It replaces unncessary string values with NA values. As this measurement can only taken with male samples.
@@ -28,7 +70,7 @@ Its nested with supportive %equalToLower% function to get data into common forma
 
 
 
-----------------How to make new poseidon packags from the data extracted from AADR v50--------------------
+### How to make new poseidon packags from the data extracted from AADR v50
 
 1)Validate extracted data using PoseidonR
 #in R : PoseidonR::Validate_janno
@@ -53,9 +95,9 @@ Its nested with supportive %equalToLower% function to get data into common forma
 
 Once the new packge is made ,
 6) Replace the dummy.janno file with the file created in step 3
-7)Make Bibiolethic data in ".bib" file.
+7) Make Bibiolethic data in ".bib" file.
 8) Run trident validate to check wether everything is in correct format
-9)Run Trident update
+9) Run Trident update
 10) Commit nd Push your new changes
 
 
