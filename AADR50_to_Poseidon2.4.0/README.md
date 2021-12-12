@@ -39,7 +39,7 @@ trident init \
 
 The `--minimal` flag will keep the output package as simple as possible and only add a minimal `POSEIDON.yml file`.
 
-4. Run the script `data migration.R` to obtain a `.janno` file from the `.anno` file (more about this process below) and add it to the package by adding the following line to the `POSEIDON.yml` file.
+4. Run the script `data migration.R` to obtain a `.janno` file from the `.anno` file (more about this process below in **How does `data migration.R` work**) and add it to the package by adding the following line to the `POSEIDON.yml` file.
 
 ```
 jannoFile: relative/path/to/yournewfile.janno
@@ -79,35 +79,24 @@ The result will be a Poseidon package with only the individuals in the forge fil
 - Run `trident validate` to check wether everything is in the correct format
 
 ### How does `data migration.R` work
-It makes a dummy dataframe called "test_pub" within your R working directoryaccording to Poseidon 2.40 standards.
-line 159 # subseting necessary data from anno is used to subset the data of the publication that you want to convert into a poseidon package.
-Then It uses built in functions to extract and parse data. 
 
-* Basic column extraction function : This is the primary function that used to extract data from relevent AADR v50 columns directly without any parsings.
+This script translates .anno to .janno files in an opinionated way. Here we document the decisions we made for individual parameters. If you apply changes to this script, remember to validate output `.janno` file with trident or `poseidonR::validate_janno`.
 
-*Xcontam_parse : this function converts "Xcontam ANGSD MOM point estimate" into Poseidon "Xcontam" data. It replaces unncessary string values with NA values. As this measurement can only taken with male samples.
+* Basic column extraction function: This is the primary function that used to extract data from relevent AADR v50 columns directly without any parsings.
 
-*Data_type_parse : this function converts AADR v50 "Data Source" column data into Poseidon 2.4 "Data type" data. 
+* Xcontam_parse: this function converts "Xcontam ANGSD MOM point estimate" into Poseidon "Xcontam" data. It replaces unncessary string values with NA values. As this measurement can only taken with male samples.
+
+* Data_type_parse: this function converts AADR v50 "Data Source" column data into Poseidon 2.4 "Data type" data. 
 Its nested with supportive %equalToLower% function to get data into common format nd minimalize complexities.
 
-*parse_udg_treatment : clean up "library type" of AADR v50 and returns UGD value to Poseidon table. It converts "library type" of AADR into a proper list, then loop through the list and replace unnecesary strings.
+* parse_udg_treatment: clean up "library type" of AADR v50 and returns UGD value to Poseidon table. It converts "library type" of AADR into a proper list, then loop through the list and replace unnecesary strings.
 
-*Lib_type_to_Lib_built : This function check the Library type values and decidethe Library built values as "ss" or "ds"
-*Pub_clean : This function clear the AADR "Publication name" column and return corresponding Poseidon publication name.
-*genotype : This function gets the AADR version ID and based on Its ".SG" or ".DG" part decides the genotype values of Poseidon "Genotype_Ploidy" 
-*derive_standard_error : This function gets AADR "Xcontam ANGSD MOM point estimate (only if male and ≥200)" "Xcontam ANGSD MOM 95% CI truncated at 0 (only if male and ≥200)" as inputs. Then it clear those data columns by cuting of unnecessary string parts and obtains a numeric value. Afterwards formulates Poesidon "Xcontam_stderr" value and round it off upto 5 digits. 
-*age_string_parser : Lines from #243 to #252 of this script are based on script "age_string_parser.R". Clone it and open in R. Function "split_age_string" takes in full date value of AADR and returns "Date_C14_Labnr,Date_C14_Uncal_BP,Date_C14_Uncal_BP_Err,Date_BC_AD_Start,Date_BC_AD_Stop,Date_Type" as a table which is assigned into the data object "Dates" .
+* Lib_type_to_Lib_built: This function check the Library type values and decidethe Library built values as "ss" or "ds"
 
+* Pub_clean: This function clear the AADR "Publication name" column and return corresponding Poseidon publication name.
 
+* genotype: This function gets the AADR version ID and based on Its ".SG" or ".DG" part decides the genotype values of Poseidon "Genotype_Ploidy" 
 
-### How to make new poseidon packags from the data extracted from AADR v50
+* derive_standard_error: This function gets AADR "Xcontam ANGSD MOM point estimate (only if male and ≥200)" "Xcontam ANGSD MOM 95% CI truncated at 0 (only if male and ≥200)" as inputs. Then it clear those data columns by cuting of unnecessary string parts and obtains a numeric value. Afterwards formulates Poesidon "Xcontam_stderr" value and round it off upto 5 digits. 
 
-1)Validate extracted data using PoseidonR
-#in R : PoseidonR::Validate_janno
-
-
-
-
-
-
-
+* age_string_parser: Lines from #243 to #252 of this script are based on script "age_string_parser.R". Clone it and open in R. Function "split_age_string" takes in full date value of AADR and returns "Date_C14_Labnr,Date_C14_Uncal_BP,Date_C14_Uncal_BP_Err,Date_BC_AD_Start,Date_BC_AD_Stop,Date_Type" as a table which is assigned into the data object "Dates".
