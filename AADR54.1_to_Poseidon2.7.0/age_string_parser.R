@@ -32,7 +32,7 @@ split_age_string <- function(x) {
   full_radiocarbon_dates <- stringr::str_extract_all(
     x[c14_age_ids], 
     paste0(
-      "[0-9]{1,5}(\\s+)*\u00B1(\\s+)*[0-9]{1,4}( BP){0,1},\\s{0,1}(", # pattern for age +/- std
+      "[0-9]{1,5}(\\s+)*\u00B1(\\s+)*[0-9]{1,4}( BP){0,1},{0,1}\\s{0,1}(", # pattern for age +/- std
       paste(
         c( # patterns for labnrs
           "CNA4579.1.1",
@@ -65,7 +65,7 @@ split_age_string <- function(x) {
   # split date and labnr
   full_radiocarbon_split <- purrr::map(full_radiocarbon_dates[full_radiocarbon_date_consumed], function(y) {
     #if (length(stringr::str_split(y, c("\u00B1|( BP){0,1}, "))[[1]])<3) {print(y)}
-    stringr::str_split(y, c("\u00B1|( BP){0,1},(\\s){0,1}")) %>% 
+    stringr::str_split(y, c("\u00B1|( BP )|( BP){0,1},(\\s){0,1}")) %>% 
       purrr::transpose(c("uncal_age", "uncal_std", "labnr")) %>%
       purrr::map(unlist)
   }) %>% purrr::transpose()
