@@ -1,0 +1,36 @@
+Representation in the .janno file,anno2janno transformation,Simplified .anno column name,AADR .anno file column name
+Poseidon_ID,"Replaced > and < with GT and LT, because > and < are reserved characters in the trident forge selection language",Genetic_ID ,Genetic ID 
+Alternative_IDs,No change,Master_ID,Master ID 
+Collection_ID,No change,Skeletal_Code,Skeletal code 
+Source_Tissue,No change,Skeletal_Element ,Skeletal element 
+Non-native column: AADR_Year_First_Publication,No change,Year_First_Publication,"Year data from this individual was first published [for a present-day individuals we give the data of the data reported here; missing GreenScience 2010 (Vi33.15, Vi33.26), Olalde2018 (I2657), RasmussenNature2010 (Australian)] "
+Publication + Non-native column: AADR_Publication,For the Publication column the information was reduced to simple keys in a list column. These keys are linked to the attached .bib file. The AADR_Publication column keeps the original structure,Publication,Publication 
+,,Date_Method,"Method for Determining Date; unless otherwise specified, calibrations use 95.4% intervals from OxCal v4.4.2 Bronk Ramsey (2009); r5; Atmospheric data from Reimer et al (2020) "
+,,Date_Mean_BP,"Date mean in BP in years before 1950 CE [OxCal mu for a direct radiocarbon date, and average of range for a contextual date] "
+,,Date_SD,"Date standard deviation in BP [OxCal sigma for a direct radiocarbon date, and standard deviation of the uniform distribution between the two bounds for a contextual date] "
+,,Date_Full_Info,"Full Date One of two formats. (Format 1) 95.4% CI calibrated radiocarbon age (Conventional Radiocarbon Age BP, Lab number) e.g. 2624-2350 calBCE (3990±40 BP, Ua-35016). (Format 2) Archaeological context range, e.g. 2500-1700 BCE "
+,,Age_Death,Age at Death from physical anthropology 
+,,Group_ID,Group ID 
+,,Locality,Locality 
+,,Political_Entity,Political Entity 
+,,Lat,Lat. 
+,,Long,Long. 
+,,Pulldown_Strategy,Pulldown Strategy 
+,,Data_Source,Data source 
+,,No_Libraries,No. Libraries 
+,,Coverage_1240k,1240k coverage (taken from original pulldown where possible) 
+,,SNPs_Autosomal_Targets_1240k,SNPs hit on autosomal targets (Computed using easystats on 1240k snpset) 
+,,SNPs_Autosomal_Targets_HO,SNPs hit on autosomal targets (Computed using easystats on HO snpset) 
+,,Molecular_Sex,Molecular Sex 
+,,Family_ID,Family ID and position within family 
+,,Y_Haplogroup_Terminal_Mutation,Y haplogroup (manual curation in terminal mutation format) 
+,,Y_Haplogroup_ISOGG,Y haplogroup (manual curation in ISOGG format) 
+,,Coverage_mtDNA,mtDNA coverage (merged data) 
+,,mtDNA_Haplogroup,mtDNA haplogroup if >2x or published 
+,,mtDNA_Match_Consensus,mtDNA match to consensus if >2x (merged data) 
+,,Damage,Damage rate in first nucleotide on sequences overlapping 1240k targets (merged data) 
+,,Sex_Ratio,Sex ratio [Y/(Y+X) counts] (merged data) 
+,,Library_Type,"Library type (minus=no.damage.correction, half=damage.retained.at.last.position, plus=damage.fully.corrected, ds=double.stranded.library.preparation, ss=single.stranded.library.preparation) "
+,,Libraries,Libraries 
+,,Assessment,ASSESSMENT 
+,,Assessment_Warnings,"ASSESSMENT WARNINGS (Xcontam interval is listed if lower bound is >0.005, ""QUESTIONABLE"" if lower bound is 0.01-0.02, ""QUESTIONABLE_CRITICAL"" or ""FAIL"" if lower bound is >0.02) (mtcontam confidence interval is listed if coverage >2 and upper bound is <0. "
