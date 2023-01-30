@@ -34,5 +34,13 @@ AADR_Year_First_Publication <- anno$Year_First_Publication
 Publication <- stringr::str_extract_all(anno$Publication, pattern = "[a-zA-Z]*[0-9]{4}|1KGPhase3")
 AADR_Publication <- anno$Publication
 
+Date_Note <- anno$Date_Method
+AADR_Date_Mean_BP <- anno$Date_Mean_BP
+AADR_Date_SD <- anno$Date_SD
+
+source("AADR54.1_to_Poseidon2.7.0/age_string_parser.R")
+date_string_parsing_result <- split_age_string(anno$Date_Full_Info)
+
+AADR_Date_Full_Info <- anno$Date_Full_Info
 
 
