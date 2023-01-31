@@ -43,4 +43,37 @@ date_string_parsing_result <- split_age_string(anno$Date_Full_Info)
 
 AADR_Date_Full_Info <- anno$Date_Full_Info
 
+AADR_Age_Death <- anno$Age_Death
+
+Group_Name <- anno$Group_ID
+
+Location <- anno$Locality
+
+Country <- anno$Political_Entity
+
+Latitude <- round(anno$Lat, digits = 5)
+
+Logitude <- round(anno$Lat, digits = 5)
+
+AADR_Pulldown_Strategy <- anno$Pulldown_Strategy
+
+# helper function to compare to strings irrespective of case
+`%equalToLower%` <- function(a, b) {
+  tolower(a) == tolower(b)
+}
+
+# translating the Data source column
+parse_capture_type <- function(x) {
+  dplyr::case_when( 
+    x %equalToLower% "1240K" ~ "1240K",
+    x %equalToLower% "Twist1.4M" ~ "TwistAncientDNA",
+    x %equalToLower% "Shotgun" ~ "Shotgun",
+    x %equalToLower% "Shotgun.diploid" ~ "Shotgun",
+    x %equalToLower% "Reference.Genome" ~ "Reference Genome" ,
+    TRUE ~ "OtherCapture"
+  )
+}
+
+Capture_Type <- parse_capture_type(anno$Data_Source)
+
 

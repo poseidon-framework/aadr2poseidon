@@ -9,14 +9,14 @@ Date_Note,No change,Date_Method,"Method for Determining Date; unless otherwise s
 Non-native column: AADR_Date_Mean_BP,No change,Date_Mean_BP,"Date mean in BP in years before 1950 CE [OxCal mu for a direct radiocarbon date, and average of range for a contextual date] "
 Non-native column: AADR_Date_SD,No change,Date_SD,"Date standard deviation in BP [OxCal sigma for a direct radiocarbon date, and standard deviation of the uniform distribution between the two bounds for a contextual date] "
 Date_C14_Labnr + Date_C14_Uncal_BP + Date_C14_Uncal_BP_Err + Date_BC_AD_Start + Date_BC_AD_Stop + Date_Type + Non-native column: AADR_Date_Full_Info,Parsed and pulled apart to fit into the 7 different .janno columns. The AADR_Date_Full_Info column keeps the original structure,Date_Full_Info,"Full Date One of two formats. (Format 1) 95.4% CI calibrated radiocarbon age (Conventional Radiocarbon Age BP, Lab number) e.g. 2624-2350 calBCE (3990±40 BP, Ua-35016). (Format 2) Archaeological context range, e.g. 2500-1700 BCE "
-,,Age_Death,Age at Death from physical anthropology 
-,,Group_ID,Group ID 
-,,Locality,Locality 
-,,Political_Entity,Political Entity 
-,,Lat,Lat. 
-,,Long,Long. 
-,,Pulldown_Strategy,Pulldown Strategy 
-,,Data_Source,Data source 
+Non-native column: AADR_Age_Death,No change,Age_Death,Age at Death from physical anthropology 
+Group_Name,No change,Group_ID,Group ID 
+Location,No change,Locality,Locality 
+Country,No change,Political_Entity,Political Entity 
+Latitude,Rounded to 5 decimal places,Lat,Lat. 
+Longitude,Rounded to 5 decimal places,Long,Long. 
+Non-native column: AADR_Pulldown_Strategy,No change,Pulldown_Strategy,Pulldown Strategy 
+Capture-Type + Non-native column: AADR_Data_Source,"For the Capture_Type column the entities defined in the Poseidon schema were extracted. All other entities, including mixed entries, were set to OtherCapture. The AADR_Data_Source column keeps the original structure",Data_Source,Data source 
 ,,No_Libraries,No. Libraries 
 ,,Coverage_1240k,1240k coverage (taken from original pulldown where possible) 
 ,,SNPs_Autosomal_Targets_1240k,SNPs hit on autosomal targets (Computed using easystats on 1240k snpset) 
