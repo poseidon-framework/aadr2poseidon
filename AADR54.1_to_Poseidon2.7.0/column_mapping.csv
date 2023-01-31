@@ -30,7 +30,7 @@ MT_Haplogroup,No change,mtDNA_Haplogroup,mtDNA haplogroup if >2x or published
 Non-native column: AADR_MT_Match_Consensus,No change,mtDNA_Match_Consensus,mtDNA match to consensus if >2x (merged data) 
 Damage,No change,Damage,Damage rate in first nucleotide on sequences overlapping 1240k targets (merged data) 
 Non-native column: AADR_Sex_Ratio,No change,Sex_Ratio,Sex ratio [Y/(Y+X) counts] (merged data) 
-,,Library_Type,"Library type (minus=no.damage.correction, half=damage.retained.at.last.position, plus=damage.fully.corrected, ds=double.stranded.library.preparation, ss=single.stranded.library.preparation) "
-,,Libraries,Libraries 
-,,Assessment,ASSESSMENT 
-,,Assessment_Warnings,"ASSESSMENT WARNINGS (Xcontam interval is listed if lower bound is >0.005, ""QUESTIONABLE"" if lower bound is 0.01-0.02, ""QUESTIONABLE_CRITICAL"" or ""FAIL"" if lower bound is >0.02) (mtcontam confidence interval is listed if coverage >2 and upper bound is <0. "
+UDG + Library_Built + Non-native column: AADR_Library_Type,Extracted information for the janno columns UDG and Library_Built. The AADR_Library_Type column keeps the original structure,Library_Type,"Library type (minus=no.damage.correction, half=damage.retained.at.last.position, plus=damage.fully.corrected, ds=double.stranded.library.preparation, ss=single.stranded.library.preparation) "
+Non-native column: AADR_Libraries,No change,Libraries,Libraries 
+Non-native column: AADR_Assessment,No change,Assessment,ASSESSMENT 
+Non-native column: AADR_Assessment_Warnings,No change,Assessment_Warnings,"ASSESSMENT WARNINGS (Xcontam interval is listed if lower bound is >0.005, ""QUESTIONABLE"" if lower bound is 0.01-0.02, ""QUESTIONABLE_CRITICAL"" or ""FAIL"" if lower bound is >0.02) (mtcontam confidence interval is listed if coverage >2 and upper bound is <0. "
