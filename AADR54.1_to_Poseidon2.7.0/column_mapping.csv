@@ -16,9 +16,9 @@ Country,No change,Political_Entity,Political Entity
 Latitude,Rounded to 5 decimal places,Lat,Lat. 
 Longitude,Rounded to 5 decimal places,Long,Long. 
 Non-native column: AADR_Pulldown_Strategy,No change,Pulldown_Strategy,Pulldown Strategy 
-Capture-Type + Non-native column: AADR_Data_Source,"For the Capture_Type column the entities defined in the Poseidon schema were extracted. All other entities, including mixed entries, were set to OtherCapture. The AADR_Data_Source column keeps the original structure",Data_Source,Data source 
+Capture_Type + Non-native column: AADR_Data_Source,"For the Capture_Type column the entities defined in the Poseidon schema were extracted. All other entities, including mixed entries, were set to OtherCapture. The AADR_Data_Source column keeps the original structure",Data_Source,Data source 
 Nr_Libraries,No change,No_Libraries,No. Libraries 
-Non-native column: AADR_Coverage_1240K,No change,Coverage_1240k,1240k coverage (taken from original pulldown where possible) 
+Non-native column: AADR_Coverage_1240K,Only kept the numbers and removed everything non-numeric from the values,Coverage_1240k,1240k coverage (taken from original pulldown where possible) 
 Non-native column: AADR_SNPs_1240K,No change,SNPs_Autosomal_Targets_1240k,SNPs hit on autosomal targets (Computed using easystats on 1240k snpset) 
 Non-native column: AADR_SNPs_HO,No change,SNPs_Autosomal_Targets_HO,SNPs hit on autosomal targets (Computed using easystats on HO snpset) 
 Genetic_Sex,"Only kept M, F and U",Molecular_Sex,Molecular Sex 

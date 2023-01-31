@@ -1,5 +1,7 @@
 library(magrittr)
 
+#### prepare input data ####
+
 anno <- readr::read_tsv(
   "https://reichdata.hms.harvard.edu/pub/datasets/amh_repo/curated_releases/V54/V54.1/SHARE/public.dir/v54.1_1240K_public.anno",
   col_names = T ,
@@ -17,7 +19,7 @@ anno <- readr::read_tsv(
 mapping_reference <- readr::read_csv("AADR54.1_to_Poseidon2.7.0/column_mapping.csv")
 colnames(anno) <- mapping_reference$`Simplified .anno column name`
 
-# construct janno columns
+#### construct janno columns ####
 
 Poseidon_ID <- anno$Genetic_ID %>%
   gsub("<", "LT", .) %>%
@@ -31,7 +33,11 @@ Source_Tissue <- anno$Skeletal_Element
 
 AADR_Year_First_Publication <- anno$Year_First_Publication
 
-Publication <- stringr::str_extract_all(anno$Publication, pattern = "[a-zA-Z]*[0-9]{4}|1KGPhase3")
+Publication <- anno$Publication %>%
+  stringr::str_extract_all(pattern = "[a-zA-Z]*[0-9]{4}|1KGPhase3") %>%
+  purrr::map_chr(function(x) paste(x, collapse = ";"))
+
+
 AADR_Publication <- anno$Publication
 
 Date_Note <- anno$Date_Method
@@ -53,7 +59,7 @@ Country <- anno$Political_Entity
 
 Latitude <- round(anno$Lat, digits = 5)
 
-Logitude <- round(anno$Lat, digits = 5)
+Longitude <- round(anno$Long, digits = 5)
 
 AADR_Pulldown_Strategy <- anno$Pulldown_Strategy
 
@@ -79,7 +85,7 @@ AADR_Data_Source <- anno$Data_Source
 
 Nr_Libraries <- anno$No_Libraries
 
-AADR_Coverage_1240K <- anno$Coverage_1240k
+AADR_Coverage_1240K <- readr::parse_number(anno$Coverage_1240k)
 
 AADR_SNPs_1240K <- anno$SNPs_Autosomal_Targets_1240k
 
@@ -152,3 +158,48 @@ AADR_Libraries <- anno$Libraries
 AADR_Assessment <- anno$Assessment
 
 AADR_Assessment_Warnings <- anno$Assessment_Warnings
+
+#### combine results ####
+
+cbind(
+  Poseidon_ID,
+  Alternative_IDs,
+  Collection_ID,
+  Source_Tissue,
+  AADR_Year_First_Publication,
+  Publication,
+  AADR_Publication,
+  Date_Note,
+  AADR_Date_Mean_BP,
+  AADR_Date_SD,
+  date_string_parsing_result,
+  AADR_Date_Full_Info,
+  AADR_Age_Death,
+  Group_Name,
+  Location,
+  Country,
+  Latitude,
+  Longitude,
+  AADR_Pulldown_Strategy,
+  Capture_Type,
+  AADR_Data_Source,
+  Nr_Libraries,
+  AADR_Coverage_1240K,
+  AADR_SNPs_1240K,
+  AADR_SNPs_HO,
+  Genetic_Sex,
+  AADR_Kinship,
+  Y_Haplogroup,
+  AADR_Y_Haplogroup_ISOGG,
+  AADR_Coverage_mtDNA,
+  MT_Haplogroup,
+  AADR_MT_Match_Consensus,
+  Damage,
+  AADR_Sex_Ratio,
+  UDG,
+  Library_Built,
+  AADR_Library_Type,
+  AADR_Libraries,
+  AADR_Assessment,
+  AADR_Assessment_Warnings
+) %>% tibble::tibble()
