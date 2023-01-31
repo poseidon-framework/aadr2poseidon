@@ -106,32 +106,46 @@ AADR_Sex_Ratio <- anno$Sex_Ratio
 parse_udg_treatment <- function(x) {
   # split string list column into a proper list column
   x %>% strsplit(",") %>%
-    # loop through list entries (one vector per entry)
-    lapply(function(x) { 
-      # make ".." to proper NA
-      ifelse(x == "..", NA_character_, x) %>%
-        # remove irrelevant parts of the string (before and after .)
-        gsub("^[a-z]*\\.", "", .) %>%
-        gsub("\\.[a-z]*$", "", .) %>%
-        trimws() %>%
-        unique
-    }) %>%
-    # make translation decision
-    purrr::map_chr(function(x) {
-      ifelse(length(x) > 1, "mixed", x) %>%
-        ifelse(. == "Mix", "mixed", .)
-    })
+  # loop through list entries (one vector per entry)
+  purrr::map(function(x) { 
+    # make ".." to proper NA
+    ifelse(x == "..", NA_character_, x) %>%
+    # remove irrelevant parts of the string (before and after .)
+    gsub("^[a-z]*\\.", "", .) %>%
+    gsub("\\.[a-z]*$", "", .) %>%
+    trimws() %>%
+    unique
+  }) %>%
+  # make translation decision
+  purrr::map_chr(function(x) {
+    ifelse(length(x) > 1, "mixed", x) %>%
+    ifelse(. == "Mix", "mixed", .)
+  })
 }
 
 UDG <- parse_udg_treatment(anno$Library_Type)
 
-# this is not sufficient yet: The function has to consider the "mixed" case
 parse_library_built <- function(x) {
-  ifelse(grepl("^ss.", x), "ss", "ds")
+  # split string list column into a proper list column
+  x %>% strsplit(",") %>%
+  # loop through list entries (one vector per entry)
+  purrr::map(function(x) { 
+    # make ".." to proper NA
+    ifelse(x == "..", NA_character_, x) %>%
+    # remove irrelevant parts of the string (after .)
+    gsub("\\.[a-z\\.]*$", "", .) %>%
+    trimws() %>%
+    unique
+  }) %>%
+  # make translation decision
+  purrr::map_chr(function(x) {
+    ifelse(length(x) > 1, "mixed", x)
+  })
 }
 
 Library_Built <- parse_library_built(anno$Library_Type)
 
+AADR_Library_Type <- anno$Library_Type
 
 AADR_Libraries <- anno$Libraries
 
