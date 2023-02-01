@@ -184,7 +184,7 @@ AADR_Assessment_Warnings <- anno$Assessment_Warnings
 
 #### combine results ####
 
-cbind(
+res_janno_raw <- cbind(
   Poseidon_ID,
   Alternative_IDs,
   Collection_ID,
@@ -200,6 +200,7 @@ cbind(
   AADR_Age_Death,
   Group_Name,
   Location,
+  Country_ISO,
   Country,
   Latitude,
   Longitude,
@@ -226,3 +227,7 @@ cbind(
   AADR_Assessment,
   AADR_Assessment_Warnings
 ) %>% tibble::tibble()
+
+res_janno <- poseidonR::as.janno(res_janno_raw)
+
+poseidonR::write_janno(res_janno, path = "AADR54.1_to_Poseidon2.7.0/tmp/AADR_1240K.janno")
