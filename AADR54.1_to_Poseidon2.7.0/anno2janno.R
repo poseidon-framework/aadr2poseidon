@@ -165,21 +165,28 @@ parse_library_built <- function(x) {
   # split string list column into a proper list column
   x %>% strsplit(",") %>%
   # loop through list entries (one vector per entry)
-  purrr::map(function(x) { 
-    # make ".." to proper NA
-    ifelse(x == "..", NA_character_, x) %>%
-    # remove irrelevant parts of the string (after .)
-    gsub("\\.[a-z\\.]*$", "", .) %>%
-    trimws() %>%
-    unique
+  purrr::map(function(x) {
+    stringr::str_extract_all(x, "((ds)|(ss))") %>%
+      purrr::compact() %>%
+      unlist() %>%
+      unique
   }) %>%
   # make translation decision
   purrr::map_chr(function(x) {
-    ifelse(length(x) > 1, "mixed", x)
+    if (is.null(x)) {
+      NA_character_
+    } else if (all(is.na(x))) {
+      NA_character_
+    } else if (length(x) > 1) {
+      "mixed"
+    } else {
+      x
+    }
   })
 }
 
 Library_Built <- parse_library_built(anno$Library_Type)
+# cbind(Library_Built, anno$Library_Type) %>% unique() %>% View()
 
 AADR_Library_Type <- anno$Library_Type
 
