@@ -12,7 +12,7 @@ Date_C14_Labnr + Date_C14_Uncal_BP + Date_C14_Uncal_BP_Err + Date_BC_AD_Start + 
 Non-native column: AADR_Age_Death,No change,Age_Death,Age at Death from physical anthropology 
 Group_Name,No change,Group_ID,Group ID 
 Location,No change,Locality,Locality 
-Country,No change,Political_Entity,Political Entity 
+Non-native column: Country_ISO + Country,For Country_ISO the country entries were mapped to ISO-alpha2 codes. The column Country contains the entries of Political_Entity unchanged,Political_Entity,Political Entity 
 Latitude,Rounded to 5 decimal places,Lat,Lat. 
 Longitude,Rounded to 5 decimal places,Long,Long. 
 Non-native column: AADR_Pulldown_Strategy,No change,Pulldown_Strategy,Pulldown Strategy 

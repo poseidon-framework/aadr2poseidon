@@ -55,6 +55,29 @@ Group_Name <- anno$Group_ID
 
 Location <- anno$Locality
 
+country_lookup_table <- readLines("AADR54.1_to_Poseidon2.7.0/location_to_M49.tsv") %>%
+  magrittr::extract(-2) %>%
+  gsub(";", "\t", .) %>%
+  paste0(collapse = "\n") %>%
+  readr::read_tsv(na = c(".." ,"")) %>%
+  dplyr::select(
+    aadr_pol_entity = `Political Entity`,
+    alpha2 = `ISO-alpha2 Code`
+  )
+lookup_alpha2 <- function(x) {
+  if (is.na(x)) { return(NA_character_) }
+  if (x == "Gernamy") { return("DE") } # special case
+  position <- country_lookup_table$aadr_pol_entity == x
+  if (any(position)) {
+    country_lookup_table$alpha2[country_lookup_table$aadr_pol_entity == x]
+  } else {
+    NA_character_
+  }
+}
+
+Country_ISO <- purrr::map_chr(anno$Political_Entity, lookup_alpha2)
+# cbind(Country_ISO, anno$Political_Entity) %>% as.data.frame() %>% dplyr::filter(is.na(Country_ISO))
+
 Country <- anno$Political_Entity
 
 Latitude <- round(anno$Lat, digits = 5)
