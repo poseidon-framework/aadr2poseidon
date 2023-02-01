@@ -41,9 +41,15 @@ Source_Tissue <- anno$Skeletal_Element
 AADR_Year_First_Publication <- anno$Year_First_Publication
 
 Publication <- anno$Publication %>%
-  stringr::str_extract_all(pattern = "[a-zA-Z]*[0-9]{4}|1KGPhase3") %>%
-  purrr::map_chr(function(x) paste(x, collapse = ";"))
-
+  stringr::str_extract_all(pattern = "[a-zA-Z]{5,}[0-9]{4}|1KGPhase3") %>%
+  purrr::map_chr(function(x) {
+    if (all(is.na(x))) {
+      NA_character_
+    } else {
+      paste(x, collapse = ";")
+    }
+  })
+# cbind(Publication, anno$Publication) %>% unique %>% View()
 
 AADR_Publication <- anno$Publication
 
