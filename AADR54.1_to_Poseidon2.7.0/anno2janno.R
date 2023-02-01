@@ -1,9 +1,16 @@
 library(magrittr)
 
 #### prepare input data ####
+# this assumes the .anno file was downloaded already from "https://reichdata.hms.harvard.edu/pub/datasets/amh_repo/curated_releases/V54/V54.1/SHARE/public.dir/v54.1_1240K_public.anno"
+
+anno_lines <- readLines("AADR54.1_to_Poseidon2.7.0/tmp/v54.1_1240K_public.anno")
+
+# remove malicious quotes in .anno file
+anno_lines[3378] <- gsub("\"384-202 calBCE", "384-202 calBCE", anno_lines[3378])
+anno_lines[3379] <- gsub("\"381-201 calBCE", "381-201 calBCE", anno_lines[3379])
 
 anno <- readr::read_tsv(
-  "https://reichdata.hms.harvard.edu/pub/datasets/amh_repo/curated_releases/V54/V54.1/SHARE/public.dir/v54.1_1240K_public.anno",
+  paste0(anno_lines, "\n"),
   col_names = T ,
   show_col_types = F ,
   skip_empty_rows = F ,
@@ -43,6 +50,9 @@ AADR_Publication <- anno$Publication
 Date_Note <- anno$Date_Method
 AADR_Date_Mean_BP <- anno$Date_Mean_BP
 AADR_Date_SD <- anno$Date_SD
+
+# fix obviously wrong entry
+anno$Date_Full_Info[12863] <- "5350-5250 BCE"
 
 source("AADR54.1_to_Poseidon2.7.0/age_string_parser.R")
 date_string_parsing_result <- split_age_string(anno$Date_Full_Info)
@@ -97,7 +107,7 @@ parse_capture_type <- function(x) {
     x %equalToLower% "Twist1.4M" ~ "TwistAncientDNA",
     x %equalToLower% "Shotgun" ~ "Shotgun",
     x %equalToLower% "Shotgun.diploid" ~ "Shotgun",
-    x %equalToLower% "Reference.Genome" ~ "Reference Genome" ,
+    x %equalToLower% "Reference.Genome" ~ "ReferenceGenome" ,
     TRUE ~ "OtherCapture"
   )
 }
@@ -253,9 +263,7 @@ issues <- poseidonR::validate_janno("AADR54.1_to_Poseidon2.7.0/tmp/AADR_1240K.ja
 issues %>% dplyr::filter(
   !(grepl("trailing whitespaces", issue) |
       grepl("Superfluous white space", issue) |
-      grepl("column is not defined", issue)
+      grepl("column is not defined", issue) |
+      grepl("ds, ss, other", issue)
     )
 ) %>% View()
-
-
-
