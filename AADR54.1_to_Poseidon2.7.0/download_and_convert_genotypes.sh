@@ -8,10 +8,13 @@ cat > tmp/convertf_parfile <<EOF
 genotypename: tmp/v54.1_1240K_public.geno
 snpname: tmp/v54.1_1240K_public.snp
 indivname: tmp/v54.1_1240K_public.ind
-outputformat: PACKEDPED
-genotypeoutname: tmp/AADR_1240K.bed
-snpoutname: tmp/AADR_1240K.bim
-indivoutname: tmp/AADR_1240K.fam
+outputformat: EIGENSTRAT
+genotypeoutname: tmp/AADR_1240K.geno
+snpoutname: tmp/AADR_1240K.snp
+indivoutname: tmp/AADR_1240K.ind
 EOF
 
+# two-step conversion is necessary, because convertf handles the group name 
+# column differently than poseidon in binary plink format
 convertf -p tmp/convertf_parfile
+trident genoconvert -p tmp/AADR_1240K.geno --outFormat PLINK

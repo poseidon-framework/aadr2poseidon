@@ -9,6 +9,9 @@ anno_lines <- readLines("AADR54.1_to_Poseidon2.7.0/tmp/v54.1_1240K_public.anno")
 anno_lines[3378] <- gsub("\"384-202 calBCE", "384-202 calBCE", anno_lines[3378])
 anno_lines[3379] <- gsub("\"381-201 calBCE", "381-201 calBCE", anno_lines[3379])
 
+# replace double quotes in general with single quotes
+anno_lines <- purrr::map_chr(anno_lines, \(x) { gsub("\"", "'", x) })
+
 anno <- readr::read_tsv(
   paste0(anno_lines, "\n"),
   col_names = T ,
@@ -40,16 +43,37 @@ Source_Tissue <- anno$Skeletal_Element
 
 AADR_Year_First_Publication <- anno$Year_First_Publication
 
-Publication <- anno$Publication %>%
+Publication_list <- anno$Publication %>%
   stringr::str_extract_all(pattern = "[a-zA-Z]{5,}[0-9]{4}|1KGPhase3") %>%
-  purrr::map_chr(function(x) {
-    if (all(is.na(x))) {
-      NA_character_
-    } else {
-      paste(x, collapse = ";")
-    }
+  purrr::map(function(x) {
+    if (all(is.na(x))) { NULL } else { x }
   })
 # cbind(Publication, anno$Publication) %>% unique %>% View()
+
+# this is informed by the observations in prepare_bib_file.R!
+key_replacement <- tibble::tribble(
+  ~bad, ~good,
+  "RaghavanNature2013", "RaghavanNature2014",
+  "Olalde2014", "OlaldeNature2014",
+  "Gamba2014",  "GambaNatureCommunications2014",
+  "SiskaScienceAdvances2017", "SikoraScience2017"
+)
+
+# replace bad keys
+Publication_cleaned <- Publication_list %>%
+  purrr::map(\(pubs) {
+    if (is.null(pubs)) { NULL } else {
+      purrr::map_chr(pubs, \(pub) {
+        if (pub %in% key_replacement$bad) {
+          key_replacement$good[pub == key_replacement$bad]
+        } else { pub }
+      })
+    }
+  })
+#tibble::tibble(a = Publication_cleaned, b = Publication_list) %>%
+#  dplyr::filter(paste(a) != paste(b)) %>% View()
+Publication <- Publication_cleaned %>%
+  purrr::map_chr(\(x) paste0(x, collapse = ";"))
 
 AADR_Publication <- anno$Publication
 
@@ -130,7 +154,18 @@ AADR_SNPs_1240K <- anno$SNPs_Autosomal_Targets_1240k
 
 AADR_SNPs_HO <- anno$SNPs_Autosomal_Targets_HO
 
-Genetic_Sex <- dplyr::case_when(anno$Molecular_Sex == "c" ~ "U", TRUE ~ anno$Molecular_Sex)
+# read .ind file for correct sex information
+sex_in_ind_file <- readLines("AADR54.1_to_Poseidon2.7.0/tmp/v54.1_1240K_public.ind") %>%
+  trimws() %>%
+  paste0("\n") %>%
+  gsub("\\s{2,}", " ", .) %>%
+  readr::read_delim(" ", col_names = c("id", "sex", "group")) %$%
+  sex
+#anno[sex_in_ind_file != anno$Molecular_Sex,] %>% View()
+
+# There is just one case where "c" should be "M"
+Genetic_Sex <- dplyr::case_when(sex_in_ind_file == "c" ~ "U", TRUE ~ sex_in_ind_file)
+#Genetic_Sex %>% table()
 
 AADR_Kinship <- anno$Family_ID
 
@@ -260,11 +295,12 @@ res_janno_raw <- cbind(
 
 res_janno <- poseidonR::as.janno(res_janno_raw)
 
-poseidonR::write_janno(res_janno, path = "AADR54.1_to_Poseidon2.7.0/tmp/AADR_1240K_raw.janno")
+poseidonR::write_janno(res_janno, path = "AADR54.1_to_Poseidon2.7.0/tmp/AADR_1240K.janno")
+
 
 #### inspect result ####
 
-issues <- poseidonR::validate_janno("AADR54.1_to_Poseidon2.7.0/tmp/AADR_1240K_raw.janno")
+issues <- poseidonR::validate_janno("AADR54.1_to_Poseidon2.7.0/tmp/AADR_1240K.janno")
 
 issues %>% dplyr::filter(
   !(grepl("trailing whitespaces", issue) |

@@ -5,14 +5,13 @@ library(magrittr)
 #   "AADR54.1_to_Poseidon2.7.0/tmp/DOIs.txt",
 #   "AADR54.1_to_Poseidon2.7.0/tmp/citation_keys.txt",
 #   "AADR54.1_to_Poseidon2.7.0/tmp/aadr2doi_result.txt",
-#   "AADR54.1_to_Poseidon2.7.0/tmp/AADR_1240K.janno",
 #   "ADR54.1_to_Poseidon2.7.0/tmp/References_raw.bib"
 # )
 
 #### prepare a list of all required papers ####
 # this assumes the .janno file was created with the anno2janno.R script
 
-aadrJanno <- poseidonR::read_janno("AADR54.1_to_Poseidon2.7.0/tmp/AADR_1240K_raw.janno", validate = F)
+aadrJanno <- poseidonR::read_janno("AADR54.1_to_Poseidon2.7.0/tmp/AADR_1240K.janno", validate = F)
 keys <- aadrJanno$Publication %>% unlist() %>% unique()
 writeLines(keys, "AADR54.1_to_Poseidon2.7.0/tmp/citation_keys.txt")
 
@@ -68,6 +67,7 @@ doi_duplicates <- combined_doi_table %>%
 
 # decide which ones to keep
 #doi_duplicates$keys
+# set this also in key_replacement in anno2janno.R!
 
 key_replacement <- tibble::tribble(
   ~bad, ~good,
@@ -76,22 +76,6 @@ key_replacement <- tibble::tribble(
   "Gamba2014",  "GambaNatureCommunications2014",
   "SiskaScienceAdvances2017", "SikoraScience2017"
 )
-
-# replace keys in .janno file
-replaced_publication_column <- aadrJanno$Publication %>%
-  purrr::map(\(pubs) {
-    if (is.null(pubs)) { NULL } else {
-      purrr::map_chr(pubs, \(pub) {
-        if (pub %in% key_replacement$bad) {
-          key_replacement$good[pub == key_replacement$bad]
-        } else { pub }
-      })
-    }
-  })
-# tibble::tibble(a = aadrJanno$Publication, b = replaced_publication_column) %>%
-#   dplyr::filter(paste(a) != paste(b)) %>% View()
-aadrJanno$Publication <- replaced_publication_column
-poseidonR::write_janno(aadrJanno, path = "AADR54.1_to_Poseidon2.7.0/tmp/AADR_1240K.janno")
 
 # remove keys from doi list
 final_doi_table <- combined_doi_table %>%
