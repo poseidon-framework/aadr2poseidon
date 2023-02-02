@@ -1,4 +1,7 @@
+library(magrittr)
+
 #### prepare a list of all required papers ####
+# this assumes the .janno file was created with the anno2janno.R script
 
 aadrJanno <- poseidonR::read_janno("AADR54.1_to_Poseidon2.7.0/tmp/AADR_1240K.janno", validate = F)
 keys <- aadrJanno$Publication %>% unlist() %>% unique()
@@ -6,36 +9,89 @@ writeLines(keys, "AADR54.1_to_Poseidon2.7.0/tmp/citation_keys.txt")
 
 #### compile list of DOIs ###
 
+file.remove("AADR54.1_to_Poseidon2.7.0/tmp/DOIs.txt")
+
 # using aadr2doi: https://github.com/nevrome/aadr2doi
 system(paste(
   "aadr2doi",
   "--inFile AADR54.1_to_Poseidon2.7.0/tmp/citation_keys.txt",
   "--aadrVersion 54.1",
   "--doiShape Short",
-  "-o AADR54.1_to_Poseidon2.7.0/tmp/DOIs.txt"
+  "--printKey",
+  "-o AADR54.1_to_Poseidon2.7.0/tmp/aadr2doi_result.txt"
   ))
 
-# manual step: add missing DOIs to DOIs.txt
-additional_dois <- c(
-  "LazaridisNature2016" = "10.1038/nature19310",
-  "LiScience2008" = "10.1126/science.1153717",
-  "JakobssonNature2008" =  "10.1038/nature06742",
-  "BraceDiekmannNatureEcologyEvolution2019" = "10.1038/s41559-019-0871-9",
-  "HaakLazaridis2015" = "10.1038/nature14317",
-  "Gamba2014" = "10.1038/ncomms6257",
-  "UllingerNearEasternArchaeology2022" = "10.1086/720748",
-  "AntonioGaoMootsScience2019" = "10.1126/science.aay6826",
-  "KanzawaKiriyamaJHG2016" = "10.1038/jhg.2016.110",
-  "JonesCurrentBiology2017" = "10.1016/j.cub.2016.12.060",
-  "ColonMolecularBiologyandEvolution2020" = "10.1093/molbev/msz267",
-  "RaghavanNature2013" = "10.1038/nature12736",
-  "OrlandoScience2014" = "10.1126/science.aaa0114",
-  "Olalde2014" = "10.1038/nature12960",
-  "GreenScience2010" = "10.1126/science.1188021",
-  "LindoFigueiroPNASNexus2022" = "10.1093/pnasnexus/pgac047"
+aadr2doi_result <- readr::read_tsv(
+  "AADR54.1_to_Poseidon2.7.0/tmp/aadr2doi_result.txt",
+  col_names = c("key", "doi")
 )
-write(additional_dois, file = "AADR54.1_to_Poseidon2.7.0/tmp/DOIs.txt", append = TRUE)
-#check nr of lines in result file: system("wc -l AADR54.1_to_Poseidon2.7.0/tmp/DOIs.txt")
+
+# manual step: add missing DOIs to DOIs.txt
+additional_dois <- tibble::tribble(
+  ~key, ~doi,
+  "LazaridisNature2016", "10.1038/nature19310",
+  "LiScience2008", "10.1126/science.1153717",
+  "JakobssonNature2008",  "10.1038/nature06742",
+  "BraceDiekmannNatureEcologyEvolution2019", "10.1038/s41559-019-0871-9",
+  "HaakLazaridis2015", "10.1038/nature14317",
+  "Gamba2014", "10.1038/ncomms6257",
+  "UllingerNearEasternArchaeology2022", "10.1086/720748",
+  "AntonioGaoMootsScience2019", "10.1126/science.aay6826",
+  "KanzawaKiriyamaJHG2016", "10.1038/jhg.2016.110",
+  "JonesCurrentBiology2017", "10.1016/j.cub.2016.12.060",
+  "ColonMolecularBiologyandEvolution2020", "10.1093/molbev/msz267",
+  "RaghavanNature2013", "10.1038/nature12736",
+  "OrlandoScience2014", "10.1126/science.aaa0114",
+  "Olalde2014", "10.1038/nature12960",
+  "GreenScience2010", "10.1126/science.1188021",
+  "LindoFigueiroPNASNexus2022", "10.1093/pnasnexus/pgac047"
+)
+
+# combine automatically retrieved and manually added dois
+combined_doi_table <- dplyr::bind_rows(aadr2doi_result, additional_dois)
+
+# clean out .Paperpile suffix in dois
+combined_doi_table$doi <- combined_doi_table$doi %>% gsub(".Paperpile", "", .)
+
+# identify doi duplicates
+doi_duplicates <- combined_doi_table %>%
+  dplyr::group_by(doi) %>%
+  dplyr::summarize(keys = list(key)) %>%
+  dplyr::filter(purrr::map_lgl(keys, \(x) length(x) > 1))
+
+# decide which ones to keep
+doi_duplicates$keys
+
+key_replacement <- tibble::tribble(
+  ~bad, ~good,
+  "RaghavanNature2013", "RaghavanNature2014",
+  "Olalde2014", "OlaldeNature2014",
+  "Gamba2014",  "GambaNatureCommunications2014",
+  "SiskaScienceAdvances2017", "SikoraScience2017"
+)
+
+# replace keys in .janno file
+replaced_publication_column <- aadrJanno$Publication %>%
+  purrr::map(\(pubs) {
+    if (is.null(pubs)) { NULL } else {
+      purrr::map_chr(pubs, \(pub) {
+        if (pub %in% key_replacement$bad) {
+          key_replacement$good[pub == key_replacement$bad]
+        } else { pub }
+      })
+    }
+  })
+# tibble::tibble(a = aadrJanno$Publication, b = replaced_publication_column) %>%
+#   dplyr::filter(paste(a) != paste(b)) %>% View()
+aadrJanno$Publication <- replaced_publication_column
+poseidonR::write_janno(aadrJanno, path = "AADR54.1_to_Poseidon2.7.0/tmp/AADR_1240K.janno")
+
+# remove keys from doi list
+final_doi_table <- combined_doi_table %>%
+  dplyr::filter(!(key %in% key_replacement$bad))
+
+# write dois to file
+writeLines(final_doi_table$doi, "AADR54.1_to_Poseidon2.7.0/tmp/DOIs.txt")
 
 #### resolve DOIs to BibTeX entries ####
 
@@ -46,9 +102,29 @@ system(paste(
   "-o AADR54.1_to_Poseidon2.7.0/tmp/References.bib"
 ))
 
-#### adjust citation keys ####
+#### clean resulting .bib file ####
 
+# load result
 references <- bibtex::read.bib("AADR54.1_to_Poseidon2.7.0/tmp/References.bib")
 
+# 1. manual step: add field "journal" to entries 'Wang_2020', '_egarac_2020', 'Moots_2022', 'Antonio_2022'
+# (all "journal = {bioRxiv}")
 
-# manual step: clean .bib file with https://flamingtempura.github.io/bibtex-tidy/
+# check which doi's are actually there
+dois_actually_in_bibtex <- references %>% purrr::map_chr(\(x) x$doi)
+setdiff(final_doi_table$doi, dois_actually_in_bibtex)
+
+# 2. manual step: add missing bibtex entries for some papers
+# 10.1126/science.abm4247 -> The genetic history of the Southern Arc...
+# 10.1038/ncomms1701.Paperpile -> New insights into the Tyrolean Iceman's origin...
+
+#### adjust citation keys in bib file ####
+
+references <- bibtex::read.bib("AADR54.1_to_Poseidon2.7.0/tmp/References.bib")
+dois_in_bibtex <- references %>% purrr::map_chr(\(x) x$doi)
+in_bibtex <- tibble::tibble(doi2bib_key = names(references), doi = dois_in_bibtex)
+merged_key_table <- dplyr::left_join(in_bibtex, final_doi_table, by = "doi")
+
+names(references) <- final_doi_table$key
+
+
