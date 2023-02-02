@@ -1,15 +1,22 @@
 library(magrittr)
 
+# to start from scratch
+# file.remove(
+#   "AADR54.1_to_Poseidon2.7.0/tmp/DOIs.txt",
+#   "AADR54.1_to_Poseidon2.7.0/tmp/citation_keys.txt",
+#   "AADR54.1_to_Poseidon2.7.0/tmp/aadr2doi_result.txt",
+#   "AADR54.1_to_Poseidon2.7.0/tmp/AADR_1240K.janno",
+#   "ADR54.1_to_Poseidon2.7.0/tmp/References_raw.bib"
+# )
+
 #### prepare a list of all required papers ####
 # this assumes the .janno file was created with the anno2janno.R script
 
-aadrJanno <- poseidonR::read_janno("AADR54.1_to_Poseidon2.7.0/tmp/AADR_1240K.janno", validate = F)
+aadrJanno <- poseidonR::read_janno("AADR54.1_to_Poseidon2.7.0/tmp/AADR_1240K_raw.janno", validate = F)
 keys <- aadrJanno$Publication %>% unlist() %>% unique()
 writeLines(keys, "AADR54.1_to_Poseidon2.7.0/tmp/citation_keys.txt")
 
 #### compile list of DOIs ###
-
-file.remove("AADR54.1_to_Poseidon2.7.0/tmp/DOIs.txt")
 
 # using aadr2doi: https://github.com/nevrome/aadr2doi
 system(paste(
@@ -60,7 +67,7 @@ doi_duplicates <- combined_doi_table %>%
   dplyr::filter(purrr::map_lgl(keys, \(x) length(x) > 1))
 
 # decide which ones to keep
-doi_duplicates$keys
+#doi_duplicates$keys
 
 key_replacement <- tibble::tribble(
   ~bad, ~good,
@@ -99,16 +106,18 @@ writeLines(final_doi_table$doi, "AADR54.1_to_Poseidon2.7.0/tmp/DOIs.txt")
 system(paste(
   "doi2bib",
   "-i AADR54.1_to_Poseidon2.7.0/tmp/DOIs.txt",
-  "-o AADR54.1_to_Poseidon2.7.0/tmp/References.bib"
+  "-o AADR54.1_to_Poseidon2.7.0/tmp/References_raw.bib"
 ))
 
 #### clean resulting .bib file ####
 
 # load result
-references <- bibtex::read.bib("AADR54.1_to_Poseidon2.7.0/tmp/References.bib")
+references <- bibtex::read.bib("AADR54.1_to_Poseidon2.7.0/tmp/References_raw.bib")
 
 # 1. manual step: add field "journal" to entries 'Wang_2020', '_egarac_2020', 'Moots_2022', 'Antonio_2022'
 # (all "journal = {bioRxiv}")
+
+references <- bibtex::read.bib("AADR54.1_to_Poseidon2.7.0/tmp/References_raw.bib")
 
 # check which doi's are actually there
 dois_actually_in_bibtex <- references %>% purrr::map_chr(\(x) x$doi)
@@ -116,15 +125,24 @@ setdiff(final_doi_table$doi, dois_actually_in_bibtex)
 
 # 2. manual step: add missing bibtex entries for some papers
 # 10.1126/science.abm4247 -> The genetic history of the Southern Arc...
-# 10.1038/ncomms1701.Paperpile -> New insights into the Tyrolean Iceman's origin...
 
 #### adjust citation keys in bib file ####
 
-references <- bibtex::read.bib("AADR54.1_to_Poseidon2.7.0/tmp/References.bib")
-dois_in_bibtex <- references %>% purrr::map_chr(\(x) x$doi)
-in_bibtex <- tibble::tibble(doi2bib_key = names(references), doi = dois_in_bibtex)
+in_references <- bibtex::read.bib("AADR54.1_to_Poseidon2.7.0/tmp/References_raw.bib")
+
+dois_in_bibtex <- in_references %>% purrr::map_chr(\(x) x$doi)
+keys_in_bibtex <- in_references %>% purrr::map_chr(\(x) attr(x, "key"))
+in_bibtex <- tibble::tibble(doi2bib_key = keys_in_bibtex, doi = dois_in_bibtex)
 merged_key_table <- dplyr::left_join(in_bibtex, final_doi_table, by = "doi")
 
-names(references) <- final_doi_table$key
+out_references <- purrr::map2(
+  in_references, merged_key_table$key,
+  \(x, y) {
+    attr(x, "key") <- y
+    return(x)
+  }
+)
+class(out_references) <- "bibentry"
 
+bibtex::write.bib(out_references, "AADR54.1_to_Poseidon2.7.0/tmp/References.bib")
 

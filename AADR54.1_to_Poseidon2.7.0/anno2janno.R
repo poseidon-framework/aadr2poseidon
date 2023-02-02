@@ -260,11 +260,11 @@ res_janno_raw <- cbind(
 
 res_janno <- poseidonR::as.janno(res_janno_raw)
 
-poseidonR::write_janno(res_janno, path = "AADR54.1_to_Poseidon2.7.0/tmp/AADR_1240K.janno")
+poseidonR::write_janno(res_janno, path = "AADR54.1_to_Poseidon2.7.0/tmp/AADR_1240K_raw.janno")
 
 #### inspect result ####
 
-issues <- poseidonR::validate_janno("AADR54.1_to_Poseidon2.7.0/tmp/AADR_1240K.janno")
+issues <- poseidonR::validate_janno("AADR54.1_to_Poseidon2.7.0/tmp/AADR_1240K_raw.janno")
 
 issues %>% dplyr::filter(
   !(grepl("trailing whitespaces", issue) |
