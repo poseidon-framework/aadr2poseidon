@@ -110,6 +110,12 @@ setdiff(final_doi_table$doi, dois_actually_in_bibtex)
 # 2. manual step: add missing bibtex entries for some papers
 # 10.1126/science.abm4247 -> The genetic history of the Southern Arc...
 
+# 3. manual step: clean incorrectly formatted values
+# {PLoS ONE} {ONE} -> {PLoS ONE}
+# {Nat Ecol Evol}amp$\mathsemicolon$ Evolution} -> {Nat Ecol Evol}
+# {PLoS Biol} Biology} -> {PLoS Biol}
+# {PLoS Genet} Genetics} -> {PLoS Genet}
+
 #### adjust citation keys in bib file ####
 
 in_references <- bibtex::read.bib("AADR54.1_to_Poseidon2.7.0/tmp/References_raw.bib")

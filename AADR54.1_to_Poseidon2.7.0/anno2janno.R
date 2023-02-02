@@ -91,7 +91,16 @@ AADR_Date_Full_Info <- anno$Date_Full_Info
 
 AADR_Age_Death <- anno$Age_Death
 
-Group_Name <- anno$Group_ID
+# read .ind file for correct group and sex information
+ind_file <- readLines("AADR54.1_to_Poseidon2.7.0/tmp/v54.1_1240K_public.ind") %>%
+  trimws() %>%
+  paste0("\n") %>%
+  gsub("\\s{2,}", " ", .) %>%
+  readr::read_delim(" ", col_names = c("id", "sex", "group"))
+# tibble::tibble(a = ind_file$group, b = anno$Group_ID) %>%
+#   dplyr::filter(a != b)
+
+Group_Name <- ind_file$group
 
 Location <- anno$Locality
 
@@ -154,17 +163,9 @@ AADR_SNPs_1240K <- anno$SNPs_Autosomal_Targets_1240k
 
 AADR_SNPs_HO <- anno$SNPs_Autosomal_Targets_HO
 
-# read .ind file for correct sex information
-sex_in_ind_file <- readLines("AADR54.1_to_Poseidon2.7.0/tmp/v54.1_1240K_public.ind") %>%
-  trimws() %>%
-  paste0("\n") %>%
-  gsub("\\s{2,}", " ", .) %>%
-  readr::read_delim(" ", col_names = c("id", "sex", "group")) %$%
-  sex
 #anno[sex_in_ind_file != anno$Molecular_Sex,] %>% View()
-
 # There is just one case where "c" should be "M"
-Genetic_Sex <- dplyr::case_when(sex_in_ind_file == "c" ~ "U", TRUE ~ sex_in_ind_file)
+Genetic_Sex <- dplyr::case_when(ind_file$sex == "c" ~ "U", TRUE ~ ind_file$sex )
 #Genetic_Sex %>% table()
 
 AADR_Kinship <- anno$Family_ID
