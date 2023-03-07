@@ -242,7 +242,12 @@ Library_Built <- parse_library_built(anno$Library_Type)
 
 AADR_Library_Type <- anno$Library_Type
 
-AADR_Libraries <- anno$Libraries
+Library_Names <- anno$Libraries %>%
+  stringr::str_split(",") %>%
+  purrr::map(function(x) {
+    if (all(is.na(x))) { NULL } else { trimws(x) }
+  })
+# cbind(Library_Names, anno$Libraries) %>% unique() %>% View()
 
 AADR_Assessment <- anno$Assessment
 
@@ -289,7 +294,7 @@ res_janno_raw <- cbind(
   UDG,
   Library_Built,
   AADR_Library_Type,
-  AADR_Libraries,
+  Library_Names,
   AADR_Assessment,
   AADR_Assessment_Warnings
 ) %>% tibble::tibble()

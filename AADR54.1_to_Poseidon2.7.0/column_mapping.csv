@@ -12,7 +12,7 @@ Date_C14_Labnr + Date_C14_Uncal_BP + Date_C14_Uncal_BP_Err + Date_BC_AD_Start + 
 Non-native column: AADR_Age_Death,No change,Age_Death,Age at Death from physical anthropology 
 Group_Name,No change,Group_ID,Group ID 
 Location,No change,Locality,Locality 
-Non-native column: Country_ISO + Country,For Country_ISO the country entries were mapped to ISO-alpha2 codes. The column Country contains the entries of Political_Entity unchanged,Political_Entity,Political Entity 
+Country_ISO + Country,For Country_ISO the country entries were mapped to ISO-alpha2 codes. The column Country contains the entries of Political_Entity unchanged,Political_Entity,Political Entity 
 Latitude,Rounded to 5 decimal places,Lat,Lat. 
 Longitude,Rounded to 5 decimal places,Long,Long. 
 Non-native column: AADR_Pulldown_Strategy,No change,Pulldown_Strategy,Pulldown Strategy 
@@ -31,6 +31,6 @@ Non-native column: AADR_MT_Match_Consensus,No change,mtDNA_Match_Consensus,mtDNA
 Damage,No change,Damage,Damage rate in first nucleotide on sequences overlapping 1240k targets (merged data) 
 Non-native column: AADR_Sex_Ratio,No change,Sex_Ratio,Sex ratio [Y/(Y+X) counts] (merged data) 
 UDG + Library_Built + Non-native column: AADR_Library_Type,Extracted information for the janno columns UDG and Library_Built. The AADR_Library_Type column keeps the original structure,Library_Type,"Library type (minus=no.damage.correction, half=damage.retained.at.last.position, plus=damage.fully.corrected, ds=double.stranded.library.preparation, ss=single.stranded.library.preparation) "
-Non-native column: AADR_Libraries,No change,Libraries,Libraries 
+Library_Names,"For Library_Names the list of libraries was split by , to form a list column (separated by ;). Leading and trailing whitespaces were removed",Libraries,Libraries 
 Non-native column: AADR_Assessment,No change,Assessment,ASSESSMENT 
 Non-native column: AADR_Assessment_Warnings,No change,Assessment_Warnings,"ASSESSMENT WARNINGS (Xcontam interval is listed if lower bound is >0.005, ""QUESTIONABLE"" if lower bound is 0.01-0.02, ""QUESTIONABLE_CRITICAL"" or ""FAIL"" if lower bound is >0.02) (mtcontam confidence interval is listed if coverage >2 and upper bound is <0. "

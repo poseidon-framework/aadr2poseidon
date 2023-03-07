@@ -1,5 +1,7 @@
 #!/bin/bash
 
+#wget https://reichdata.hms.harvard.edu/pub/datasets/amh_repo/curated_releases/V54/V54.1/SHARE/public.dir/v54.1_1240K_public.anno -O tmp/v54.1_1240K_public.anno
+#wget https://reichdata.hms.harvard.edu/pub/datasets/amh_repo/curated_releases/V54/V54.1/SHARE/public.dir/v54.1_1240K_public.ind -O tmp/v54.1_1240K_public.ind
 wget https://reichdata.hms.harvard.edu/pub/datasets/amh_repo/curated_releases/V54/V54.1/SHARE/public.dir/v54.1_1240K_public.tar -O tmp/v54.1_1240K_public.tar
 
 tar -xvf tmp/v54.1_1240K_public.tar -C tmp
