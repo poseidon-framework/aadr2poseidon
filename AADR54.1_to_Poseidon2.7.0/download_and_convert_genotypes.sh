@@ -2,14 +2,14 @@
 
 #wget https://reichdata.hms.harvard.edu/pub/datasets/amh_repo/curated_releases/V54/V54.1/SHARE/public.dir/v54.1_1240K_public.anno -O tmp/v54.1_1240K_public.anno
 #wget https://reichdata.hms.harvard.edu/pub/datasets/amh_repo/curated_releases/V54/V54.1/SHARE/public.dir/v54.1_1240K_public.ind -O tmp/v54.1_1240K_public.ind
-wget https://reichdata.hms.harvard.edu/pub/datasets/amh_repo/curated_releases/V54/V54.1/SHARE/public.dir/v54.1_1240K_public.tar -O tmp/v54.1_1240K_public.tar
+wget https://reichdata.hms.harvard.edu/pub/datasets/amh_repo/curated_releases/V54/V54.1.p1/SHARE/public.dir/v54.1.p1_1240K_public.tar -O tmp/v54.1.p1_1240K_public.tar
 
-tar -xvf tmp/v54.1_1240K_public.tar -C tmp
+tar -xvf tmp/v54.1.p1_1240K_public.tar -C tmp
 
 cat > tmp/convertf_parfile <<EOF
-genotypename: tmp/v54.1_1240K_public.geno
-snpname: tmp/v54.1_1240K_public.snp
-indivname: tmp/v54.1_1240K_public.ind
+genotypename: tmp/v54.1.p1_1240K_public.geno
+snpname: tmp/v54.1.p1_1240K_public.snp
+indivname: tmp/v54.1.p1_1240K_public.ind
 outputformat: EIGENSTRAT
 genotypeoutname: tmp/AADR_1240K.geno
 snpoutname: tmp/AADR_1240K.snp

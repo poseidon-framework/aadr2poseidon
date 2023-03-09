@@ -1,13 +1,13 @@
 library(magrittr)
 
 #### prepare input data ####
-# this assumes the .anno file was downloaded already from "https://reichdata.hms.harvard.edu/pub/datasets/amh_repo/curated_releases/V54/V54.1/SHARE/public.dir/v54.1_1240K_public.anno"
+# this assumes the .anno file was downloaded
 
-anno_lines <- readLines("AADR54.1_to_Poseidon2.7.0/tmp/v54.1_1240K_public.anno")
+anno_lines <- readLines("AADR54.1_to_Poseidon2.7.0/tmp/v54.1.p1_1240K_public.anno")
 
 # remove malicious quotes in .anno file
-anno_lines[3378] <- gsub("\"384-202 calBCE", "384-202 calBCE", anno_lines[3378])
-anno_lines[3379] <- gsub("\"381-201 calBCE", "381-201 calBCE", anno_lines[3379])
+#anno_lines[3378] <- gsub("\"384-202 calBCE", "384-202 calBCE", anno_lines[3378])
+#anno_lines[3379] <- gsub("\"381-201 calBCE", "381-201 calBCE", anno_lines[3379])
 
 # replace double quotes in general with single quotes
 anno_lines <- purrr::map_chr(anno_lines, \(x) { gsub("\"", "'", x) })
@@ -18,9 +18,7 @@ anno <- readr::read_tsv(
   show_col_types = F ,
   skip_empty_rows = F ,
   na = c("..", "", "n/a", "na")
-) %>%
-  # remove empty last column
-  dplyr::select(-"...36")
+)
 
 # make list of column names for columns_mapping.csv
 # purrr::walk(colnames(anno), \(x) cat(x, "\n"))
@@ -48,7 +46,7 @@ Publication_list <- anno$Publication %>%
   purrr::map(function(x) {
     if (all(is.na(x))) { NULL } else { x }
   })
-# cbind(Publication, anno$Publication) %>% unique %>% View()
+# cbind(Publication_list, anno$Publication) %>% unique %>% View()
 
 # this is informed by the observations in prepare_bib_file.R!
 key_replacement <- tibble::tribble(
@@ -82,7 +80,7 @@ AADR_Date_Mean_BP <- anno$Date_Mean_BP
 AADR_Date_SD <- anno$Date_SD
 
 # fix obviously wrong entry
-anno$Date_Full_Info[12863] <- "5350-5250 BCE"
+anno$Date_Full_Info[12786] <- "5350-5250 BCE"
 
 source("AADR54.1_to_Poseidon2.7.0/age_string_parser.R")
 date_string_parsing_result <- split_age_string(anno$Date_Full_Info)
@@ -92,7 +90,7 @@ AADR_Date_Full_Info <- anno$Date_Full_Info
 AADR_Age_Death <- anno$Age_Death
 
 # read .ind file for correct group and sex information
-ind_file <- readLines("AADR54.1_to_Poseidon2.7.0/tmp/v54.1_1240K_public.ind") %>%
+ind_file <- readLines("AADR54.1_to_Poseidon2.7.0/tmp/v54.1.p1_1240K_public.ind") %>%
   trimws() %>%
   paste0("\n") %>%
   gsub("\\s{2,}", " ", .) %>%
@@ -294,14 +292,14 @@ res_janno_raw <- cbind(
   UDG,
   Library_Built,
   AADR_Library_Type,
-  Library_Names,
+  I(Library_Names),
   AADR_Assessment,
   AADR_Assessment_Warnings
 ) %>% tibble::tibble()
 
-res_janno <- poseidonR::as.janno(res_janno_raw)
+res_janno <- janno::as.janno(res_janno_raw)
 
-poseidonR::write_janno(res_janno, path = "AADR54.1_to_Poseidon2.7.0/tmp/AADR_1240K.janno")
+janno::write_janno(res_janno, path = "AADR54.1_to_Poseidon2.7.0/tmp/AADR_1240K.janno")
 
 
 #### inspect result ####
@@ -312,6 +310,6 @@ issues %>% dplyr::filter(
   !(grepl("trailing whitespaces", issue) |
       grepl("Superfluous white space", issue) |
       grepl("column is not defined", issue) |
-      grepl("ds, ss, other", issue)
+      grepl("ds, ss, mixed", issue)
     )
 ) %>% View()
