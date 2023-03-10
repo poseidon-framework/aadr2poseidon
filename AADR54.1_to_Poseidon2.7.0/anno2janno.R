@@ -6,8 +6,8 @@ library(magrittr)
 anno_lines <- readLines("AADR54.1_to_Poseidon2.7.0/tmp/v54.1.p1_1240K_public.anno")
 
 # remove malicious quotes in .anno file
-#anno_lines[3378] <- gsub("\"384-202 calBCE", "384-202 calBCE", anno_lines[3378])
-#anno_lines[3379] <- gsub("\"381-201 calBCE", "381-201 calBCE", anno_lines[3379])
+anno_lines[3301] <- gsub("\"384-202 calBCE", "384-202 calBCE", anno_lines[3301])
+anno_lines[3302] <- gsub("\"381-201 calBCE", "381-201 calBCE", anno_lines[3302])
 
 # replace double quotes in general with single quotes
 anno_lines <- purrr::map_chr(anno_lines, \(x) { gsub("\"", "'", x) })
@@ -27,11 +27,19 @@ anno <- readr::read_tsv(
 mapping_reference <- readr::read_csv("AADR54.1_to_Poseidon2.7.0/column_mapping.csv")
 colnames(anno) <- mapping_reference$`Simplified .anno column name`
 
+# renaming duplicates
+
+# anno %>%
+#   dplyr::mutate(index = 1:nrow(.)) %>%
+#   dplyr::group_by(Genetic_ID) %>%
+#   dplyr::filter(dplyr::n() > 1) %>% View()
+
 #### construct janno columns ####
 
 Poseidon_ID <- anno$Genetic_ID %>%
   gsub("<", "LT", .) %>%
   gsub(">", "GT", .)
+# tibble::tibble(a = Poseidon_ID, b = anno$Genetic_ID) %>% dplyr::filter(a != b) %>% View()
 
 Alternative_IDs <- anno$Master_ID
 
@@ -99,6 +107,8 @@ ind_file <- readLines("AADR54.1_to_Poseidon2.7.0/tmp/v54.1.p1_1240K_public.ind")
 #   dplyr::filter(a != b)
 
 Group_Name <- ind_file$group
+
+anno$Locality[10823] <- anno$Locality[10824] <- "Valencian Community, Valencia/Valencia, Bocairent, La Coveta Empareta"
 
 Location <- anno$Locality
 
@@ -240,6 +250,12 @@ Library_Built <- parse_library_built(anno$Library_Type)
 
 AADR_Library_Type <- anno$Library_Type
 
+# replace wrong delimiters
+semicolon_delimited <- anno$Libraries[c(1764, 4372:4407, 4679, 9591, 9592, 10303)]
+anno$Libraries[c(1764, 4372:4407, 4679, 9591, 9592, 10303)] <- semicolon_delimited %>%
+  gsub(",", "", .) %>%
+  gsub(";", ",", .)
+
 Library_Names <- anno$Libraries %>%
   stringr::str_split(",") %>%
   purrr::map(function(x) {
@@ -304,12 +320,6 @@ janno::write_janno(res_janno, path = "AADR54.1_to_Poseidon2.7.0/tmp/AADR_1240K.j
 
 #### inspect result ####
 
-issues <- poseidonR::validate_janno("AADR54.1_to_Poseidon2.7.0/tmp/AADR_1240K.janno")
+issues <- janno::validate_janno("AADR54.1_to_Poseidon2.7.0/tmp/AADR_1240K.janno")
 
-issues %>% dplyr::filter(
-  !(grepl("trailing whitespaces", issue) |
-      grepl("Superfluous white space", issue) |
-      grepl("column is not defined", issue) |
-      grepl("ds, ss, mixed", issue)
-    )
-) %>% View()
+issues %>% View()

@@ -21,7 +21,7 @@ writeLines(keys, "AADR54.1_to_Poseidon2.7.0/tmp/citation_keys.txt")
 system(paste(
   "aadr2doi",
   "--inFile AADR54.1_to_Poseidon2.7.0/tmp/citation_keys.txt",
-  "--aadrVersion 54.1",
+  "--aadrVersion 54.1.p1",
   "--doiShape Short",
   "--printKey",
   "-o AADR54.1_to_Poseidon2.7.0/tmp/aadr2doi_result.txt"
@@ -40,15 +40,15 @@ additional_dois <- tibble::tribble(
   "JakobssonNature2008",  "10.1038/nature06742",
   "BraceDiekmannNatureEcologyEvolution2019", "10.1038/s41559-019-0871-9",
   "HaakLazaridis2015", "10.1038/nature14317",
-  "Gamba2014", "10.1038/ncomms6257",
+  #"Gamba2014", "10.1038/ncomms6257",
   "UllingerNearEasternArchaeology2022", "10.1086/720748",
   "AntonioGaoMootsScience2019", "10.1126/science.aay6826",
   "KanzawaKiriyamaJHG2016", "10.1038/jhg.2016.110",
   "JonesCurrentBiology2017", "10.1016/j.cub.2016.12.060",
   "ColonMolecularBiologyandEvolution2020", "10.1093/molbev/msz267",
-  "RaghavanNature2013", "10.1038/nature12736",
+  #"RaghavanNature2013", "10.1038/nature12736",
   "OrlandoScience2014", "10.1126/science.aaa0114",
-  "Olalde2014", "10.1038/nature12960",
+  #"Olalde2014", "10.1038/nature12960",
   "GreenScience2010", "10.1126/science.1188021",
   "LindoFigueiroPNASNexus2022", "10.1093/pnasnexus/pgac047"
 )
@@ -68,6 +68,8 @@ doi_duplicates <- combined_doi_table %>%
 # decide which ones to keep
 #doi_duplicates$keys
 # set this also in key_replacement in anno2janno.R!
+# When this is set, then this code here will actually not do anything,
+# because the offending values are already removed
 
 key_replacement <- tibble::tribble(
   ~bad, ~good,
@@ -80,6 +82,8 @@ key_replacement <- tibble::tribble(
 # remove keys from doi list
 final_doi_table <- combined_doi_table %>%
   dplyr::filter(!(key %in% key_replacement$bad))
+
+final_doi_table <- combined_doi_table
 
 # write dois to file
 writeLines(final_doi_table$doi, "AADR54.1_to_Poseidon2.7.0/tmp/DOIs.txt")
