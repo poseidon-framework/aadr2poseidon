@@ -165,7 +165,7 @@ AADR_SNPs_1240K <- anno$SNPs_Autosomal_Targets_1240k
 AADR_SNPs_HO <- anno$SNPs_Autosomal_Targets_HO
 
 #anno[sex_in_ind_file != anno$Molecular_Sex,] %>% View()
-# There is just one case where "c" should be "M"
+# There is just one case with "c"
 Genetic_Sex <- dplyr::case_when(ind_file$sex == "c" ~ "U", TRUE ~ ind_file$sex )
 #Genetic_Sex %>% table()
 
