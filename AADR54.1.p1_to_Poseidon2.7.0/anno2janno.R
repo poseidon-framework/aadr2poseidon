@@ -1,7 +1,7 @@
 library(magrittr)
 
 #### prepare input data ####
-# this assumes the .anno file was downloaded
+# this assumes the .anno file was already downloaded
 
 anno_lines <- readLines("AADR54.1.p1_to_Poseidon2.7.0/tmp/v54.1.p1_1240K_public.anno")
 
