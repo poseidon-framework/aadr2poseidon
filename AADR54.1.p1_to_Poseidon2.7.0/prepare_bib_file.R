@@ -2,33 +2,33 @@ library(magrittr)
 
 # to start from scratch
 # file.remove(
-#   "AADR54.1_to_Poseidon2.7.0/tmp/DOIs.txt",
-#   "AADR54.1_to_Poseidon2.7.0/tmp/citation_keys.txt",
-#   "AADR54.1_to_Poseidon2.7.0/tmp/aadr2doi_result.txt",
+#   "AADR54.1.p1_to_Poseidon2.7.0/tmp/DOIs.txt",
+#   "AADR54.1.p1_to_Poseidon2.7.0/tmp/citation_keys.txt",
+#   "AADR54.1.p1_to_Poseidon2.7.0/tmp/aadr2doi_result.txt",
 #   "ADR54.1_to_Poseidon2.7.0/tmp/References_raw.bib"
 # )
 
 #### prepare a list of all required papers ####
 # this assumes the .janno file was created with the anno2janno.R script
 
-aadrJanno <- poseidonR::read_janno("AADR54.1_to_Poseidon2.7.0/tmp/AADR_1240K.janno", validate = F)
+aadrJanno <- poseidonR::read_janno("AADR54.1.p1_to_Poseidon2.7.0/tmp/AADR_1240K.janno", validate = F)
 keys <- aadrJanno$Publication %>% unlist() %>% unique()
-writeLines(keys, "AADR54.1_to_Poseidon2.7.0/tmp/citation_keys.txt")
+writeLines(keys, "AADR54.1.p1_to_Poseidon2.7.0/tmp/citation_keys.txt")
 
 #### compile list of DOIs ###
 
 # using aadr2doi: https://github.com/nevrome/aadr2doi
 system(paste(
   "aadr2doi",
-  "--inFile AADR54.1_to_Poseidon2.7.0/tmp/citation_keys.txt",
+  "--inFile AADR54.1.p1_to_Poseidon2.7.0/tmp/citation_keys.txt",
   "--aadrVersion 54.1.p1",
   "--doiShape Short",
   "--printKey",
-  "-o AADR54.1_to_Poseidon2.7.0/tmp/aadr2doi_result.txt"
+  "-o AADR54.1.p1_to_Poseidon2.7.0/tmp/aadr2doi_result.txt"
   ))
 
 aadr2doi_result <- readr::read_tsv(
-  "AADR54.1_to_Poseidon2.7.0/tmp/aadr2doi_result.txt",
+  "AADR54.1.p1_to_Poseidon2.7.0/tmp/aadr2doi_result.txt",
   col_names = c("key", "doi")
 )
 
@@ -86,26 +86,26 @@ final_doi_table <- combined_doi_table %>%
 final_doi_table <- combined_doi_table
 
 # write dois to file
-writeLines(final_doi_table$doi, "AADR54.1_to_Poseidon2.7.0/tmp/DOIs.txt")
+writeLines(final_doi_table$doi, "AADR54.1.p1_to_Poseidon2.7.0/tmp/DOIs.txt")
 
 #### resolve DOIs to BibTeX entries ####
 
 # using doi2bib: https://github.com/bibcure/doi2bib
 system(paste(
   "doi2bib",
-  "-i AADR54.1_to_Poseidon2.7.0/tmp/DOIs.txt",
-  "-o AADR54.1_to_Poseidon2.7.0/tmp/References_raw.bib"
+  "-i AADR54.1.p1_to_Poseidon2.7.0/tmp/DOIs.txt",
+  "-o AADR54.1.p1_to_Poseidon2.7.0/tmp/References_raw.bib"
 ))
 
 #### clean resulting .bib file ####
 
 # load result
-references <- bibtex::read.bib("AADR54.1_to_Poseidon2.7.0/tmp/References_raw.bib")
+references <- bibtex::read.bib("AADR54.1.p1_to_Poseidon2.7.0/tmp/References_raw.bib")
 
 # 1. manual step: add field "journal" to entries 'Wang_2020', '_egarac_2020', 'Moots_2022', 'Antonio_2022'
 # (all "journal = {bioRxiv}")
 
-references <- bibtex::read.bib("AADR54.1_to_Poseidon2.7.0/tmp/References_raw.bib")
+references <- bibtex::read.bib("AADR54.1.p1_to_Poseidon2.7.0/tmp/References_raw.bib")
 
 # check which doi's are actually there
 dois_actually_in_bibtex <- references %>% purrr::map_chr(\(x) x$doi)
@@ -122,7 +122,7 @@ setdiff(final_doi_table$doi, dois_actually_in_bibtex)
 
 #### adjust citation keys in bib file ####
 
-in_references <- bibtex::read.bib("AADR54.1_to_Poseidon2.7.0/tmp/References_raw.bib")
+in_references <- bibtex::read.bib("AADR54.1.p1_to_Poseidon2.7.0/tmp/References_raw.bib")
 
 dois_in_bibtex <- in_references %>% purrr::map_chr(\(x) x$doi)
 keys_in_bibtex <- in_references %>% purrr::map_chr(\(x) attr(x, "key"))
@@ -138,5 +138,5 @@ out_references <- purrr::map2(
 )
 class(out_references) <- "bibentry"
 
-bibtex::write.bib(out_references, "AADR54.1_to_Poseidon2.7.0/tmp/References.bib")
+bibtex::write.bib(out_references, "AADR54.1.p1_to_Poseidon2.7.0/tmp/References.bib")
 
