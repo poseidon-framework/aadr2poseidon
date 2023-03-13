@@ -138,5 +138,7 @@ out_references <- purrr::map2(
 )
 class(out_references) <- "bibentry"
 
+#### write final .bib file #### 
+
 bibtex::write.bib(out_references, "AADR54.1.p1_to_Poseidon2.7.0/tmp/References.bib")
 

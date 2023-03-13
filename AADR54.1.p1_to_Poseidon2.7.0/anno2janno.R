@@ -27,13 +27,6 @@ anno <- readr::read_tsv(
 mapping_reference <- readr::read_csv("AADR54.1.p1_to_Poseidon2.7.0/column_mapping.csv")
 colnames(anno) <- mapping_reference$`Simplified .anno column name`
 
-# renaming duplicates
-
-# anno %>%
-#   dplyr::mutate(index = 1:nrow(.)) %>%
-#   dplyr::group_by(Genetic_ID) %>%
-#   dplyr::filter(dplyr::n() > 1) %>% View()
-
 #### construct janno columns ####
 
 Poseidon_ID <- anno$Genetic_ID %>%
@@ -315,11 +308,14 @@ res_janno_raw <- cbind(
 
 res_janno <- janno::as.janno(res_janno_raw)
 
-janno::write_janno(res_janno, path = "AADR54.1.p1_to_Poseidon2.7.0/tmp/AADR_1240K.janno")
+#### write .janno file ####
 
+janno::write_janno(
+  res_janno,
+  path = "AADR54.1.p1_to_Poseidon2.7.0/tmp/AADR_1240K.janno"
+)
 
 #### inspect result ####
 
 issues <- janno::validate_janno("AADR54.1.p1_to_Poseidon2.7.0/tmp/AADR_1240K.janno")
-
 issues %>% View()
