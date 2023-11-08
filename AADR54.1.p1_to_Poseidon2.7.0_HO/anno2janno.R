@@ -55,12 +55,6 @@ Poseidon_ID <- anno$Genetic_ID %>%
 
 Alternative_IDs <- anno$Master_ID
 
-# anno$Skeletal_Code %>% is.na() %>% all()
-# Collection_ID <- anno$Skeletal_Code
-
-# anno$Skeletal_Element %>% is.na() %>% all()
-# Source_Tissue <- anno$Skeletal_Element
-
 AADR_Year_First_Publication <- anno$Year_First_Publication
 
 Publication_list <- anno$Publication %>%
