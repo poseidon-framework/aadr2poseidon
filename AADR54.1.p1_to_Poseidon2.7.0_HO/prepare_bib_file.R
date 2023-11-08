@@ -11,7 +11,7 @@ library(magrittr)
 #### prepare a list of all required papers ####
 # this assumes the .janno file was created with the anno2janno.R script
 
-aadrJanno <- poseidonR::read_janno("AADR54.1.p1_to_Poseidon2.7.0_HO/tmp/AADR_HO_without_1240K.janno", validate = F)
+aadrJanno <- poseidonR::read_janno("AADR54.1.p1_to_Poseidon2.7.0_HO/tmp/AADR_HO_without_1240K_Publications_Incomplete.janno", validate = F)
 keys <- aadrJanno$Publication %>% unlist() %>% unique()
 writeLines(keys, "AADR54.1.p1_to_Poseidon2.7.0_HO/tmp/citation_keys.txt")
 
@@ -102,7 +102,27 @@ out_references <- purrr::map2(
 )
 class(out_references) <- "bibentry"
 
-#### write final .bib file #### 
+#### write .bib file #### 
 
 bibtex::write.bib(out_references, "AADR54.1.p1_to_Poseidon2.7.0_HO/tmp/References.bib")
 
+#### add AADR references to bib file and janno file ####
+
+# manual step: add bibtex entries for AADR and AADRv541p1 to bib file
+
+aadrJannoWithAADRRef <- aadrJanno %>%
+  dplyr::mutate(
+    Publication = purrr::map(
+      Publication, function(x) {
+        c(x, "AADR", "AADRv541p1")
+      }
+    )
+  )
+
+janno::write_janno(
+  aadrJannoWithAADRRef,
+  path = "AADR54.1.p1_to_Poseidon2.7.0_HO/tmp/AADR_HO_without_1240K.janno"
+)
+
+issues <- janno::validate_janno("AADR54.1.p1_to_Poseidon2.7.0_HO/tmp/AADR_HO_without_1240K.janno")
+issues %>% View()
