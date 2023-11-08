@@ -1,6 +1,6 @@
-# [V54.1.p1](https://reichdata.hms.harvard.edu/pub/datasets/amh_repo/curated_releases/index_v54.1.p1.html): Data release: Mar 6 2023 (minor patch on v54.1)
+# [V54.1.p1](https://reichdata.hms.harvard.edu/pub/datasets/amh_repo/curated_releases/index_v54.1.p1.html): Data release: Mar 6 2023 (minor patch on v54.1) - 1240K version
 
-Here are the steps we applied to transform the AADR dataset to a set of Poseidon packages:
+Here are the steps we applied to transform the AADR 1240K dataset to a set of Poseidon packages:
 
 1. Download the AADR dataset and convert the genotype data to a Poseidon-compatible format with `download_and_convert_genotypes.sh`.
 2. Transform the .anno file to a .janno file with `anno2janno.R`. This includes renaming, manipulating and mapping the .anno columns to the specified [.janno columns](https://poseidon-framework.github.io/#/janno_details) according to the decisions documented in `column_mapping.csv`. Minor changes beyond that are listed below. The parsing of the `Full Date...` column requires more code outsourced to `age_string_parser.R`. The standardization of country names for `Country_ISO` relies on the `location_to_M49.tsv` lookup table provided by Hugo Zeberg.
