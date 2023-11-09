@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cd AADR54.1.p1_to_Poseidon2.7.0_1240K
+cd AADR54.1.p1_to_Poseidon2.7.0_1240K_1240K
 
 # download archive
 wget https://reichdata.hms.harvard.edu/pub/datasets/amh_repo/curated_releases/V54/V54.1.p1/SHARE/public.dir/v54.1.p1_1240K_public.tar -O tmp/v54.1.p1_1240K_public.tar

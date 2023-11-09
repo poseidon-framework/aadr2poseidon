@@ -3,7 +3,7 @@ library(magrittr)
 #### prepare input data ####
 # this assumes the .anno file was already downloaded
 
-anno_lines <- readLines("AADR54.1.p1_to_Poseidon2.7.0/tmp/v54.1.p1_1240K_public.anno")
+anno_lines <- readLines("AADR54.1.p1_to_Poseidon2.7.0_1240K/tmp/v54.1.p1_1240K_public.anno")
 
 # remove malicious quotes in .anno file
 anno_lines[3301] <- gsub("\"384-202 calBCE", "384-202 calBCE", anno_lines[3301])
@@ -24,7 +24,7 @@ anno <- readr::read_tsv(
 # purrr::walk(colnames(anno), \(x) cat(x, "\n"))
 
 # adopt simplified column names for convenience
-mapping_reference <- readr::read_csv("AADR54.1.p1_to_Poseidon2.7.0/column_mapping.csv")
+mapping_reference <- readr::read_csv("AADR54.1.p1_to_Poseidon2.7.0_1240K/column_mapping.csv")
 colnames(anno) <- mapping_reference$`Simplified .anno column name`
 
 #### construct janno columns ####
@@ -50,6 +50,8 @@ Publication_list <- anno$Publication %>%
 # cbind(Publication_list, anno$Publication) %>% unique %>% View()
 
 # this is informed by the observations in prepare_bib_file.R!
+# In the future everything bibliography-related should be done over there,
+# even changing the .janno file
 key_replacement <- tibble::tribble(
   ~bad, ~good,
   "RaghavanNature2013", "RaghavanNature2014",
@@ -83,7 +85,7 @@ AADR_Date_SD <- anno$Date_SD
 # fix obviously wrong entry
 anno$Date_Full_Info[12786] <- "5350-5250 BCE"
 
-source("AADR54.1.p1_to_Poseidon2.7.0/age_string_parser.R")
+source("AADR54.1.p1_to_Poseidon2.7.0_1240K/age_string_parser.R")
 date_string_parsing_result <- split_age_string(anno$Date_Full_Info)
 
 AADR_Date_Full_Info <- anno$Date_Full_Info
@@ -91,7 +93,7 @@ AADR_Date_Full_Info <- anno$Date_Full_Info
 AADR_Age_Death <- anno$Age_Death
 
 # read .ind file for correct group and sex information
-ind_file <- readLines("AADR54.1.p1_to_Poseidon2.7.0/tmp/v54.1.p1_1240K_public.ind") %>%
+ind_file <- readLines("AADR54.1.p1_to_Poseidon2.7.0_1240K/tmp/v54.1.p1_1240K_public.ind") %>%
   trimws() %>%
   paste0("\n") %>%
   gsub("\\s{2,}", " ", .) %>%
@@ -105,7 +107,7 @@ anno$Locality[10823] <- anno$Locality[10824] <- "Valencian Community, Valencia/V
 
 Location <- anno$Locality
 
-country_lookup_table <- readLines("AADR54.1.p1_to_Poseidon2.7.0/location_to_M49.tsv") %>%
+country_lookup_table <- readLines("AADR54.1.p1_to_Poseidon2.7.0_1240K/location_to_M49.tsv") %>%
   magrittr::extract(-2) %>%
   gsub(";", "\t", .) %>%
   paste0(collapse = "\n") %>%
@@ -312,10 +314,10 @@ res_janno <- janno::as.janno(res_janno_raw)
 
 janno::write_janno(
   res_janno,
-  path = "AADR54.1.p1_to_Poseidon2.7.0/tmp/AADR_1240K.janno"
+  path = "AADR54.1.p1_to_Poseidon2.7.0_1240K/tmp/AADR_1240K.janno"
 )
 
 #### inspect result ####
 
-issues <- janno::validate_janno("AADR54.1.p1_to_Poseidon2.7.0/tmp/AADR_1240K.janno")
+issues <- janno::validate_janno("AADR54.1.p1_to_Poseidon2.7.0_1240K/tmp/AADR_1240K.janno")
 issues %>% View()

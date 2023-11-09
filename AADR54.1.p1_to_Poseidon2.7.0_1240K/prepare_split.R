@@ -2,7 +2,7 @@ library(magrittr)
 
 #### read clean .janno file ####
 
-aadrJanno <- poseidonR::read_janno("AADR54.1.p1_to_Poseidon2.7.0/tmp/AADR_1240K.janno", validate = F)
+aadrJanno <- poseidonR::read_janno("AADR54.1.p1_to_Poseidon2.7.0_1240K/tmp/AADR_1240K.janno", validate = F)
 
 #### define subsets ####
 
@@ -32,13 +32,13 @@ nrow(modern)/nrow(aadrJanno)
 
 writeLines(
   paste0("<", modern$Poseidon_ID, ">"),
-  "AADR54.1.p1_to_Poseidon2.7.0/tmp/subsetModern.pfs"
+  "AADR54.1.p1_to_Poseidon2.7.0_1240K/tmp/subsetModern.pfs"
 )
 writeLines(
   paste0("<", europe_ancient$Poseidon_ID, ">"),
-  "AADR54.1.p1_to_Poseidon2.7.0/tmp/subsetEuropeAncient.pfs"
+  "AADR54.1.p1_to_Poseidon2.7.0_1240K/tmp/subsetEuropeAncient.pfs"
 )
 writeLines(
   paste0("<", beyond_europe_ancient$Poseidon_ID, ">"),
-  "AADR54.1.p1_to_Poseidon2.7.0/tmp/subsetBeyondEuropeAncient.pfs"
+  "AADR54.1.p1_to_Poseidon2.7.0_1240K/tmp/subsetBeyondEuropeAncient.pfs"
 )
