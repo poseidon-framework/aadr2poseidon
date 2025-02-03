@@ -4,11 +4,8 @@ split_age_string <- function(x) {
   
   #### modify input (fixing small details) ####
   x <- gsub("\\+", "\u00B1", x) # replace + with \u00B1
-  #x <- gsub("(.*)(?=\\()", "\\1 ", x, perl = T) # missing space before parentheses
-  x <- gsub("AA-R-", "AAR- ", x) # fix wrong lab code (http://www.radiocarbon.org/Info/labcodes.html)
-  x <- gsub("Wk - ", "Wk-", x) # fix wrong lab code
   x <- gsub("\u{00a0}", " ", x) # replace wrong space characters
-  x <- gsub("¬†", " ", x)
+  x <- gsub("cal BP", " BP", x)
   
   #### construct result table ####
   res <- tibble::tibble(
@@ -42,15 +39,26 @@ split_age_string <- function(x) {
           "D-AMS-[0-9]*",
           "AA84155",
           "KIA44691",
+          "MAMS\\s-\\s[0-9]*",
           "MAMS 21972",
           "R-EVA1606/MAMS-[0-9]*",
           "TÜBİTAK-[0-9]*",
           "AAR-\\s[0-9]*",
-          "OxA-X-[0-9]*-[0-9]*",
+          "AA-R-[0-9]*",
+          "OxA-[X,V]-[0-9]*(-[0-9]*)?",
+          "Ox-A-[0-9]*",
+          "OxA\\s-\\s[0-9]*",
           "CIRCE-DSH-[0-9]*",
           "ISGS-A[0-9]*",
           "CEDAD-LTL[0-9]*A",
-          "[A-Za-z]{2,7}(\\s|-)[0-9]*" # that's the normal pattern, the others are deviating from that
+          "TERRA-b[0-9]*",
+          "BE-\\s?[0-9]*\\.1\\.1",
+          "FTMC-IL[0-9]*-[0-9]*",
+          "Wk-\\s-\\s[0-9]*",
+          "LTL-[0-9]*[A-Z]*",
+          "[A-Za-z]{2,7}(\\s|-)[0-9]*", # that's the normal pattern, the others are deviating from that
+          "Poz", # must be matched after standard pattern, because it's too general
+          "Beta"
         ),
         collapse = "|"
       ),
