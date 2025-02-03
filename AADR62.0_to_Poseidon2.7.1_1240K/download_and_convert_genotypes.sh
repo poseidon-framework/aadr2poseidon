@@ -1,18 +1,19 @@
 #!/bin/bash
 
-cd AADR54.1.p1_to_Poseidon2.7.0_1240K_1240K
+cd AADR62.0_to_Poseidon2.7.1_1240K
+mkdir tmp
 
-# download archive
-wget https://reichdata.hms.harvard.edu/pub/datasets/amh_repo/curated_releases/V54/V54.1.p1/SHARE/public.dir/v54.1.p1_1240K_public.tar -O tmp/v54.1.p1_1240K_public.tar
-
-# unpack
-tar -xvf tmp/v54.1.p1_1240K_public.tar -C tmp
+# download relevant files
+wget https://dataverse.harvard.edu/api/access/datafile/10537413 -O tmp/v62.0_1240k_public.anno
+wget https://dataverse.harvard.edu/api/access/datafile/10537414 -O tmp/v62.0_1240k_public.ind
+wget https://dataverse.harvard.edu/api/access/datafile/10537415 -O tmp/v62.0_1240k_public.snp
+wget https://dataverse.harvard.edu/api/access/datafile/10537126 -O tmp/v62.0_1240k_public.geno
 
 # convert to EIGENSTRAT
 cat > tmp/convertf_parfile <<EOF
-genotypename: tmp/v54.1.p1_1240K_public.geno
-snpname: tmp/v54.1.p1_1240K_public.snp
-indivname: tmp/v54.1.p1_1240K_public.ind
+genotypename: tmp/v62.0_1240k_public.geno
+snpname: tmp/v62.0_1240k_public.snp
+indivname: tmp/v62.0_1240k_public.ind
 outputformat: EIGENSTRAT
 genotypeoutname: tmp/AADR_1240K.geno
 snpoutname: tmp/AADR_1240K.snp
