@@ -26,6 +26,10 @@ Here are the steps we applied to transform the AADR 1240K dataset to a set of Po
 - Line 4069: The lab identifier in the `Full Date...` entry included a misplaced character: `±ETH` -> `ETH`.
 - Line 7098: Wrong separators between individual values in the list column `Libraries`. We replaced the entry with `MLZ003.A0201.TF1.1,MLZ003.A0202.TF2.1,MLZ003.A0203.TF2.1,MLZ005.A0101.TF1.1,MLZ005.A0102.TF2.1,MLZ005.A0103.TF2.1,MLZ005.A0201.TF1.1,MLZ005.A0202.TF2.1,MLZ005.A0203.TF2.1`.
 
+The `Full Date...` column includes more formatting inconsistencies. They often affect many entries. We did not fix them in the source data, but only in memory with some code for subsequent parsing. See the code in `age_string_parser.R`.
+
+Group_Names and Genetic_Sex were taken from the .ind-file, not the .anno file.
+
 
 - #anno$Locality[c(2055, 2058, 2059, 2060, 8127, 8128, 8129, 8130, 8132, 8135, 8137, 9621, 10239, 10240, 10241, 10242)] <- "El Soco (southeast coast DR, San Pedro de Macorís, Ramón Santana, Playa Nueva Romana)"
 

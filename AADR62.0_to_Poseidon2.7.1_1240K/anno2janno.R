@@ -54,30 +54,21 @@ AADR_Date_Full_Info <- anno$Date_Full_Info
 
 AADR_Age_Death <- anno$Age_Death
 
-
-
-### ISSUE_MM: from the below code seems like there is 179 samples for which there is a disparity between ind file and Genetic_ID; not sure how to tackle this
-## For example in the AADR v62.0 ind file there's:
-# AVL001.SG F Denmark_AvlebjergStroby_N.SG
-# AVL001_d.SG U Denmark_AvlebjergStroby_N.SG
-# and the corresponding lines in the AADR v62.0 anno are:
-#   AVL001.SG	AVL001	CGG024035	Tooth	2024	SeersholmSikoraNature2024	10.1038/s41586-024-07651-2	ENA: PRJEB76142	Direct: IntCal20	5165	79	3356-3098 calBCE (4510±32 BP; UBA-40443)	Inf I; c. 4.5	Denmark_AvlebjergStroby_N.SG	Strøby (Avlebjerg)	Denmark	55.38332	12.28199	Native Pulldown on 3.2M snpset	SG	Shotgun	2	113383	54884	F	..	..	..	n/a (female)	..	122.294	K1b1a1	0.265	..	..	..	..	ss.minus,ss.minus	MA2895ULSS21A,MA2895ULSS21B	..	PROVISIONAL_PASS	..
-# AVL001_d.SG	AVL001	CGG024035	Tooth	2024	SeersholmSikoraNature2024	10.1038/s41586-024-07651-2	ENA: PRJEB76142	Direct: IntCal20	5165	79	3356-3098 calBCE (4510±32 BP; UBA-40443)	Inf I; c. 4.5	Denmark_AvlebjergStroby_N_lc.SG	Strøby (Avlebjerg)	Denmark	55.38332	12.28199	Native Pulldown on 3.2M snpset	SG	Shotgun	2	1435	742	U	..	..	..	..	..	..	..	..	..	..	..	..	ss.minus,ss.minus	MA2895ULSS21A,MA2895ULSS21B	..	PROVISIONAL_QUESTIONABLE	2500.to.5000.SNPs
-# Thus the ind file Pop name does not always equal the "Group ID" in the anno file.
-# These samples anyway look like duplicates (identical Master_ID) of some sort where the "worse" Genetic_ID is labelled with "_d"
-
-
 # read .ind file for correct group and sex information
-ind_file <- readLines("AADR62.0_to_Poseidon_1240K/tmp/v62.0_1240k_public.ind") %>%
+ind_file <- readLines("AADR62.0_to_Poseidon2.7.1_1240K/tmp/v62.0_1240k_public.ind") %>%
   trimws() %>%
   paste0("\n") %>%
   gsub("\\s{2,}", " ", .) %>%
   readr::read_delim(" ", col_names = c("id", "sex", "group"))
-# tibble::tibble(a = ind_file$group, b = anno$Group_ID) %>%
-#   dplyr::filter(a != b)
+
+# tibble::tibble(.ind = ind_file$id, .anno = anno$Genetic_ID) %>%
+#   dplyr::filter(.ind != .anno)
+# tibble::tibble(.ind = ind_file$group, .anno = anno$Group_ID) %>%
+#   dplyr::filter(.ind != .anno)
+# tibble::tibble(.ind = ind_file$sex, .anno = anno$Molecular_Sex) %>%
+#   dplyr::filter(.ind != .anno)
 
 Group_Name <- ind_file$group
-
 
 Location <- anno$Locality
 
