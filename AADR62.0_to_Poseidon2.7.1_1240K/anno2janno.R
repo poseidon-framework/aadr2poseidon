@@ -47,6 +47,11 @@ date_string_parsing_result <- split_age_string(anno$Date_Full_Info)
 
 AADR_Date_Full_Info <- anno$Date_Full_Info
 
+# dplyr::bind_cols(
+#   full = AADR_Date_Full_Info,
+#   date_string_parsing_result
+# ) %>% View()
+
 AADR_Age_Death <- anno$Age_Death
 
 

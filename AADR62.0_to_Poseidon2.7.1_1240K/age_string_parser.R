@@ -9,6 +9,9 @@ split_age_string <- function(x) {
   x <- gsub("\u{00a0}", " ", x)
   # hide FRE ("Fresh water reservoir effect"?) dates for parsing
   x <- gsub("\\[.*?\\],", "", x)
+  x <- gsub(", corrected for FWRE", "", x)
+  # fixing special formatting mistakes
+  x <- gsub(" BP; ", " BP, ", x)
 
   #### construct result table ####
   res <- tibble::tibble(
@@ -88,7 +91,7 @@ split_age_string <- function(x) {
   simple_age_split <- x %>%
     stringr::str_replace_all("\\(", "") %>%
     stringr::str_replace_all("\\)", "") %>%
-    stringr::str_split("\\s*-\\s*|-|\\s+")
+    stringr::str_split("\\s*-\\s*|-|–|\\s+")
   
   # translate first elements of the vector to meaningful start and stop ages
   stop <- start <- rep(NA, length(simple_age_split))
