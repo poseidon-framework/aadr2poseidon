@@ -10,8 +10,12 @@ split_age_string <- function(x) {
   # hide FRE ("Fresh water reservoir effect"?) dates for parsing
   x <- gsub("\\[.*?\\],", "", x)
   x <- gsub(", corrected for FWRE", "", x)
-  # fixing special formatting mistakes
+  # fixing special formatting mistakes affecting individual samples
   x <- gsub(" BP; ", " BP, ", x)
+  x <- gsub(" ±", "±", x)
+  x <- gsub("([0-9]+±[0-9]+)([,;])", "\\1 BP,", x)
+  x <- gsub("([0-9])(cal)", "\\1 cal", x)
+
 
   #### construct result table ####
   res <- tibble::tibble(
