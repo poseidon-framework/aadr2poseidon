@@ -13,11 +13,19 @@ Here are the steps we applied to transform the AADR 1240K dataset to a set of Po
 
 `column_mapping.csv` only documents systematic changes. Here are some notes on minor, additional changes to the .anno file. Some of these where proposed by Martyna Molak. We enacted the changes before or during reading.
 
-- The line 15317 has three entries for `Damage rate in first nucleotide on sequences overlapping 1240k targets (merged data)`, where only a single numbers is expected: `0.0157, 0.0173, 0.0162`. We selected the middle value `0.0162` and deleted the others.
-- The lines 15365, 15366, and 15366 of the .anno file have the `mtDNA haplogroup if >2x or published` wrongly in the column `mtDNA coverage (merged data)`. We moved the three values to the correct column.
-- The line 15615 has an impossible entry in `Full Date...`: `76-2332 calCE`. We assume that there was a typo in the Stolarek et al. supplementary information file. The samples were radiocarbon dated, but the publication does not report dating lab numbers nor uncalibrated C14 dates. We then set the mean date and the standard deviation to `..`.
-- The line 7264 has another impossible entry in `Full Date...`: `2550-565 calCE (1646±68 BP)`. We assume there was a typo in AADR field "2550-565 calCE (1646±68 BP)" for this sample; the original publication "WangYuCurrentBiology2023" refrains from providing calibrated dates at all due to indication of a strong reservoir effect and "lack of estimates for the local reservoir effect in the region"; not sure how AADR came up with these estimates for this sample as well as for two other samples from the site (also dated): KMT001.SG, KMT002.SG, KMT003.SG.
+- Line 15317: Three entries for `Damage rate in first nucleotide on sequences overlapping 1240k targets (merged data)`, where only a single numbers is expected: `0.0157, 0.0173, 0.0162`. We selected the middle value `0.0162` and deleted the others.
+- Lines 15365, 15366, and 15366: Have the `mtDNA haplogroup if >2x or published` entries wrongly in the column `mtDNA coverage (merged data)`. We moved the three values to the correct column.
+- Line 15615: Impossible entry in `Full Date...`: `76-2332 calCE`. We assume that there was a typo in the Stolarek et al. supplementary information file. The samples were radiocarbon dated, but the publication does not report dating lab numbers nor uncalibrated C14 dates. We then set the mean date and the standard deviation to `..`.
+- Line 7264: Impossible entry in `Full Date...`: `2550-565 calCE (1646±68 BP)`. We assume there was a typo in AADR field `2550-565 calCE (1646±68 BP)` for this sample; the original publication "WangYuCurrentBiology2023" refrains from providing calibrated dates at all due to indication of a strong reservoir effect and "lack of estimates for the local reservoir effect in the region"; not sure how AADR came up with these estimates for this sample as well as for two other samples from the site (also dated): KMT001.SG, KMT002.SG, KMT003.SG.
+- Lines 15416 and 15429: Incorrectly formatted `Full Date...` entries. We changed them to:
+  - `4311-4052 calBCE (5329±23 BP) [R_combine: (5220±90 BP, Gd-2729), (5366±32 BP, OxA-30501), (5300±35 BP, Poz-76057)]`
+  - `5623-5487 calBCE (6635±18 BP) [R_combine: (6610±30 BP, Beta-386397), (6670±30 BP, Beta-386398), (6630±30 BP, Beta-458001), (6630±30 BP, Beta-458002)]`
+- We renamed the radiocarbon lab `T±B_TAK` to `TUBITAK` in the radiocarbon date lab identifiers.
+
+
 - The line 7098 has wrong separators between individual values in the list column `Libraries`. We replaced the entry with `MLZ003.A0201.TF1.1,MLZ003.A0202.TF2.1,MLZ003.A0203.TF2.1,MLZ005.A0101.TF1.1,MLZ005.A0102.TF2.1,MLZ005.A0103.TF2.1,MLZ005.A0201.TF1.1,MLZ005.A0202.TF2.1,MLZ005.A0203.TF2.1`.
+
+
 - #anno$Locality[c(2055, 2058, 2059, 2060, 8127, 8128, 8129, 8130, 8132, 8135, 8137, 9621, 10239, 10240, 10241, 10242)] <- "El Soco (southeast coast DR, San Pedro de Macorís, Ramón Santana, Playa Nueva Romana)"
 
 

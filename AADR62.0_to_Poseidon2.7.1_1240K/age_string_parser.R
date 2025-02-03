@@ -3,10 +3,15 @@ library(magrittr)
 split_age_string <- function(x) {
   
   #### modify input (fixing small details) ####
-  x <- gsub("\\+", "\u00B1", x) # replace + with \u00B1
-  x <- gsub("\u{00a0}", " ", x) # replace wrong space characters
+  # replace + with \u00B1
+  x <- gsub("\\+", "\u00B1", x)
+  # replace wrong space characters
+  x <- gsub("\u{00a0}", " ", x)
+  # other replacements
   x <- gsub("cal BP", " BP", x)
-  
+  x <- gsub("\\[.*?\\],", "", x)
+  x <- gsub("±ETH", "ETH", x)
+
   #### construct result table ####
   res <- tibble::tibble(
     Date_C14_Labnr = rep(NA, length(x)),
@@ -29,40 +34,8 @@ split_age_string <- function(x) {
   full_radiocarbon_dates <- stringr::str_extract_all(
     x[c14_age_ids], 
     paste0(
-      "[0-9]{1,5}(\\s+)*\u00B1(\\s+)*[0-9]{1,4}( BP){0,1},{0,1}\\s{0,1}(", # pattern for age +/- std
-      paste(
-        c( # patterns for labnrs
-          "CNA4579.1.1",
-          "Beta [0-9]+",
-          "COL3897.1.1",
-          "A-",
-          "D-AMS-[0-9]*",
-          "AA84155",
-          "KIA44691",
-          "MAMS\\s-\\s[0-9]*",
-          "MAMS 21972",
-          "R-EVA1606/MAMS-[0-9]*",
-          "TÜBİTAK-[0-9]*",
-          "AAR-\\s[0-9]*",
-          "AA-R-[0-9]*",
-          "OxA-[X,V]-[0-9]*(-[0-9]*)?",
-          "Ox-A-[0-9]*",
-          "OxA\\s-\\s[0-9]*",
-          "CIRCE-DSH-[0-9]*",
-          "ISGS-A[0-9]*",
-          "CEDAD-LTL[0-9]*A",
-          "TERRA-b[0-9]*",
-          "BE-\\s?[0-9]*\\.1\\.1",
-          "FTMC-IL[0-9]*-[0-9]*",
-          "Wk-\\s-\\s[0-9]*",
-          "LTL-[0-9]*[A-Z]*",
-          "[A-Za-z]{2,7}(\\s|-)[0-9]*", # that's the normal pattern, the others are deviating from that
-          "Poz", # must be matched after standard pattern, because it's too general
-          "Beta"
-        ),
-        collapse = "|"
-      ),
-      ")"
+      "[0-9]{1,5}(\\s+)*\u00B1(\\s+)*[0-9]{1,4}(\\sBP),{0,1}\\s{0,1}", # pattern for age +/- std
+      "[A-Za-z0-9-\\s,]+[^);\\)]" # pattern for labnr
     )
   )
   
@@ -72,8 +45,10 @@ split_age_string <- function(x) {
   
   # split date and labnr
   full_radiocarbon_split <- purrr::map(full_radiocarbon_dates[full_radiocarbon_date_consumed], function(y) {
-    #if (length(stringr::str_split(y, c("\u00B1|( BP){0,1}, "))[[1]])<3) {print(y)}
-    stringr::str_split(y, c("\u00B1|( BP )|( BP){0,1},(\\s){0,1}")) %>% 
+    split_pattern <- c("\u00B1|( BP,\\s?)")
+    split_res <- stringr::str_split(y, split_pattern)
+    purrr::walk(split_res, \(s) { if (length(s) != 3) {print(y)} })
+    split_res %>% 
       purrr::transpose(c("uncal_age", "uncal_std", "labnr")) %>%
       purrr::map(unlist)
   }) %>% purrr::transpose()
