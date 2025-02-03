@@ -29,7 +29,7 @@ split_age_string <- function(x) {
   res$Date_Type[present_ids] <- "modern"
   c14_age_ids <- grep("±", x) # indizes of suspected radiocarbon dates
   
-  #### parse nice, full uncalibrated c14 dates ####
+  #### parse nice, full, named uncalibrated c14 dates ####
   # extract real, nice radiocarbon dates
   full_radiocarbon_dates <- stringr::str_extract_all(
     x[c14_age_ids], 
@@ -58,7 +58,7 @@ split_age_string <- function(x) {
   res$Date_C14_Uncal_BP_Err[c14_age_ids_true] <- full_radiocarbon_split$uncal_std
   res$Date_C14_Labnr[c14_age_ids_true] <- full_radiocarbon_split$labnr
   
-  #### parse unnamed radiocarbon dates ####
+  #### parse remaining unnamed radiocarbon dates ####
   c14_age_ids_false <- c14_age_ids[!full_radiocarbon_date_consumed]
   unnamed_radiocarbon_dates <- stringr::str_extract_all(
     x[c14_age_ids_false], 
@@ -68,7 +68,10 @@ split_age_string <- function(x) {
     purrr::map(function(x) { if (length(x)>2) {x[-1]} else x })
   
   unnamed_radiocarbon_split <- purrr::map(unnamed_radiocarbon_dates, function(y) {
-    stringr::str_split(y, c("\\s*\u00B1")) %>% 
+    split_pattern <- c("\\s*\u00B1")
+    split_res <- stringr::str_split(y, split_pattern)
+    purrr::walk(split_res, \(s) { if (length(s) != 2) {print(y)} })
+    split_res %>% 
       purrr::transpose(c("uncal_age", "uncal_std")) %>%
       purrr::map(unlist)
   }) %>% purrr::transpose()
