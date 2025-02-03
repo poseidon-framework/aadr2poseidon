@@ -22,6 +22,8 @@ Here are the steps we applied to transform the AADR 1240K dataset to a set of Po
   - `5623-5487 calBCE (6635±18 BP) [R_combine: (6610±30 BP, Beta-386397), (6670±30 BP, Beta-386398), (6630±30 BP, Beta-458001), (6630±30 BP, Beta-458002)]`
 - We renamed the radiocarbon lab `T±B_TAK` to `TUBITAK` in the radiocarbon date lab identifiers.
 - Line 7778: The information for the uncalibrated radiocarbon date in the `Full Date...` column is incomplete: `988-1163 calCE (1065±, EZV-00225)`. We adjusted the entry to the shape of a contextual, non-C14 date: `988-1163 CE`.
+- Lines 6881 and 6882: The `Full Date...` column used `cal BP` instead of the usual `BP`. We changed it.
+- Line 4069: The lab identifier in the `Full Date...` entry included a misplaced character: `±ETH` -> `ETH`.
 
 
 - The line 7098 has wrong separators between individual values in the list column `Libraries`. We replaced the entry with `MLZ003.A0201.TF1.1,MLZ003.A0202.TF2.1,MLZ003.A0203.TF2.1,MLZ005.A0101.TF1.1,MLZ005.A0102.TF2.1,MLZ005.A0103.TF2.1,MLZ005.A0201.TF1.1,MLZ005.A0202.TF2.1,MLZ005.A0203.TF2.1`.

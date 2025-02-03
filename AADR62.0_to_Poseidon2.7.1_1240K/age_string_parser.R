@@ -7,10 +7,8 @@ split_age_string <- function(x) {
   x <- gsub("\\+", "\u00B1", x)
   # replace wrong space characters
   x <- gsub("\u{00a0}", " ", x)
-  # other replacements
-  x <- gsub("cal BP", " BP", x)
+  # hide FRE ("Fresh water reservoir effect"?) dates for parsing
   x <- gsub("\\[.*?\\],", "", x)
-  x <- gsub("±ETH", "ETH", x)
 
   #### construct result table ####
   res <- tibble::tibble(
