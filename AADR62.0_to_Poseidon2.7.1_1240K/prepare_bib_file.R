@@ -1,3 +1,46 @@
+### ISSUE_MM: I'm not sure how the publication validation is supposed to work so not sure how to check whether it all is fine
+Publication_list <- anno$Publication %>%
+  stringr::str_extract_all(pattern = "[a-zA-Z]{5,}[0-9]{4}|1KGPhase3") %>%
+  purrr::map(function(x) {
+    if (all(is.na(x))) { NULL } else { x }
+  })
+# cbind(Publication_list, anno$Publication) %>% unique %>% View()
+
+# this is informed by the observations in prepare_bib_file.R!
+# In the future everything bibliography-related should be done over there,
+# even changing the .janno file
+key_replacement <- tibble::tribble(
+  ~bad, ~good,
+  "RaghavanNature2013", "RaghavanNature2014",
+  "Olalde2014", "OlaldeNature2014",
+  "Gamba2014",  "GambaNatureCommunications2014",
+  "SiskaScienceAdvances2017", "SikoraScience2017"
+)
+
+# replace bad keys
+Publication_cleaned <- Publication_list %>%
+  purrr::map(\(pubs) {
+    if (is.null(pubs)) { NULL } else {
+      purrr::map_chr(pubs, \(pub) {
+        if (pub %in% key_replacement$bad) {
+          key_replacement$good[pub == key_replacement$bad]
+        } else { pub }
+      })
+    }
+  })
+#tibble::tibble(a = Publication_cleaned, b = Publication_list) %>%
+#  dplyr::filter(paste(a) != paste(b)) %>% View()
+Publication <- Publication_cleaned %>%
+  purrr::map_chr(\(x) paste0(x, collapse = ";"))
+
+AADR_Publication <- anno$Publication
+
+
+
+
+
+
+
 library(magrittr)
 
 # to start from scratch
