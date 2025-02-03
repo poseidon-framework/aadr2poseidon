@@ -24,17 +24,12 @@ Here are the steps we applied to transform the AADR 1240K dataset to a set of Po
 - Line 7778: The information for the uncalibrated radiocarbon date in the `Full Date...` column is incomplete: `988-1163 calCE (1065±, EZV-00225)`. We adjusted the entry to the shape of a contextual, non-C14 date: `988-1163 CE`.
 - Lines 6881 and 6882: The `Full Date...` column used `cal BP` instead of the usual `BP`. We changed it.
 - Line 4069: The lab identifier in the `Full Date...` entry included a misplaced character: `±ETH` -> `ETH`.
-
-
-- The line 7098 has wrong separators between individual values in the list column `Libraries`. We replaced the entry with `MLZ003.A0201.TF1.1,MLZ003.A0202.TF2.1,MLZ003.A0203.TF2.1,MLZ005.A0101.TF1.1,MLZ005.A0102.TF2.1,MLZ005.A0103.TF2.1,MLZ005.A0201.TF1.1,MLZ005.A0202.TF2.1,MLZ005.A0203.TF2.1`.
+- Line 7098: Wrong separators between individual values in the list column `Libraries`. We replaced the entry with `MLZ003.A0201.TF1.1,MLZ003.A0202.TF2.1,MLZ003.A0203.TF2.1,MLZ005.A0101.TF1.1,MLZ005.A0102.TF2.1,MLZ005.A0103.TF2.1,MLZ005.A0201.TF1.1,MLZ005.A0202.TF2.1,MLZ005.A0203.TF2.1`.
 
 
 - #anno$Locality[c(2055, 2058, 2059, 2060, 8127, 8128, 8129, 8130, 8132, 8135, 8137, 9621, 10239, 10240, 10241, 10242)] <- "El Soco (southeast coast DR, San Pedro de Macorís, Ramón Santana, Playa Nueva Romana)"
 
 
-
-- We preemptively replaced all double quotes (if there are any) with single quotes to avoid reading issues.
-- The values `".."`, `""`, `"n/a"`, `"na"` were all treated as `NA`.
 
 
 - The publication keys `RaghavanNature2013`, `Olalde2014`, `Gamba2014` and `SiskaScienceAdvances2017` are DOI duplicates of `RaghavanNature2014`, `OlaldeNature2014`, `GambaNatureCommunications2014` and `SikoraScience2017` and were replaced by these.
@@ -44,3 +39,7 @@ Here are the steps we applied to transform the AADR 1240K dataset to a set of Po
 - Some entries to the `Libraries` column (rows: 1765, 4373, 4374, 4375, 4376, 4377, 4378, 4379, 4380, 4381, 4382, 4383, 4384, 4385, 4386, 4387, 4388, 4389, 4390, 4391, 4392, 4393, 4394, 4395, 4396, 4397, 4398, 4399, 4400, 4401, 4402, 4403, 4404, 4405, 4406, 4407, 4408, 4680, 9592, 9593, 10304) are not delimited by `,`, but by `;`. We changed the entries before parsing.
 - The following paper keys are missing or not linked to entries with DOIs on the AADR website: `LazaridisNature2016`, `LiScience2008`, `JakobssonNature2008`, `BraceDiekmannNatureEcologyEvolution2019`, `HaakLazaridis2015`, `UllingerNearEasternArchaeology2022`, `AntonioGaoMootsScience2019`, `KanzawaKiriyamaJHG2016`, `JonesCurrentBiology2017`, `ColonMolecularBiologyandEvolution2020`, `OrlandoScience2014`, `GreenScience2010`, `LindoFigueiroPNASNexus2022`. We added the DOIs manually, as they are necessary for downloading the BibTeX entries automatically.
 
+While reading we applied the following changes:
+
+- We preemptively replaced all double quotes (if there are any) with single quotes to avoid reading issues.
+- The values `".."`, `""`, `"n/a"`, `"na"` were all treated as `NA`.
