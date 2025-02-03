@@ -3,46 +3,22 @@ library(magrittr)
 #### prepare input data ####
 # this assumes the .anno file was already downloaded
 
-anno_lines <- readLines("AADR62.0_to_Poseidon_1240K/tmp/v62.0_1240k_public.anno")
+anno_lines <- readLines("AADR62.0_to_Poseidon2.7.1_1240K/tmp/v62.0_1240k_public.anno")
 
 # replace double quotes in general with single quotes
 anno_lines <- purrr::map_chr(anno_lines, \(x) { gsub("\"", "'", x) })
 
 anno <- readr::read_tsv(
   paste0(anno_lines, "\n"),
-  col_names = T ,
-  show_col_types = F ,
-  skip_empty_rows = F ,
+  col_names = T,
+  show_col_types = F,
+  skip_empty_rows = F,
   na = c("..", "", "n/a", "na")
 )
 
-
-# make list of column names for columns_mapping.csv
-# purrr::walk(colnames(anno), \(x) cat(x, "\n"))
-
 # adopt simplified column names for convenience
-mapping_reference <- readr::read_csv("AADR62.0_to_Poseidon_1240K/column_mapping.csv")
-colnames(anno) <- mapping_reference$`Simplified .anno column name` ## WARNING!!! This works simply on the order base (not recognizing the actual column names so column_mappin.csv needs to be adjusted for each version of AADR release)
-
-
-## MANUAL FIXES after initial validation (by Martyna Molak, 20241206):
-anno$Skeletal_Code[c(15903)] <- "C-2 (2)"
-anno$Locality[c(2055, 2058, 2059, 2060, 8127, 8128, 8129, 8130, 8132, 8135, 8137, 9621, 10239, 10240, 10241, 10242)] <- "El Soco (southeast coast DR, San Pedro de Macorís, Ramón Santana, Playa Nueva Romana)"
-
-# Impossible dating for the "PCA0034.SG" sample from "StolarekGenomeBio2023"
-anno$Date_Full_Info[c(15614)] <- "76-232 calCE"  ## we assume that there was a typo in the Stolarek et al. supplementary information file field "76-2332 calCE". The samples were radiocarbon dated, but the publication does not report dating lab numbers nor uncalibrated C14 date
-anno$Date_Mean_BP[c(15614)] <- "1796" ## this is retrospectively calculated from the average of the calibrated range 
-anno$Date_SD[c(15614)] <- ".."  ## I didn't manage to reproduce the sd calculation for the neighboring samples so I leave it as unknown
-
-# Impossible dating for the "KMT001.SG" sample from "WangYuCurrentBiology2023"
-anno$Date_Full_Info[c(7263)] <- "250-565 calCE (1646±68 BP)" ## we assume there was a typo in AADR field "2550-565 calCE (1646±68 BP)" for this sample; the original publication "WangYuCurrentBiology2023" refrains from providing calibrated dates at all due to indication of a strong reservoir effect and "lack of estimates for the local reservoir effect in the region"; not sure how AADR came up with these estimates for this sample as well as for two other samples from the site (also dated): KMT001.SG, KMT002.SG, KMT003.SG
-
-# issue: "Superfluous white space around separator ;" in row 7097 (sample "MLZ005003.AG")
-anno$Libraries[c(7097)] <- "MLZ003.A0201.TF1.1,MLZ003.A0202.TF2.1,MLZ003.A0203.TF2.1,MLZ005.A0101.TF1.1,MLZ005.A0102.TF2.1,MLZ005.A0103.TF2.1,MLZ005.A0201.TF1.1,MLZ005.A0202.TF2.1,MLZ005.A0203.TF2.1"
-
-##
-
-
+mapping_reference <- readr::read_csv("AADR62.0_to_Poseidon2.7.1_1240K/column_mapping.csv")
+colnames(anno) <- mapping_reference$`Simplified .anno column name` ## WARNING!!! This works simply on the order base (not recognizing the actual column names so column_mapping.csv needs to be adjusted for each version of AADR release)
 
 
 #### construct janno columns ####

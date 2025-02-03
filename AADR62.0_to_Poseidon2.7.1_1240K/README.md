@@ -1,4 +1,4 @@
-# [V54.1.p1](https://reichdata.hms.harvard.edu/pub/datasets/amh_repo/curated_releases/index_v54.1.p1.html): Data release: Mar 6 2023 (minor patch on v54.1) - 1240K version
+# [V62.0](https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/FFIDCW): Data release: Sep 16 2024 - 1240K version
 
 Here are the steps we applied to transform the AADR 1240K dataset to a set of Poseidon packages:
 
@@ -11,12 +11,22 @@ Here are the steps we applied to transform the AADR 1240K dataset to a set of Po
 
 ## Notes on additional minor changes
 
-`column_mapping.csv` only documents systematic changes. Here are some notes on minor, additional changes to the .anno file:
+`column_mapping.csv` only documents systematic changes. Here are some notes on minor, additional changes to the .anno file. Some of these where proposed by Martyna Molak. We enacted the changes before or during reading.
 
-- The lines 3301 and 3302 of the .anno file feature malicious quotes in the `Full Date...` column. They had to be removed to read it correctly. To make sure this doesn't also happen in other columns unnoticed we replaced all double quotes with single quotes.
+- The line 15317 has three entries for `Damage rate in first nucleotide on sequences overlapping 1240k targets (merged data)`, where only a single numbers is expected: `0.0157, 0.0173, 0.0162`. We selected the middle value `0.0162` and deleted the others.
+- The lines 15365, 15366, and 15366 of the .anno file have the `mtDNA haplogroup if >2x or published` wrongly in the column `mtDNA coverage (merged data)`. We moved the three values to the correct column.
+- The line 15615 has an impossible entry in `Full Date...`: `76-2332 calCE`. We assume that there was a typo in the Stolarek et al. supplementary information file. The samples were radiocarbon dated, but the publication does not report dating lab numbers nor uncalibrated C14 dates. We then set the mean date and the standard deviation to `..`.
+- The line 7264 has another impossible entry in `Full Date...`: `2550-565 calCE (1646±68 BP)`. We assume there was a typo in AADR field "2550-565 calCE (1646±68 BP)" for this sample; the original publication "WangYuCurrentBiology2023" refrains from providing calibrated dates at all due to indication of a strong reservoir effect and "lack of estimates for the local reservoir effect in the region"; not sure how AADR came up with these estimates for this sample as well as for two other samples from the site (also dated): KMT001.SG, KMT002.SG, KMT003.SG.
+- The line 7098 has superfluous whitespaces around individual values in the list column `Libraries`. We replaced the entry with `MLZ003.A0201.TF1.1,MLZ003.A0202.TF2.1,MLZ003.A0203.TF2.1,MLZ005.A0101.TF1.1,MLZ005.A0102.TF2.1,MLZ005.A0103.TF2.1,MLZ005.A0201.TF1.1,MLZ005.A0202.TF2.1,MLZ005.A0203.TF2.1`.
+- #anno$Locality[c(2055, 2058, 2059, 2060, 8127, 8128, 8129, 8130, 8132, 8135, 8137, 9621, 10239, 10240, 10241, 10242)] <- "El Soco (southeast coast DR, San Pedro de Macorís, Ramón Santana, Playa Nueva Romana)"
+
+
+
+- We preemptively replaced all double quotes (if there are any) with single quotes to avoid reading issues.
 - The values `".."`, `""`, `"n/a"`, `"na"` were all treated as `NA`.
+
+
 - The publication keys `RaghavanNature2013`, `Olalde2014`, `Gamba2014` and `SiskaScienceAdvances2017` are DOI duplicates of `RaghavanNature2014`, `OlaldeNature2014`, `GambaNatureCommunications2014` and `SikoraScience2017` and were replaced by these.
-- The entry `"5350-5250 CE"` in the `Full Date...` column in row 12787 is impossible. We changed it to `"5350-5250 BCE"`.
 - The country name `Gernamy` was treated as `Germany`.
 - The entry `"Valencian Community, València/Valencia, Bocairent, La Coveta Emparetà"` of the `Locality` column in the rows 10824 and 10825 seems to include invalid unicode characters. We changed it to `"Valencian Community, Valencia/Valencia, Bocairent, La Coveta Empareta"`.
 - The Genetic sex `c` was treated as `U`.
