@@ -34,9 +34,70 @@ Source_Tissue <- anno$Skeletal_Element
 
 ## Publication related columns
 AADR_Year_First_Publication <- anno$Year_First_Publication
-
-source(...)
+AADR_Publication <- anno$Publication
 AADR_Publication_DOI <- anno$Publication_DOI
+
+publication_list <- anno$Publication %>%
+  stringr::str_extract_all(pattern = "[a-zA-Z]{5,}[0-9]{4}|1KGPhase3") %>%
+  purrr::map(function(x) {
+    if (all(is.na(x))) { NULL } else { x }
+  })
+# cbind(publication_list, anno$Publication) %>% unique %>% View()
+
+Publication <- publication_list
+
+publications_and_dois_raw <- purrr::map2_dfr(
+  publication_list,
+  anno$Publication_DOI,
+  function(pubkeys, potentialdoi) {
+    pubkey <- if(!is.null(pubkeys)) { pubkeys[[1]] } else { NA_character_ }
+    doi <- stringr::str_extract(potentialdoi, "(?i)10.\\d{4,9}[-._;()/:A-Z0-9]+")
+    tibble::tibble(
+      key = pubkey,
+      doi = doi
+    )
+  }
+) %>% unique()
+
+key_and_dois <- publications_and_dois_raw %>%
+  dplyr::group_by(key) %>%
+  dplyr::slice_min(doi) %>%
+  dplyr::ungroup() %>%
+  dplyr::filter(!is.na(key))
+
+all_keys_as_used <- tibble::tibble(
+  key = publication_list %>% unlist() %>% unique()
+)
+
+all_keys_with_dois <- dplyr::full_join(keys_with_dois, all_keys_as_used, by = "key")
+# this shows the entries without DOI -> must be added manually
+all_keys_with_dois %>%
+  dplyr::filter(is.na(doi))
+
+manually_recovered_dois <- tibble::tribble(
+  ~key, ~doi,
+  "ChangmaiScientificReports2022", "10.1038/s41598-022-26799-3",
+  "GerberbioRxiv2024", "10.1101/2024.05.29.596386",
+  "NikitinPLoSOne2023", "10.1371/journal.pone.0285449",
+  "Pruefer2017", "10.1126/science.aao1887",
+  "ReichWorkingPaper2016", NA_character_, # this is a tricky one - it doesn't have a DOI
+  "SiskaScienceAdvances2017", "10.1126/science.aao1807",
+  "SjogrenPLoSOne2020", "10.1371/journal.pone.0241278",
+  "HaakLazaridis2015", "10.1038/nature14317",
+  "HarneyScience2023", "10.1126/science.ade4995",
+  "LiScience2008", "10.1126/science.1153717",
+  "JakobssonNature2008", "10.1038/nature06742",
+  "GreenScience2010", "10.1126/science.1188021",
+  "KellerNatureCommunications2012", "10.1038/ncomms1701",
+  "NarasimahPattersonScience2019", "10.1126/science.aat7487",
+  "FuNature2015", "10.1038/nature14558"
+)
+
+complete_keys_and_dois <- dplyr::rows_patch(all_keys_with_dois, manually_recovered_dois, by = "key")
+
+unqiue_dois <- complete_keys_and_dois$doi %>% unique()
+
+writeLines(unqiue_dois, "AADR62.0_to_Poseidon2.7.1_1240K/tmp/DOIs.txt")
 
 ## Dating related columns
 Date_Note <- anno$Date_Method
@@ -226,7 +287,7 @@ res_janno_raw <- cbind(
   Collection_ID,
   Source_Tissue,
   AADR_Year_First_Publication,
-  Publication,
+  I(Publication),
   AADR_Publication,
   AADR_Publication_DOI,
   AADR_Data_PID,
