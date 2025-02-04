@@ -70,9 +70,12 @@ ind_file <- readLines("AADR62.0_to_Poseidon2.7.1_1240K/tmp/v62.0_1240k_public.in
 
 Group_Name <- ind_file$group
 
+#ind_file$sex %>% table()
+Genetic_Sex <- ind_file$sex
+
 Location <- anno$Locality
 
-country_lookup_table <- readLines("AADR62.0_to_Poseidon_1240K/location_to_M49.tsv") %>%
+country_lookup_table <- readLines("AADR62.0_to_Poseidon2.7.1_1240K/location_to_M49.tsv") %>%
   magrittr::extract(-2) %>%
   gsub(";", "\t", .) %>%
   paste0(collapse = "\n") %>%
@@ -93,6 +96,7 @@ lookup_alpha2 <- function(x) {
 }
 
 Country_ISO <- purrr::map_chr(anno$Political_Entity, lookup_alpha2)
+# which(is.na(Country_ISO))
 # cbind(Country_ISO, anno$Political_Entity) %>% as.data.frame() %>% dplyr::filter(is.na(Country_ISO))
 
 Country <- anno$Political_Entity
@@ -125,18 +129,9 @@ AADR_Data_Source <- anno$Data_Source
 
 Nr_Libraries <- anno$No_Libraries
 
-#AADR_Coverage_1240K <- readr::parse_number(anno$Coverage_1240k)
-
 AADR_SNPs_1240K <- anno$SNPs_Autosomal_Targets_1240k
 
 AADR_SNPs_HO <- anno$SNPs_Autosomal_Targets_HO
-
-#anno[sex_in_ind_file != anno$Molecular_Sex,] %>% View()
-# There is just one case with "c"
-Genetic_Sex <- dplyr::case_when(ind_file$sex == "c" ~ "U", TRUE ~ ind_file$sex )
-#Genetic_Sex %>% table()
-
-#AADR_Kinship <- anno$Family_ID
 
 Y_Haplogroup <- anno$Y_Haplogroup_Terminal_Mutation
 
@@ -209,14 +204,6 @@ Library_Built <- parse_library_built(anno$Library_Type)
 # cbind(Library_Built, anno$Library_Type) %>% unique() %>% View()
 
 AADR_Library_Type <- anno$Library_Type
-
-
-#### ISSUE_MM: I haven't looked for wrong delimiters so far
-# replace wrong delimiters
-## semicolon_delimited <- anno$Libraries[c(1764, 4372:4407, 4679, 9591, 9592, 10303)]
-## anno$Libraries[c(1764, 4372:4407, 4679, 9591, 9592, 10303)] <- semicolon_delimited %>%
-##  gsub(",", "", .) %>%
-##  gsub(";", ",", .)
 
 Library_Names <- anno$Libraries %>%
   stringr::str_split(",") %>%

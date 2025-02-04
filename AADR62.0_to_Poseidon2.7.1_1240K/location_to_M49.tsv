@@ -71,7 +71,7 @@ Antigua and Barbuda	Americas;019;Latin America and the Caribbean;419;Caribbean;0
 Aruba	Americas;019;Latin America and the Caribbean;419;Caribbean;029;Aruba;533;AW
 Bahamas	Americas;019;Latin America and the Caribbean;419;Caribbean;029;Bahamas;044;BS
 Barbados	Americas;019;Latin America and the Caribbean;419;Caribbean;029;Barbados;052;BB
-"Bonaire, Sint Eustatius and Saba"	"Americas;019;Latin America and the Caribbean;419;Caribbean;029;Bonaire, Sint Eustatius and Saba;535;BQ"
+Bonaire, Sint Eustatius and Saba	Americas;019;Latin America and the Caribbean;419;Caribbean;029;Bonaire, Sint Eustatius and Saba;535;BQ
 British Virgin Islands	Americas;019;Latin America and the Caribbean;419;Caribbean;029;British Virgin Islands;092;VG
 Cayman Islands	Americas;019;Latin America and the Caribbean;419;Caribbean;029;Cayman Islands;136;KY
 Cuba	Americas;019;Latin America and the Caribbean;419;Caribbean;029;Cuba;192;CU
@@ -136,8 +136,8 @@ Turkmenistan	Asia;142;Central Asia;143;..;..;Turkmenistan;795;TM
 Uzbekistan	Asia;142;Central Asia;143;..;..;Uzbekistan;860;UZ
 China	Asia;142;Eastern Asia;030;..;..;China;156;CN
 Taiwan	Asia;142;Eastern Asia;030;..;..;China;158;TW
-"China, Hong Kong Special Administrative Region"	"Asia;142;Eastern Asia;030;..;..;China, Hong Kong Special Administrative Region;344;HK"
-"China, Macao Special Administrative Region"	"Asia;142;Eastern Asia;030;..;..;China, Macao Special Administrative Region;446;MO"
+China, Hong Kong Special Administrative Region	Asia;142;Eastern Asia;030;..;..;China, Hong Kong Special Administrative Region;344;HK
+China, Macao Special Administrative Region	Asia;142;Eastern Asia;030;..;..;China, Macao Special Administrative Region;446;MO
 Democratic People's Republic of Korea	Asia;142;Eastern Asia;030;..;..;Democratic People's Republic of Korea;408;KP
 Japan	Asia;142;Eastern Asia;030;..;..;Japan;392;JP
 Mongolia	Asia;142;Eastern Asia;030;..;..;Mongolia;496;MN
