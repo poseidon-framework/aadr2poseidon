@@ -1,33 +1,40 @@
 library(magrittr)
 
-# write dois to file
-
-
 #### resolve DOIs to BibTeX entries ####
 
 # using doi2bib: https://github.com/bibcure/doi2bib
+# runs for a couple of minutes
 system(paste(
   "doi2bib",
-  "-i AADR54.1.p1_to_Poseidon2.7.0_1240K/tmp/DOIs.txt",
-  "-o AADR54.1.p1_to_Poseidon2.7.0_1240K/tmp/References_raw.bib"
+  "-i AADR62.0_to_Poseidon2.7.1_1240K/tmp/DOIs.txt",
+  "-o AADR62.0_to_Poseidon2.7.1_1240K/tmp/References_raw.bib"
 ))
 
 #### clean resulting .bib file ####
 
+# validate result
+
+system("biber --tool --validate-datamodel AADR62.0_to_Poseidon2.7.1_1240K/tmp/References_raw.bib")
+
 # load result
-references <- bibtex::read.bib("AADR54.1.p1_to_Poseidon2.7.0_1240K/tmp/References_raw.bib")
+references <- bibtex::read.bib("AADR62.0_to_Poseidon2.7.1_1240K/tmp/References_raw.bib")
 
-# 1. manual step: add field "journal" to entries 'Wang_2020', '_egarac_2020', 'Moots_2022', 'Antonio_2022'
-# (all "journal = {bioRxiv}")
+# 1. manual step: add field "journal" to some entries
+# (some "journal = {bioRxiv}")
 
-references <- bibtex::read.bib("AADR54.1.p1_to_Poseidon2.7.0_1240K/tmp/References_raw.bib")
+references <- bibtex::read.bib("AADR62.0_to_Poseidon2.7.1_1240K/tmp/References_raw.bib")
 
 # check which doi's are actually there
 dois_actually_in_bibtex <- references %>% purrr::map_chr(\(x) x$doi)
-setdiff(final_doi_table$doi, dois_actually_in_bibtex)
+requested_dois <- readLines("AADR62.0_to_Poseidon2.7.1_1240K/tmp/DOIs.txt")
+
+setdiff(requested_dois, dois_actually_in_bibtex)
 
 # 2. manual step: add missing bibtex entries for some papers
-# 10.1126/science.abm4247 -> The genetic history of the Southern Arc...
+# 10.7554/eLife.79714 -> 
+# 10.1038/s41467-019-09209- -> 
+# 10.7554/eLife.85492 -> 
+# 10.1186/s13059-023-03013-103 -> 
 
 # 3. manual step: clean incorrectly formatted values
 # {PLoS ONE} {ONE} -> {PLoS ONE}
