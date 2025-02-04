@@ -29,17 +29,19 @@ Poseidon_ID <- anno$Genetic_ID %>%
 # tibble::tibble(a = Poseidon_ID, b = anno$Genetic_ID) %>% dplyr::filter(a != b) %>% View()
 
 Alternative_IDs <- anno$Master_ID
-
 Collection_ID <- anno$Skeletal_Code
-
 Source_Tissue <- anno$Skeletal_Element
 
+## Publication related columns
 AADR_Year_First_Publication <- anno$Year_First_Publication
 
-# note that the Publication column is constructed in the prepare_bibliography.R script
+source(...)
+AADR_Publication_DOI <- anno$Publication_DOI
 
+## Dating related columns
 Date_Note <- anno$Date_Method
-AADR_Date_Mean_BP <- anno$Date_Mean_BP
+
+Date_BC_AD_Median <- -anno$Date_Mean_BP + 1950 # turn to BC/AD age
 AADR_Date_SD <- anno$Date_SD
 
 source("AADR62.0_to_Poseidon2.7.1_1240K/age_string_parser.R")
@@ -54,6 +56,8 @@ AADR_Date_Full_Info <- anno$Date_Full_Info
 
 AADR_Age_Death <- anno$Age_Death
 
+
+## Columns overlapping with the .ind file
 # read .ind file for correct group and sex information
 ind_file <- readLines("AADR62.0_to_Poseidon2.7.1_1240K/tmp/v62.0_1240k_public.ind") %>%
   trimws() %>%
@@ -73,6 +77,7 @@ Group_Name <- ind_file$group
 #ind_file$sex %>% table()
 Genetic_Sex <- ind_file$sex
 
+## Spatial columns
 Location <- anno$Locality
 
 country_lookup_table <- readLines("AADR62.0_to_Poseidon2.7.1_1240K/location_to_M49.tsv") %>%
@@ -100,11 +105,10 @@ Country_ISO <- purrr::map_chr(anno$Political_Entity, lookup_alpha2)
 # cbind(Country_ISO, anno$Political_Entity) %>% as.data.frame() %>% dplyr::filter(is.na(Country_ISO))
 
 Country <- anno$Political_Entity
-
 Latitude <- round(anno$Lat, digits = 5)
-
 Longitude <- round(anno$Long, digits = 5)
 
+## Columns related to genetic data preparation
 AADR_Pulldown_Strategy <- anno$Pulldown_Strategy
 
 # helper function to compare to strings irrespective of case
@@ -124,27 +128,16 @@ parse_capture_type <- function(x) {
 }
 
 Capture_Type <- parse_capture_type(anno$Data_Source)
-
 AADR_Data_Source <- anno$Data_Source
-
 Nr_Libraries <- anno$No_Libraries
-
 AADR_SNPs_1240K <- anno$SNPs_Autosomal_Targets_1240k
-
 AADR_SNPs_HO <- anno$SNPs_Autosomal_Targets_HO
-
 Y_Haplogroup <- anno$Y_Haplogroup_Terminal_Mutation
-
 AADR_Y_Haplogroup_ISOGG <- anno$Y_Haplogroup_ISOGG
-
 AADR_Coverage_mtDNA <- anno$Coverage_mtDNA
-
 MT_Haplogroup <- anno$mtDNA_Haplogroup
-
 AADR_MT_Match_Consensus <- anno$mtDNA_Match_Consensus
-
 Damage <- anno$Damage
-
 AADR_Sex_Ratio <- anno$Sex_Ratio
 
 parse_udg_treatment <- function(x) {
@@ -212,7 +205,6 @@ Library_Names <- anno$Libraries %>%
   })
 # cbind(Library_Names, anno$Libraries) %>% unique() %>% View()
 
-AADR_Publication_DOI <- anno$Publication_DOI
 AADR_Data_PID <- anno$Data_PID
 AADR_ROHmin4cM <- anno$ROH_min4cM
 AADR_ROHmin20cM <- anno$ROH_min20cM
@@ -222,8 +214,8 @@ AADR_ANGSD_MoM95 <- anno$ANGSD_MoM95CI
 AADR_hapConX_95 <- anno$hapCon_95CI
 AADR_Endogenous <- anno$Endogenous
 
+## Assessment columns
 AADR_Assessment <- anno$Assessment
-
 AADR_Assessment_Warnings <- anno$Assessment_Warnings
 
 #### combine results ####
@@ -239,7 +231,7 @@ res_janno_raw <- cbind(
   AADR_Publication_DOI,
   AADR_Data_PID,
   Date_Note,
-  AADR_Date_Mean_BP,
+  Date_BC_AD_Median,
   AADR_Date_SD,
   date_string_parsing_result,
   AADR_Date_Full_Info,
