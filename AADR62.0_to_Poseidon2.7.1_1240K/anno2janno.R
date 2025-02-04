@@ -69,7 +69,7 @@ all_keys_as_used <- tibble::tibble(
   key = publication_list %>% unlist() %>% unique()
 )
 
-all_keys_with_dois <- dplyr::full_join(keys_with_dois, all_keys_as_used, by = "key")
+all_keys_with_dois <- dplyr::full_join(key_and_dois, all_keys_as_used, by = "key")
 # this shows the entries without DOI -> must be added manually
 all_keys_with_dois %>%
   dplyr::filter(is.na(doi))
@@ -95,9 +95,15 @@ manually_recovered_dois <- tibble::tribble(
 
 complete_keys_and_dois <- dplyr::rows_patch(all_keys_with_dois, manually_recovered_dois, by = "key")
 
-unqiue_dois <- complete_keys_and_dois$doi %>% unique()
+# wrong dois
+complete_keys_and_dois$doi[complete_keys_and_dois$key == "FeldmanNatureCommunications2019"] <- "10.1038/s41467-019-09209-7"
+complete_keys_and_dois$doi[complete_keys_and_dois$key == "StolarekGenomeBio2023"] <- "10.1186/s13059-023-03013-9"
 
-writeLines(unqiue_dois, "AADR62.0_to_Poseidon2.7.1_1240K/tmp/DOIs.txt")
+# this is to be used in prepare_bib_file.R
+saveRDS(
+  complete_keys_and_dois,
+  file = "AADR62.0_to_Poseidon2.7.1_1240K/tmp/complete_keys_and_dois.rds"
+)
 
 ## Dating related columns
 Date_Note <- anno$Date_Method
