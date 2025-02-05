@@ -16,18 +16,18 @@ Here are the steps we applied to transform the AADR 1240K dataset to a set of Po
 - Line 15317: Three entries for `Damage rate in first nucleotide on sequences overlapping 1240k targets (merged data)`, where only a single numbers is expected: `0.0157, 0.0173, 0.0162`. We selected the middle value `0.0162` and deleted the others.
 - Lines 15365, 15366, and 15366: Have the `mtDNA haplogroup if >2x or published` entries wrongly in the column `mtDNA coverage (merged data)`. We moved the three values to the correct column.
 - Line 15615: Impossible entry in `Full Date...`: `76-2332 calCE`. We assume that there was a typo in the Stolarek et al. supplementary information file. The samples were radiocarbon dated, but the publication does not report dating lab numbers nor uncalibrated C14 dates. We decided to set the mean date and the standard deviation to `..`.
-- Line 7264: Impossible entry in `Full Date...`: `2550-565 calCE (1646±68 BP)`. We assume there was a typo in AADR field `2550-565 calCE (1646±68 BP)` for this sample; the original publication "WangYuCurrentBiology2023" refrains from providing calibrated dates at all due to indication of a strong reservoir effect and "lack of estimates for the local reservoir effect in the region"; not sure how the AADR-Team came up with the estimates for this sample as well as for two other samples from the site (also dated): KMT001.SG, KMT002.SG, KMT003.SG.
+- Line 7264: Impossible entry in `Full Date...`: `2550-565 calCE (1646±68 BP)`. We assume there was a typo in AADR field for this sample; the original publication "WangYuCurrentBiology2023" refrains from providing calibrated dates at all due to indication of a strong reservoir effect and "lack of estimates for the local reservoir effect in the region"; not sure how the AADR-Team actually came up with the estimates for this sample as well as for two other samples from the site: KMT001.SG, KMT002.SG, KMT003.SG.
 - Lines 15416 and 15429: Incorrectly formatted `Full Date...` entries. We changed them to:
   - `4311-4052 calBCE (5329±23 BP) [R_combine: (5220±90 BP, Gd-2729), (5366±32 BP, OxA-30501), (5300±35 BP, Poz-76057)]`
   - `5623-5487 calBCE (6635±18 BP) [R_combine: (6610±30 BP, Beta-386397), (6670±30 BP, Beta-386398), (6630±30 BP, Beta-458001), (6630±30 BP, Beta-458002)]`
-- Line 7778: The information for the uncalibrated radiocarbon date in the `Full Date...` column is incomplete: `988-1163 calCE (1065±, EZV-00225)`. We adjusted the entry to the shape of a contextual, non-C14 date: `988-1163 CE`.
+- Line 7778: The information for the uncalibrated radiocarbon date in the `Full Date...` column is incomplete: `988-1163 calCE (1065±, EZV-00225)`. We adjusted the entry to the shape of a contextual, non-C14 date: `988-1163 CE`. The supplementary material of the source publication did not help to resolve this.
 - Lines 6881 and 6882: The `Full Date...` column used `cal BP` instead of the usual `BP`. We changed it.
 - Line 4069: The lab identifier in the `Full Date...` entry included a misplaced character: `±ETH` -> `ETH`.
 - Line 7098: Wrong separators between individual values in the list column `Libraries`. We replaced the entry with `MLZ003.A0201.TF1.1,MLZ003.A0202.TF2.1,MLZ003.A0203.TF2.1,MLZ005.A0101.TF1.1,MLZ005.A0102.TF2.1,MLZ005.A0103.TF2.1,MLZ005.A0201.TF1.1,MLZ005.A0202.TF2.1,MLZ005.A0203.TF2.1`.
-- We renamed the radiocarbon lab `T±B_TAK` (encoding issue?) to `TUBITAK` in the radiocarbon date lab identifiers.
-- We removed some leading and trailing white spaces from entries.
+- We renamed the radiocarbon lab `T±B_TAK` (encoding issue?) to `TUBITAK` in the radiocarbon lab identifiers.
+- We removed leading and trailing white spaces from various entries.
 
-`anno2janno.R` and `age_string_parser.R` includes code with more minor changes, that we did not apply to the source data, but only in memory for subsequent parsing and creation of the desired Poseidon fields. Especially the `Full Date...` column includes many formatting inconsistencies.
+The code in `anno2janno.R` and `age_string_parser.R` applies more changes. Especially the `Full Date...` column includes many formatting inconsistencies, but to parse it we needed it to be tidy. Not all of these changes where mirrored back to the original AADR column -- some were only temporally applied for parsing (e.g. omitting corrections for a fresh water reservoir effect).
 
-- `Group_Names` and `Genetic_Sex` were taken from the .ind-file, not the .anno file. Like this we avoid the many mismatches.
+- `Group_Names` and `Genetic_Sex` were taken from the .ind-file, not the .anno file. This was necessary to avoid numerous mismatches.
 - Future versions of Poseidon will not support non-ASCII characters in group/population names, so we replaced every instance of `ø` (in `Ertebølle`) with `o` in this field.
