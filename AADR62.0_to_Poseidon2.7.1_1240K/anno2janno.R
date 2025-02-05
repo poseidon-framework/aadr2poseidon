@@ -112,18 +112,23 @@ saveRDS(
 ## Dating related columns
 Date_Note <- anno$Date_Method
 
-Date_BC_AD_Median <- -anno$Date_Mean_BP + 1950 # turn to BC/AD age
-AADR_Date_SD <- anno$Date_SD
-
 source("AADR62.0_to_Poseidon2.7.1_1240K/age_string_parser.R")
 date_string_parsing_result <- split_age_string(anno$Date_Full_Info)
 
 AADR_Date_Full_Info <- anno$Date_Full_Info
 
+Date_BC_AD_Median <- ifelse(
+  date_string_parsing_result$Date_Type == "modern",
+  2000,
+  -anno$Date_Mean_BP + 1950 # turn to BC/AD age
+)
+AADR_Date_SD <- anno$Date_SD
+
 # inspect the parsing results
 # dplyr::bind_cols(
 #   full = AADR_Date_Full_Info,
-#   date_string_parsing_result
+#   date_string_parsing_result,
+#   median = Date_BC_AD_Median
 # ) %>% View()
 
 AADR_Age_Death <- anno$Age_Death
