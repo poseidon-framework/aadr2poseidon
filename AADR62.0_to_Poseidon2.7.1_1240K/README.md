@@ -25,6 +25,7 @@ Here are the steps we applied to transform the AADR 1240K dataset to a set of Po
 - Line 4069: The lab identifier in the `Full Date...` entry included a misplaced character: `±ETH` -> `ETH`.
 - Line 7098: Wrong separators between individual values in the list column `Libraries`. We replaced the entry with `MLZ003.A0201.TF1.1,MLZ003.A0202.TF2.1,MLZ003.A0203.TF2.1,MLZ005.A0101.TF1.1,MLZ005.A0102.TF2.1,MLZ005.A0103.TF2.1,MLZ005.A0201.TF1.1,MLZ005.A0202.TF2.1,MLZ005.A0203.TF2.1`.
 - We renamed the radiocarbon lab `T±B_TAK` (encoding issue?) to `TUBITAK` in the radiocarbon date lab identifiers.
+- We removed some leading and trailing white spaces from entries.
 
 `anno2janno.R` and `age_string_parser.R` includes code with more minor changes, that we did not apply to the source data, but only in memory for subsequent parsing and creation of the desired Poseidon fields. Especially the `Full Date...` column includes many formatting inconsistencies.
 
