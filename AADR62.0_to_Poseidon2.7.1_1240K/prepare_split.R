@@ -2,43 +2,58 @@ library(magrittr)
 
 #### read clean .janno file ####
 
-aadrJanno <- poseidonR::read_janno("AADR54.1.p1_to_Poseidon2.7.0_1240K/tmp/AADR_1240K.janno", validate = F)
+aadr_janno <- janno::read_janno("AADR62.0_to_Poseidon2.7.1_1240K/tmp/AADR_1240K.janno", validate = F)
 
 #### define subsets ####
 
-modern <- aadrJanno %>% dplyr::filter(
+modern <- aadr_janno %>% dplyr::filter(
   Date_Type == "modern"
 )
-europe_ancient <- aadrJanno %>%
+europe_ancient_north <- aadr_janno %>%
   dplyr::anti_join(modern, by = "Poseidon_ID") %>%
   dplyr::filter(
     Longitude >= -12 & Longitude <= 35,
-    Latitude >= 34 & Latitude <= 65,
+    Latitude >= 46 & Latitude <= 65,
   )
-beyond_europe_ancient <- aadrJanno %>%
+europe_ancient_south <- aadr_janno %>%
   dplyr::anti_join(modern, by = "Poseidon_ID") %>%
-  dplyr::anti_join(europe_ancient, by = "Poseidon_ID")
+  dplyr::filter(
+    Longitude >= -12 & Longitude <= 35,
+    Latitude >= 34 & Latitude < 46,
+  )
+beyond_europe_ancient <- aadr_janno %>%
+  dplyr::anti_join(modern, by = "Poseidon_ID") %>%
+  dplyr::anti_join(europe_ancient_north, by = "Poseidon_ID") %>%
+  dplyr::anti_join(europe_ancient_south, by = "Poseidon_ID")
 
 #### sanity checks to make validate the subsets ####
 
-nrow(aadrJanno) == nrow(modern) + nrow(europe_ancient) + nrow(beyond_europe_ancient)
+nrow(aadr_janno) == nrow(modern) + nrow(europe_ancient_north) + nrow(europe_ancient_south) + nrow(beyond_europe_ancient)
 setequal(
-  aadrJanno$Poseidon_ID,
-  c(modern$Poseidon_ID, europe_ancient$Poseidon_ID, beyond_europe_ancient$Poseidon_ID)
+  aadr_janno$Poseidon_ID,
+  c(
+    modern$Poseidon_ID,
+    europe_ancient_north$Poseidon_ID,
+    europe_ancient_south$Poseidon_ID,
+    beyond_europe_ancient$Poseidon_ID)
 )
-nrow(modern)/nrow(aadrJanno)
+nrow(modern)/nrow(aadr_janno)
 
 #### write forgeScript files ###
 
 writeLines(
   paste0("<", modern$Poseidon_ID, ">"),
-  "AADR54.1.p1_to_Poseidon2.7.0_1240K/tmp/subsetModern.pfs"
+  "AADR62.0_to_Poseidon2.7.1_1240K/tmp/subsetModern.pfs"
 )
 writeLines(
-  paste0("<", europe_ancient$Poseidon_ID, ">"),
-  "AADR54.1.p1_to_Poseidon2.7.0_1240K/tmp/subsetEuropeAncient.pfs"
+  paste0("<", europe_ancient_north$Poseidon_ID, ">"),
+  "AADR62.0_to_Poseidon2.7.1_1240K/tmp/subsetEuropeAncientNorth.pfs"
+)
+writeLines(
+  paste0("<", europe_ancient_south$Poseidon_ID, ">"),
+  "AADR62.0_to_Poseidon2.7.1_1240K/tmp/subsetEuropeAncientSouth.pfs"
 )
 writeLines(
   paste0("<", beyond_europe_ancient$Poseidon_ID, ">"),
-  "AADR54.1.p1_to_Poseidon2.7.0_1240K/tmp/subsetBeyondEuropeAncient.pfs"
+  "AADR62.0_to_Poseidon2.7.1_1240K/tmp/subsetBeyondEuropeAncient.pfs"
 )
