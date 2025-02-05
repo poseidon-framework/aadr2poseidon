@@ -24,18 +24,20 @@ system(paste(
 # system("biber --tool --validate-datamodel AADR62.0_to_Poseidon2.7.1_1240K/tmp/References_raw.bib")
 
 # load result
-references <- bibtex::read.bib("AADR62.0_to_Poseidon2.7.1_1240K/tmp/References_raw.bib")
+in_references <- bibtex::read.bib("AADR62.0_to_Poseidon2.7.1_1240K/tmp/References_raw.bib")
 
 # 1. manual step: add field "journal" to some entries
 # (some "journal = {bioRxiv}")
 
-references <- bibtex::read.bib("AADR62.0_to_Poseidon2.7.1_1240K/tmp/References_raw.bib")
+in_references <- bibtex::read.bib("AADR62.0_to_Poseidon2.7.1_1240K/tmp/References_raw.bib")
 
 # check which doi's are actually there
-dois_actually_in_bibtex <- references %>% purrr::map_chr(\(x) x$doi)
+dois_in_bibtex <- in_references %>% purrr::map_chr(\(x) {
+  if (is.null(x$doi)) { NA_character_ } else {x$doi}
+})
 requested_dois <- readLines("AADR62.0_to_Poseidon2.7.1_1240K/tmp/DOIs.txt")
 
-setdiff(tolower(requested_dois), tolower(dois_actually_in_bibtex))
+setdiff(tolower(requested_dois), tolower(dois_in_bibtex))
 
 # 2. manual step: add missing bibtex entries for one paper
 # https://reich.hms.harvard.edu/sites/reich.hms.harvard.edu/files/inline-files/10_24_2016_Screening_report_for_St_Marys_City_burials_FINAL_IL.pdf

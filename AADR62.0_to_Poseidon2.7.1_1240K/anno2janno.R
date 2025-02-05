@@ -116,6 +116,7 @@ date_string_parsing_result <- split_age_string(anno$Date_Full_Info)
 
 AADR_Date_Full_Info <- anno$Date_Full_Info
 
+# inspect the parsing results
 # dplyr::bind_cols(
 #   full = AADR_Date_Full_Info,
 #   date_string_parsing_result
@@ -345,12 +346,12 @@ res_janno <- janno::as.janno(res_janno_raw)
 
 janno::write_janno(
   res_janno,
-  path = "AADR62.0_to_Poseidon_1240K/tmp/AADR_1240K.janno"
+  path = "AADR62.0_to_Poseidon2.7.1_1240K/tmp/AADR_1240K.janno"
 )
 
 #### inspect result ####
 
-issues <- janno::validate_janno("AADR62.0_to_Poseidon_1240K/tmp/AADR_1240K.janno")
+issues <- janno::validate_janno("AADR62.0_to_Poseidon2.7.1_1240K/tmp/AADR_1240K.janno")
 issues %>% View()
 
-write.table(issues, file = "AADR62.0_to_Poseidon_1240K/issues.2.tsv", sep = "\t")
+write.table(issues, file = "AADR62.0_to_Poseidon2.7.1_1240K/tmp/issues.tsv", sep = "\t")
