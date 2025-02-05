@@ -140,6 +140,13 @@ ind_file <- readLines("AADR62.0_to_Poseidon2.7.1_1240K/tmp/v62.0_1240k_public.in
 # tibble::tibble(.ind = ind_file$sex, .anno = anno$Molecular_Sex) %>%
 #   dplyr::filter(.ind != .anno)
 
+# find non-ASCII characters in the group names
+ind_file$group[grepl("[^ -~]", ind_file$group)]
+
+# replace ø by o here and in AADR_1240K.ind
+ind_file$group <- gsub("ø", "o", ind_file$group)
+system("sed -i -e 's/ø/o/g' AADR62.0_to_Poseidon2.7.1_1240K/tmp/AADR_1240K.ind")
+
 Group_Name <- ind_file$group
 
 #ind_file$sex %>% table()
@@ -351,7 +358,7 @@ janno::write_janno(
 
 #### inspect result ####
 
-issues <- janno::validate_janno("AADR62.0_to_Poseidon2.7.1_1240K/tmp/AADR_1240K.janno")
-issues %>% View()
+#issues <- janno::validate_janno("AADR62.0_to_Poseidon2.7.1_1240K/tmp/AADR_1240K.janno")
+#issues %>% View()
 
-write.table(issues, file = "AADR62.0_to_Poseidon2.7.1_1240K/tmp/issues.tsv", sep = "\t")
+#write.table(issues, file = "AADR62.0_to_Poseidon2.7.1_1240K/tmp/issues.tsv", sep = "\t")
