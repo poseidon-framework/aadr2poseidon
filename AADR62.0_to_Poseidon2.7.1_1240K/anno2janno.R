@@ -44,8 +44,10 @@ publication_list <- anno$Publication %>%
   })
 # cbind(publication_list, anno$Publication) %>% unique %>% View()
 
-Publication <- publication_list
+Publication <- publication_list %>%
+  purrr::map(\(x) c(x, "AADRv620", "AADR"))
 
+# preparation for bibtex entry compilation in prepare_bib_file.R
 publications_and_dois_raw <- purrr::map2_dfr(
   publication_list,
   anno$Publication_DOI,
@@ -95,9 +97,11 @@ manually_recovered_dois <- tibble::tribble(
 
 complete_keys_and_dois <- dplyr::rows_patch(all_keys_with_dois, manually_recovered_dois, by = "key")
 
-# wrong dois
-complete_keys_and_dois$doi[complete_keys_and_dois$key == "FeldmanNatureCommunications2019"] <- "10.1038/s41467-019-09209-7"
-complete_keys_and_dois$doi[complete_keys_and_dois$key == "StolarekGenomeBio2023"] <- "10.1186/s13059-023-03013-9"
+# fixing wrong dois
+complete_keys_and_dois$doi[complete_keys_and_dois$key == "FeldmanNatureCommunications2019"] <-
+  "10.1038/s41467-019-09209-7"
+complete_keys_and_dois$doi[complete_keys_and_dois$key == "StolarekGenomeBio2023"] <-
+  "10.1186/s13059-023-03013-9"
 
 # this is to be used in prepare_bib_file.R
 saveRDS(

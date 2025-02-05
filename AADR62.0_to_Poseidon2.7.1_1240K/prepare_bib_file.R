@@ -90,3 +90,6 @@ purrr::walk(
   }
 )
 
+# manual step: add AADR references to References.bib
+# AADRv620: https://doi.org/10.7910/DVN/FFIDCW
+# AADR: http://dx.doi.org/10.1038/s41597-024-03031-7
