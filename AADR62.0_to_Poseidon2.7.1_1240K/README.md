@@ -24,6 +24,9 @@ Here are the steps we applied to transform the AADR 1240K dataset to a set of Po
 - Lines 6881 and 6882: The `Full Date...` column used `cal BP` instead of the usual `BP`. We changed it.
 - Line 4069: The lab identifier in the `Full Date...` entry included a misplaced character: `±ETH` -> `ETH`.
 - Line 7098: Wrong separators between individual values in the list column `Libraries`. We replaced the entry with `MLZ003.A0201.TF1.1,MLZ003.A0202.TF2.1,MLZ003.A0203.TF2.1,MLZ005.A0101.TF1.1,MLZ005.A0102.TF2.1,MLZ005.A0103.TF2.1,MLZ005.A0201.TF1.1,MLZ005.A0202.TF2.1,MLZ005.A0203.TF2.1`.
+- Line 15136: The radiocarbon date identifier in the `Full Date...` column `ACQ40+41:13` does not look like a proper identifier. We removed it and only kept `K-3748`.
+- Line 15100: Same issue. `K-3744/BCH198 5a+b` -> `K-3744`
+- Line 15217: Same issue. `AAR-10993; BCH198:4a+b` -> `AAR-10993`
 - We renamed the radiocarbon lab `T±B_TAK` (encoding issue?) to `TUBITAK` in the radiocarbon lab identifiers.
 - We removed leading and trailing white spaces from various entries.
 

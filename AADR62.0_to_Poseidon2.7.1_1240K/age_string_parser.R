@@ -11,11 +11,11 @@ split_age_string <- function(x) {
   x <- gsub("\\[.*?\\],", "", x)
   x <- gsub(", corrected for FWRE", "", x)
   # fixing special formatting mistakes affecting individual samples
+  x <- gsub("cal BCE", "calBCE", x)
   x <- gsub(" BP; ", " BP, ", x)
   x <- gsub(" ±", "±", x)
   x <- gsub("([0-9]+±[0-9]+)([,;])", "\\1 BP,", x)
   x <- gsub("([0-9])(cal)", "\\1 cal", x)
-
 
   #### construct result table ####
   res <- tibble::tibble(
@@ -40,7 +40,7 @@ split_age_string <- function(x) {
     x[c14_age_ids], 
     paste0(
       "[0-9]{1,5}(\\s+)*\u00B1(\\s+)*[0-9]{1,4}(\\sBP),{0,1}\\s{0,1}", # pattern for age +/- std
-      "[A-Za-z0-9-\\s,/]+[^);\\)]" # pattern for labnr
+      "[A-Za-z0-9-\\s,/\\(\\.]+[^);\\)]" # pattern for labnr
     )
   )
   
