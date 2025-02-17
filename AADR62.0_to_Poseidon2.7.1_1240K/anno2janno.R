@@ -132,11 +132,13 @@ Date_BC_AD_Median <- ifelse(
 AADR_Date_SD <- anno$Date_SD
 
 # inspect the parsing results
-# dplyr::bind_cols(
+# ap <- dplyr::bind_cols(
 #   full = AADR_Date_Full_Info,
 #   date_string_parsing_result,
 #   median = Date_BC_AD_Median
-# ) %>% View()
+# )
+# ap %>% View()
+# ap[5014,] %>% tidyr::unnest() %>% View()
 
 AADR_Age_Death <- anno$Age_Death
 
