@@ -1,5 +1,5 @@
 Representation in the .janno file,anno2janno transformation,Simplified .anno column name,AADR .anno file column name
-Poseidon_ID,"Replaced > and < with GT and LT, because > and < are reserved characters in the trident forge selection language.",Genetic_ID ,"Genetic ID (suffixes: "".DG"" is a high coverage shotgun genome with diploid genotype calls, "".AG"" is shotgun data with each position in the genome represented by a randomly chosen sequence, "".HO"" is Affymetrix Human Origins genotype data)"
+Poseidon_ID + Genotype_Ploidy,"Replaced > and < with GT and LT, because > and < are reserved characters in the trident forge selection language in the IDs. The genotype ploidy is derived from the suffixes (.DG, .SG, .AG, .TW, etc.).",Genetic_ID ,"Genetic ID (suffixes: "".DG"" is a high coverage shotgun genome with diploid genotype calls, "".AG"" is shotgun data with each position in the genome represented by a randomly chosen sequence, "".HO"" is Affymetrix Human Origins genotype data)"
 Alternative_IDs,No change,Master_ID,Master ID
 Collection_ID,No change,Skeletal_Code,Skeletal code
 Source_Tissue,No change,Skeletal_Element ,Skeletal element

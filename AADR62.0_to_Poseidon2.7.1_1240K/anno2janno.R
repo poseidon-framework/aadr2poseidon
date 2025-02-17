@@ -28,6 +28,13 @@ Poseidon_ID <- anno$Genetic_ID %>%
   gsub(">", "GT", .)
 # tibble::tibble(a = Poseidon_ID, b = anno$Genetic_ID) %>% dplyr::filter(a != b) %>% View()
 
+Genotype_Ploidy <- anno %$%
+  dplyr::case_when(
+    grepl(".DG$", Genetic_ID) ~ "diploid",
+    .default = "haploid"
+  )
+# tibble::tibble(anno$Genetic_ID, Genotype_Ploidy) %>% View()
+
 Alternative_IDs <- anno$Master_ID
 Collection_ID <- anno$Skeletal_Code
 Source_Tissue <- anno$Skeletal_Element
@@ -306,6 +313,7 @@ AADR_Assessment_Warnings <- anno$Assessment_Warnings
 
 res_janno_raw <- cbind(
   Poseidon_ID,
+  Genotype_Ploidy,
   Alternative_IDs,
   Collection_ID,
   Source_Tissue,
