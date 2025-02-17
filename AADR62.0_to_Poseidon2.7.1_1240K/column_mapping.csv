@@ -26,7 +26,7 @@ Non-native column: AADR_SNPs_HO,No change,SNPs_Autosomal_Targets_HO,SNPs hit on 
 Genetic_Sex,"Only kept M, F and U",Molecular_Sex,Molecular Sex
 Non-native column: AADR_ROHmin4cM,No change,ROH_min4cM,Sum total of ROH segments >4 cM
 Non-native column: AADR_ROHmin20cM,No change,ROH_min20cM,Sum total of ROH segments >20cM
-Y_Haplogroup,No change,Y_Haplogroup_Terminal_Mutation,Y haplogroup in terminal mutation notation automatically called based on Yfull with the software described in Lazaridis et al. Science 2022
+Y_Haplogroup + Non-native column: AADR_Y_Haplogroup_Terminal_Mutation,For Y_Haplogroup n/a (female) was turned simply to n/a to correctly specify the information as missing.,Y_Haplogroup_Terminal_Mutation,Y haplogroup in terminal mutation notation automatically called based on Yfull with the software described in Lazaridis et al. Science 2022
 Non-native column: AADR_Y_Haplogroup_ISOGG,No change,Y_Haplogroup_ISOGG,Y haplogroup  in ISOGG v15.73 notation automatically called based on Yfull with the software described in Lazaridis et al. Science 2022
 Non-native column: AADR_Y_Haplogroup_Manual,No change,Y_Haplogroup_Manual,Y haplogroup manually called if different from automatic
 Non-native column: AADR_Coverage_mtDNA,No change,Coverage_mtDNA,mtDNA coverage (merged data)

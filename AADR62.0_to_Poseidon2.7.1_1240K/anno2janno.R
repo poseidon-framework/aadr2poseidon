@@ -223,11 +223,21 @@ AADR_Data_Source <- anno$Data_Source
 Nr_Libraries <- anno$No_Libraries
 AADR_SNPs_1240K <- anno$SNPs_Autosomal_Targets_1240k
 AADR_SNPs_HO <- anno$SNPs_Autosomal_Targets_HO
-Y_Haplogroup <- anno$Y_Haplogroup_Terminal_Mutation
+
+AADR_Y_Haplogroup_Terminal_Mutation <- anno$Y_Haplogroup_Terminal_Mutation
+Y_Haplogroup <- ifelse(
+  grepl("^n/a", anno$Y_Haplogroup_Terminal_Mutation),
+  NA_character_,
+  anno$Y_Haplogroup_Terminal_Mutation
+)
+# tibble::tibble(AADR_Y_Haplogroup_Terminal_Mutation, Y_Haplogroup) %>% View()
+
 AADR_Y_Haplogroup_ISOGG <- anno$Y_Haplogroup_ISOGG
 AADR_Coverage_mtDNA <- anno$Coverage_mtDNA
+
 MT_Haplogroup <- anno$mtDNA_Haplogroup
 AADR_MT_Match_Consensus <- anno$mtDNA_Match_Consensus
+
 Damage <- anno$Damage
 AADR_Sex_Ratio <- anno$Sex_Ratio
 
@@ -345,6 +355,7 @@ res_janno_raw <- cbind(
   AADR_ROHmin4cM,
   AADR_ROHmin20cM,
   Y_Haplogroup,
+  AADR_Y_Haplogroup_Terminal_Mutation,
   AADR_Y_Haplogroup_ISOGG,
   AADR_Y_Haplogroup_Manual,
   AADR_Coverage_mtDNA,
