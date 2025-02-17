@@ -16,6 +16,7 @@ trident forge -d tmp/AADR_1240K --forgeFile tmp/subsetEuropeAncientNorth.pfs --o
 trident forge -d tmp/AADR_1240K --forgeFile tmp/subsetEuropeAncientSouth.pfs --outFormat PLINK -o tmp/AADR_v62_1240K_EuropeAncientSouth
 trident forge -d tmp/AADR_1240K --forgeFile tmp/subsetBeyondEuropeAncient.pfs --outFormat PLINK -o tmp/AADR_v62_1240K_BeyondAncient
 
+cd tmp
 # remove empty .janno columns
 trident rectify --jannoRemoveEmpty -d AADR_v62_1240K_EuropeAncientNorth -d AADR_v62_1240K_EuropeAncientSouth -d AADR_v62_1240K_Modern -d AADR_v62_1240K_BeyondAncient
 
