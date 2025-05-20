@@ -1,0 +1,280 @@
+Political Entity	Region Name;Region Code;Sub-region Name;Sub-region Code;Intermediate Region Name;Intermediate Region Code;Country or Area;M49 Code;ISO-alpha2 Code
+..	..;..;..;..;..;..;..;..;..
+Algeria	Africa;002;Northern Africa;015;..;..;Algeria;012;DZ
+Egypt	Africa;002;Northern Africa;015;..;..;Egypt;818;EG
+Libya	Africa;002;Northern Africa;015;..;..;Libya;434;LY
+Morocco	Africa;002;Northern Africa;015;..;..;Morocco;504;MA
+Western Sahara (Morocco)	Africa;002;Northern Africa;015;..;..;Morocco;504;MA
+Sudan	Africa;002;Northern Africa;015;..;..;Sudan;729;SD
+Tunisia	Africa;002;Northern Africa;015;..;..;Tunisia;788;TN
+Western Sahara	Africa;002;Northern Africa;015;..;..;Western Sahara;732;EH
+British Indian Ocean Territory	Africa;002;Sub-Saharan Africa;202;Eastern Africa;014;British Indian Ocean Territory;086;IO
+Burundi	Africa;002;Sub-Saharan Africa;202;Eastern Africa;014;Burundi;108;BI
+Comoros	Africa;002;Sub-Saharan Africa;202;Eastern Africa;014;Comoros;174;KM
+Djibouti	Africa;002;Sub-Saharan Africa;202;Eastern Africa;014;Djibouti;262;DJ
+Eritrea	Africa;002;Sub-Saharan Africa;202;Eastern Africa;014;Eritrea;232;ER
+Ethiopia	Africa;002;Sub-Saharan Africa;202;Eastern Africa;014;Ethiopia;231;ET
+French Southern Territories	Africa;002;Sub-Saharan Africa;202;Eastern Africa;014;French Southern Territories;260;TF
+Kenya	Africa;002;Sub-Saharan Africa;202;Eastern Africa;014;Kenya;404;KE
+Madagascar	Africa;002;Sub-Saharan Africa;202;Eastern Africa;014;Madagascar;450;MG
+Malawi	Africa;002;Sub-Saharan Africa;202;Eastern Africa;014;Malawi;454;MW
+Mauritius	Africa;002;Sub-Saharan Africa;202;Eastern Africa;014;Mauritius;480;MU
+Mayotte	Africa;002;Sub-Saharan Africa;202;Eastern Africa;014;Mayotte;175;YT
+Mozambique	Africa;002;Sub-Saharan Africa;202;Eastern Africa;014;Mozambique;508;MZ
+Réunion	Africa;002;Sub-Saharan Africa;202;Eastern Africa;014;Réunion;638;RE
+Rwanda	Africa;002;Sub-Saharan Africa;202;Eastern Africa;014;Rwanda;646;RW
+Seychelles	Africa;002;Sub-Saharan Africa;202;Eastern Africa;014;Seychelles;690;SC
+Somalia	Africa;002;Sub-Saharan Africa;202;Eastern Africa;014;Somalia;706;SO
+South Sudan	Africa;002;Sub-Saharan Africa;202;Eastern Africa;014;South Sudan;728;SS
+Uganda	Africa;002;Sub-Saharan Africa;202;Eastern Africa;014;Uganda;800;UG
+United Republic of Tanzania	Africa;002;Sub-Saharan Africa;202;Eastern Africa;014;United Republic of Tanzania;834;TZ
+Tanzania	Africa;002;Sub-Saharan Africa;202;Eastern Africa;014;United Republic of Tanzania;834;TZ
+Zambia	Africa;002;Sub-Saharan Africa;202;Eastern Africa;014;Zambia;894;ZM
+Zimbabwe	Africa;002;Sub-Saharan Africa;202;Eastern Africa;014;Zimbabwe;716;ZW
+Angola	Africa;002;Sub-Saharan Africa;202;Middle Africa;017;Angola;024;AO
+Cameroon	Africa;002;Sub-Saharan Africa;202;Middle Africa;017;Cameroon;120;CM
+Central African Republic	Africa;002;Sub-Saharan Africa;202;Middle Africa;017;Central African Republic;140;CF
+Chad	Africa;002;Sub-Saharan Africa;202;Middle Africa;017;Chad;148;TD
+Congo	Africa;002;Sub-Saharan Africa;202;Middle Africa;017;Congo;178;CG
+Democratic Republic of the Congo	Africa;002;Sub-Saharan Africa;202;Middle Africa;017;Democratic Republic of the Congo;180;CD
+DR Congo	Africa;002;Sub-Saharan Africa;202;Middle Africa;017;Democratic Republic of the Congo;180;CD
+Equatorial Guinea	Africa;002;Sub-Saharan Africa;202;Middle Africa;017;Equatorial Guinea;226;GQ
+Gabon	Africa;002;Sub-Saharan Africa;202;Middle Africa;017;Gabon;266;GA
+Sao Tome and Principe	Africa;002;Sub-Saharan Africa;202;Middle Africa;017;Sao Tome and Principe;678;ST
+Botswana	Africa;002;Sub-Saharan Africa;202;Southern Africa;018;Botswana;072;BW
+Eswatini	Africa;002;Sub-Saharan Africa;202;Southern Africa;018;Eswatini;748;SZ
+Lesotho	Africa;002;Sub-Saharan Africa;202;Southern Africa;018;Lesotho;426;LS
+Namibia	Africa;002;Sub-Saharan Africa;202;Southern Africa;018;Namibia;516;NA
+BotswanaOrNamibia	Africa;002;Sub-Saharan Africa;202;Southern Africa;018;Namibia;516;NA
+South Africa	Africa;002;Sub-Saharan Africa;202;Southern Africa;018;South Africa;710;ZA
+Benin	Africa;002;Sub-Saharan Africa;202;Western Africa;011;Benin;204;BJ
+Burkina Faso	Africa;002;Sub-Saharan Africa;202;Western Africa;011;Burkina Faso;854;BF
+Cabo Verde	Africa;002;Sub-Saharan Africa;202;Western Africa;011;Cabo Verde;132;CV
+Côte d’Ivoire	Africa;002;Sub-Saharan Africa;202;Western Africa;011;Côte d’Ivoire;384;CI
+Gambia	Africa;002;Sub-Saharan Africa;202;Western Africa;011;Gambia;270;GM
+Ghana	Africa;002;Sub-Saharan Africa;202;Western Africa;011;Ghana;288;GH
+Guinea	Africa;002;Sub-Saharan Africa;202;Western Africa;011;Guinea;324;GN
+Guinea-Bissau	Africa;002;Sub-Saharan Africa;202;Western Africa;011;Guinea-Bissau;624;GW
+Liberia	Africa;002;Sub-Saharan Africa;202;Western Africa;011;Liberia;430;LR
+Mali	Africa;002;Sub-Saharan Africa;202;Western Africa;011;Mali;466;ML
+Mauritania	Africa;002;Sub-Saharan Africa;202;Western Africa;011;Mauritania;478;MR
+Niger	Africa;002;Sub-Saharan Africa;202;Western Africa;011;Niger;562;NE
+Nigeria	Africa;002;Sub-Saharan Africa;202;Western Africa;011;Nigeria;566;NG
+Saint Helena	Africa;002;Sub-Saharan Africa;202;Western Africa;011;Saint Helena;654;SH
+Senegal	Africa;002;Sub-Saharan Africa;202;Western Africa;011;Senegal;686;SN
+Sierra Leone	Africa;002;Sub-Saharan Africa;202;Western Africa;011;Sierra Leone;694;SL
+Togo	Africa;002;Sub-Saharan Africa;202;Western Africa;011;Togo;768;TG
+Anguilla	Americas;019;Latin America and the Caribbean;419;Caribbean;029;Anguilla;660;AI
+Antigua and Barbuda	Americas;019;Latin America and the Caribbean;419;Caribbean;029;Antigua and Barbuda;028;AG
+Aruba	Americas;019;Latin America and the Caribbean;419;Caribbean;029;Aruba;533;AW
+Bahamas	Americas;019;Latin America and the Caribbean;419;Caribbean;029;Bahamas;044;BS
+Barbados	Americas;019;Latin America and the Caribbean;419;Caribbean;029;Barbados;052;BB
+Bonaire, Sint Eustatius and Saba	Americas;019;Latin America and the Caribbean;419;Caribbean;029;Bonaire, Sint Eustatius and Saba;535;BQ
+British Virgin Islands	Americas;019;Latin America and the Caribbean;419;Caribbean;029;British Virgin Islands;092;VG
+Cayman Islands	Americas;019;Latin America and the Caribbean;419;Caribbean;029;Cayman Islands;136;KY
+Cuba	Americas;019;Latin America and the Caribbean;419;Caribbean;029;Cuba;192;CU
+Curaçao	Americas;019;Latin America and the Caribbean;419;Caribbean;029;Curaçao;531;CW
+Curacao	Americas;019;Latin America and the Caribbean;419;Caribbean;029;Curaçao;531;CW
+Dominica	Americas;019;Latin America and the Caribbean;419;Caribbean;029;Dominica;212;DM
+Dominican Republic	Americas;019;Latin America and the Caribbean;419;Caribbean;029;Dominican Republic;214;DO
+Grenada	Americas;019;Latin America and the Caribbean;419;Caribbean;029;Grenada;308;GD
+Guadeloupe	Americas;019;Latin America and the Caribbean;419;Caribbean;029;Guadeloupe;312;GP
+Haiti	Americas;019;Latin America and the Caribbean;419;Caribbean;029;Haiti;332;HT
+Jamaica	Americas;019;Latin America and the Caribbean;419;Caribbean;029;Jamaica;388;JM
+Martinique	Americas;019;Latin America and the Caribbean;419;Caribbean;029;Martinique;474;MQ
+Montserrat	Americas;019;Latin America and the Caribbean;419;Caribbean;029;Montserrat;500;MS
+Puerto Rico	Americas;019;Latin America and the Caribbean;419;Caribbean;029;Puerto Rico;630;PR
+Saint Barthélemy	Americas;019;Latin America and the Caribbean;419;Caribbean;029;Saint Barthélemy;652;BL
+Saint Kitts and Nevis	Americas;019;Latin America and the Caribbean;419;Caribbean;029;Saint Kitts and Nevis;659;KN
+Saint Lucia	Americas;019;Latin America and the Caribbean;419;Caribbean;029;Saint Lucia;662;LC
+St. Lucia	Americas;019;Latin America and the Caribbean;419;Caribbean;029;Saint Lucia;662;LC
+Saint Martin (French Part)	Americas;019;Latin America and the Caribbean;419;Caribbean;029;Saint Martin (French Part);663;MF
+Saint Vincent and the Grenadines	Americas;019;Latin America and the Caribbean;419;Caribbean;029;Saint Vincent and the Grenadines;670;VC
+Sint Maarten (Dutch part)	Americas;019;Latin America and the Caribbean;419;Caribbean;029;Sint Maarten (Dutch part);534;SX
+Trinidad and Tobago	Americas;019;Latin America and the Caribbean;419;Caribbean;029;Trinidad and Tobago;780;TT
+Turks and Caicos Islands	Americas;019;Latin America and the Caribbean;419;Caribbean;029;Turks and Caicos Islands;796;TC
+United States Virgin Islands	Americas;019;Latin America and the Caribbean;419;Caribbean;029;United States Virgin Islands;850;VI
+Belize	Americas;019;Latin America and the Caribbean;419;Central America;013;Belize;084;BZ
+Costa Rica	Americas;019;Latin America and the Caribbean;419;Central America;013;Costa Rica;188;CR
+El Salvador	Americas;019;Latin America and the Caribbean;419;Central America;013;El Salvador;222;SV
+Guatemala	Americas;019;Latin America and the Caribbean;419;Central America;013;Guatemala;320;GT
+Honduras	Americas;019;Latin America and the Caribbean;419;Central America;013;Honduras;340;HN
+Mexico	Americas;019;Latin America and the Caribbean;419;Central America;013;Mexico;484;MX
+Nicaragua	Americas;019;Latin America and the Caribbean;419;Central America;013;Nicaragua;558;NI
+Panama	Americas;019;Latin America and the Caribbean;419;Central America;013;Panama;591;PA
+Argentina	Americas;019;Latin America and the Caribbean;419;South America;005;Argentina;032;AR
+Bolivia (Plurinational State of)	Americas;019;Latin America and the Caribbean;419;South America;005;Bolivia (Plurinational State of);068;BO
+Bolivia	Americas;019;Latin America and the Caribbean;419;South America;005;Bolivia (Plurinational State of);068;BO
+Bouvet Island	Americas;019;Latin America and the Caribbean;419;South America;005;Bouvet Island;074;BV
+Brazil	Americas;019;Latin America and the Caribbean;419;South America;005;Brazil;076;BR
+Chile	Americas;019;Latin America and the Caribbean;419;South America;005;Chile;152;CL
+Colombia	Americas;019;Latin America and the Caribbean;419;South America;005;Colombia;170;CO
+Ecuador	Americas;019;Latin America and the Caribbean;419;South America;005;Ecuador;218;EC
+Falkland Islands (Malvinas)	Americas;019;Latin America and the Caribbean;419;South America;005;Falkland Islands (Malvinas);238;FK
+French Guiana	Americas;019;Latin America and the Caribbean;419;South America;005;French Guiana;254;GF
+Guyana	Americas;019;Latin America and the Caribbean;419;South America;005;Guyana;328;GY
+Paraguay	Americas;019;Latin America and the Caribbean;419;South America;005;Paraguay;600;PY
+Peru	Americas;019;Latin America and the Caribbean;419;South America;005;Peru;604;PE
+South Georgia and the South Sandwich Islands	Americas;019;Latin America and the Caribbean;419;South America;005;South Georgia and the South Sandwich Islands;239;GS
+Suriname	Americas;019;Latin America and the Caribbean;419;South America;005;Suriname;740;SR
+Uruguay	Americas;019;Latin America and the Caribbean;419;South America;005;Uruguay;858;UY
+Venezuela (Bolivarian Republic of)	Americas;019;Latin America and the Caribbean;419;South America;005;Venezuela (Bolivarian Republic of);862;VE
+Venezuela	Americas;019;Latin America and the Caribbean;419;South America;005;Venezuela (Bolivarian Republic of);862;VE
+Bermuda	Americas;019;Northern America;021;..;..;Bermuda;060;BM
+Canada	Americas;019;Northern America;021;..;..;Canada;124;CA
+Greenland	Americas;019;Northern America;021;..;..;Greenland;304;GL
+Saint Pierre and Miquelon	Americas;019;Northern America;021;..;..;Saint Pierre and Miquelon;666;PM
+United States of America	Americas;019;Northern America;021;..;..;United States of America;840;US
+USA	Americas;019;Northern America;021;..;..;United States of America;840;US
+Antarctica	..;..;..;..;..;..;Antarctica;010;AQ
+Kazakhstan	Asia;142;Central Asia;143;..;..;Kazakhstan;398;KZ
+Kyrgyzstan	Asia;142;Central Asia;143;..;..;Kyrgyzstan;417;KG
+Tajikistan	Asia;142;Central Asia;143;..;..;Tajikistan;762;TJ
+Turkmenistan	Asia;142;Central Asia;143;..;..;Turkmenistan;795;TM
+Uzbekistan	Asia;142;Central Asia;143;..;..;Uzbekistan;860;UZ
+China	Asia;142;Eastern Asia;030;..;..;China;156;CN
+Taiwan	Asia;142;Eastern Asia;030;..;..;China;158;TW
+China, Hong Kong Special Administrative Region	Asia;142;Eastern Asia;030;..;..;China, Hong Kong Special Administrative Region;344;HK
+China, Macao Special Administrative Region	Asia;142;Eastern Asia;030;..;..;China, Macao Special Administrative Region;446;MO
+Democratic People's Republic of Korea	Asia;142;Eastern Asia;030;..;..;Democratic People's Republic of Korea;408;KP
+Japan	Asia;142;Eastern Asia;030;..;..;Japan;392;JP
+Mongolia	Asia;142;Eastern Asia;030;..;..;Mongolia;496;MN
+Republic of Korea	Asia;142;Eastern Asia;030;..;..;Republic of Korea;410;KR
+South Korea	Asia;142;Eastern Asia;030;..;..;Republic of Korea;410;KR
+Brunei Darussalam	Asia;142;South-eastern Asia;035;..;..;Brunei Darussalam;096;BN
+Brunei	Asia;142;South-eastern Asia;035;..;..;Brunei Darussalam;096;BN
+Cambodia	Asia;142;South-eastern Asia;035;..;..;Cambodia;116;KH
+Indonesia	Asia;142;South-eastern Asia;035;..;..;Indonesia;360;ID
+Lao People's Democratic Republic	Asia;142;South-eastern Asia;035;..;..;Lao People's Democratic Republic;418;LA
+Laos	Asia;142;South-eastern Asia;035;..;..;Lao People's Democratic Republic;418;LA
+Malaysia	Asia;142;South-eastern Asia;035;..;..;Malaysia;458;MY
+Myanmar	Asia;142;South-eastern Asia;035;..;..;Myanmar;104;MM
+Philippines	Asia;142;South-eastern Asia;035;..;..;Philippines;608;PH
+Singapore	Asia;142;South-eastern Asia;035;..;..;Singapore;702;SG
+Thailand	Asia;142;South-eastern Asia;035;..;..;Thailand;764;TH
+Timor-Leste	Asia;142;South-eastern Asia;035;..;..;Timor-Leste;626;TL
+Viet Nam	Asia;142;South-eastern Asia;035;..;..;Viet Nam;704;VN
+Vietnam	Asia;142;South-eastern Asia;035;..;..;Viet Nam;704;VN
+Afghanistan	Asia;142;Southern Asia;034;..;..;Afghanistan;004;AF
+Bangladesh	Asia;142;Southern Asia;034;..;..;Bangladesh;050;BD
+Bhutan	Asia;142;Southern Asia;034;..;..;Bhutan;064;BT
+India	Asia;142;Southern Asia;034;..;..;India;356;IN
+Iran (Islamic Republic of)	Asia;142;Southern Asia;034;..;..;Iran (Islamic Republic of);364;IR
+Iran	Asia;142;Southern Asia;034;..;..;Iran (Islamic Republic of);364;IR
+Maldives	Asia;142;Southern Asia;034;..;..;Maldives;462;MV
+Nepal	Asia;142;Southern Asia;034;..;..;Nepal;524;NP
+Pakistan	Asia;142;Southern Asia;034;..;..;Pakistan;586;PK
+Sri Lanka	Asia;142;Southern Asia;034;..;..;Sri Lanka;144;LK
+Armenia	Asia;142;Western Asia;145;..;..;Armenia;051;AM
+Azerbaijan	Asia;142;Western Asia;145;..;..;Azerbaijan;031;AZ
+Bahrain	Asia;142;Western Asia;145;..;..;Bahrain;048;BH
+Cyprus	Asia;142;Western Asia;145;..;..;Cyprus;196;CY
+Georgia	Asia;142;Western Asia;145;..;..;Georgia;268;GE
+Abkhazia	Asia;142;Western Asia;145;..;..;Georgia;268;GE
+Iraq	Asia;142;Western Asia;145;..;..;Iraq;368;IQ
+Israel	Asia;142;Western Asia;145;..;..;Israel;376;IL
+Jordan	Asia;142;Western Asia;145;..;..;Jordan;400;JO
+Kuwait	Asia;142;Western Asia;145;..;..;Kuwait;414;KW
+Lebanon	Asia;142;Western Asia;145;..;..;Lebanon;422;LB
+Oman	Asia;142;Western Asia;145;..;..;Oman;512;OM
+Qatar	Asia;142;Western Asia;145;..;..;Qatar;634;QA
+Saudi Arabia	Asia;142;Western Asia;145;..;..;Saudi Arabia;682;SA
+State of Palestine	Asia;142;Western Asia;145;..;..;State of Palestine;275;PS
+Syrian Arab Republic	Asia;142;Western Asia;145;..;..;Syrian Arab Republic;760;SY
+Syria	Asia;142;Western Asia;145;..;..;Syrian Arab Republic;760;SY
+Türkiye	Asia;142;Western Asia;145;..;..;Türkiye;792;TR
+Turkey	Asia;142;Western Asia;145;..;..;Türkiye;792;TR
+United Arab Emirates	Asia;142;Western Asia;145;..;..;United Arab Emirates;784;AE
+Yemen	Asia;142;Western Asia;145;..;..;Yemen;887;YE
+Belarus	Europe;150;Eastern Europe;151;..;..;Belarus;112;BY
+Bulgaria	Europe;150;Eastern Europe;151;..;..;Bulgaria;100;BG
+Czechia	Europe;150;Eastern Europe;151;..;..;Czechia;203;CZ
+Czech Republic	Europe;150;Eastern Europe;151;..;..;Czechia;203;CZ
+Czechoslovakia	Europe;150;Eastern Europe;151;..;..;Czechia;203;CZ
+Hungary	Europe;150;Eastern Europe;151;..;..;Hungary;348;HU
+Poland	Europe;150;Eastern Europe;151;..;..;Poland;616;PL
+Republic of Moldova	Europe;150;Eastern Europe;151;..;..;Republic of Moldova;498;MD
+Moldova	Europe;150;Eastern Europe;151;..;..;Republic of Moldova;498;MD
+Romania	Europe;150;Eastern Europe;151;..;..;Romania;642;RO
+Russian Federation	Europe;150;Eastern Europe;151;..;..;Russian Federation;643;RU
+Russia	Europe;150;Eastern Europe;151;..;..;Russian Federation;643;RU
+Slovakia	Europe;150;Eastern Europe;151;..;..;Slovakia;703;SK
+Ukraine	Europe;150;Eastern Europe;151;..;..;Ukraine;804;UA
+Crimea	Europe;150;Eastern Europe;151;..;..;Ukraine;804;UA
+Åland Islands	Europe;150;Northern Europe;154;..;..;Åland Islands;248;AX
+Guernsey	Europe;150;Northern Europe;154;Channel Islands;830;Guernsey;831;GG
+Jersey	Europe;150;Northern Europe;154;Channel Islands;830;Jersey;832;JE
+Channel Islands	Europe;150;Northern Europe;154;Channel Islands;830;Jersey;832;JE
+Sark	Europe;150;Northern Europe;154;Channel Islands;830;Sark;680;
+Denmark	Europe;150;Northern Europe;154;..;..;Denmark;208;DK
+Estonia	Europe;150;Northern Europe;154;..;..;Estonia;233;EE
+Faroe Islands	Europe;150;Northern Europe;154;..;..;Faroe Islands;234;FO
+Faroes	Europe;150;Northern Europe;154;..;..;Faroe Islands;234;FO
+Finland	Europe;150;Northern Europe;154;..;..;Finland;246;FI
+Iceland	Europe;150;Northern Europe;154;..;..;Iceland;352;IS
+Ireland	Europe;150;Northern Europe;154;..;..;Ireland;372;IE
+Isle of Man	Europe;150;Northern Europe;154;..;..;Isle of Man;833;IM
+Latvia	Europe;150;Northern Europe;154;..;..;Latvia;428;LV
+Lithuania	Europe;150;Northern Europe;154;..;..;Lithuania;440;LT
+Norway	Europe;150;Northern Europe;154;..;..;Norway;578;NO
+Svalbard and Jan Mayen Islands	Europe;150;Northern Europe;154;..;..;Svalbard and Jan Mayen Islands;744;SJ
+Sweden	Europe;150;Northern Europe;154;..;..;Sweden;752;SE
+United Kingdom of Great Britain and Northern Ireland	Europe;150;Northern Europe;154;..;..;United Kingdom of Great Britain and Northern Ireland;826;GB
+United Kingdom	Europe;150;Northern Europe;154;..;..;United Kingdom of Great Britain and Northern Ireland;826;GB
+Albania	Europe;150;Southern Europe;039;..;..;Albania;008;AL
+Andorra	Europe;150;Southern Europe;039;..;..;Andorra;020;AD
+Bosnia and Herzegovina	Europe;150;Southern Europe;039;..;..;Bosnia and Herzegovina;070;BA
+Bosnia-Herzegovina	Europe;150;Southern Europe;039;..;..;Bosnia and Herzegovina;070;BA
+Croatia	Europe;150;Southern Europe;039;..;..;Croatia;191;HR
+Gibraltar	Europe;150;Southern Europe;039;..;..;Gibraltar;292;GI
+Greece	Europe;150;Southern Europe;039;..;..;Greece;300;GR
+Holy See	Europe;150;Southern Europe;039;..;..;Holy See;336;VA
+Italy	Europe;150;Southern Europe;039;..;..;Italy;380;IT
+Malta	Europe;150;Southern Europe;039;..;..;Malta;470;MT
+Montenegro	Europe;150;Southern Europe;039;..;..;Montenegro;499;ME
+North Macedonia	Europe;150;Southern Europe;039;..;..;North Macedonia;807;MK
+Portugal	Europe;150;Southern Europe;039;..;..;Portugal;620;PT
+San Marino	Europe;150;Southern Europe;039;..;..;San Marino;674;SM
+Serbia	Europe;150;Southern Europe;039;..;..;Serbia;688;RS
+Slovenia	Europe;150;Southern Europe;039;..;..;Slovenia;705;SI
+Spain	Europe;150;Southern Europe;039;..;..;Spain;724;ES
+Canary Islands	Europe;150;Southern Europe;039;..;..;Spain;724;ES
+Austria	Europe;150;Western Europe;155;..;..;Austria;040;AT
+Belgium	Europe;150;Western Europe;155;..;..;Belgium;056;BE
+France	Europe;150;Western Europe;155;..;..;France;250;FR
+Germany	Europe;150;Western Europe;155;..;..;Germany;276;DE
+Liechtenstein	Europe;150;Western Europe;155;..;..;Liechtenstein;438;LI
+Luxembourg	Europe;150;Western Europe;155;..;..;Luxembourg;442;LU
+Monaco	Europe;150;Western Europe;155;..;..;Monaco;492;MC
+Netherlands	Europe;150;Western Europe;155;..;..;Netherlands;528;NL
+Switzerland	Europe;150;Western Europe;155;..;..;Switzerland;756;CH
+Australia	Oceania;009;Australia and New Zealand;053;..;..;Australia;036;AU
+Christmas Island	Oceania;009;Australia and New Zealand;053;..;..;Christmas Island;162;CX
+Cocos (Keeling) Islands	Oceania;009;Australia and New Zealand;053;..;..;Cocos (Keeling) Islands;166;CC
+Heard Island and McDonald Islands	Oceania;009;Australia and New Zealand;053;..;..;Heard Island and McDonald Islands;334;HM
+New Zealand	Oceania;009;Australia and New Zealand;053;..;..;New Zealand;554;NZ
+Norfolk Island	Oceania;009;Australia and New Zealand;053;..;..;Norfolk Island;574;NF
+Fiji	Oceania;009;Melanesia;054;..;..;Fiji;242;FJ
+New Caledonia	Oceania;009;Melanesia;054;..;..;New Caledonia;540;NC
+Papua New Guinea	Oceania;009;Melanesia;054;..;..;Papua New Guinea;598;PG
+Solomon Islands	Oceania;009;Melanesia;054;..;..;Solomon Islands;090;SB
+Vanuatu	Oceania;009;Melanesia;054;..;..;Vanuatu;548;VU
+Guam	Oceania;009;Micronesia;057;..;..;Guam;316;GU
+Kiribati	Oceania;009;Micronesia;057;..;..;Kiribati;296;KI
+Marshall Islands	Oceania;009;Micronesia;057;..;..;Marshall Islands;584;MH
+Micronesia (Federated States of)	Oceania;009;Micronesia;057;..;..;Micronesia (Federated States of);583;FM
+Federated States of Micronesia	Oceania;009;Micronesia;057;..;..;Micronesia (Federated States of);583;FM
+Nauru	Oceania;009;Micronesia;057;..;..;Nauru;520;NR
+Northern Mariana Islands	Oceania;009;Micronesia;057;..;..;Northern Mariana Islands;580;MP
+Palau	Oceania;009;Micronesia;057;..;..;Palau;585;PW
+United States Minor Outlying Islands	Oceania;009;Micronesia;057;..;..;United States Minor Outlying Islands;581;UM
+American Samoa	Oceania;009;Polynesia;061;..;..;American Samoa;016;AS
+Cook Islands	Oceania;009;Polynesia;061;..;..;Cook Islands;184;CK
+French Polynesia	Oceania;009;Polynesia;061;..;..;French Polynesia;258;PF
+Niue	Oceania;009;Polynesia;061;..;..;Niue;570;NU
+Pitcairn	Oceania;009;Polynesia;061;..;..;Pitcairn;612;PN
+Samoa	Oceania;009;Polynesia;061;..;..;Samoa;882;WS
+Tokelau	Oceania;009;Polynesia;061;..;..;Tokelau;772;TK
+Tonga	Oceania;009;Polynesia;061;..;..;Tonga;776;TO
+Tuvalu	Oceania;009;Polynesia;061;..;..;Tuvalu;798;TV
+Wallis and Futuna Islands	Oceania;009;Polynesia;061;..;..;Wallis and Futuna Islands;876;WF
