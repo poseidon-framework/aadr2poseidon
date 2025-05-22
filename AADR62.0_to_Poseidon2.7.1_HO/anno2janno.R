@@ -44,7 +44,7 @@ anno <- readr::read_tsv(
 # purrr::walk(colnames(anno), \(x) cat(x, "\n"))
 
 # adopt simplified column names for convenience
-mapping_reference <- readr::read_csv("AADR54.1.p1_to_Poseidon2.7.0_HO/column_mapping.csv")
+mapping_reference <- readr::read_csv("AADR62.0_to_Poseidon2.7.1_HO/column_mapping.csv")
 colnames(anno) <- mapping_reference$`Simplified .anno column name`
 
 #### construct janno columns ####
@@ -54,25 +54,80 @@ Poseidon_ID <- anno$Genetic_ID %>%
   gsub(",", "_", .)
 # tibble::tibble(a = Poseidon_ID, b = anno$Genetic_ID) %>% dplyr::filter(a != b) %>% View()
 
+Genotype_Ploidy <- anno %$%
+  dplyr::case_when(
+    grepl(".DG$", Genetic_ID) ~ "diploid",
+    .default = "haploid"
+  )
+# tibble::tibble(anno$Genetic_ID, Genotype_Ploidy) %>% View()
+
 Alternative_IDs <- anno$Master_ID
+Collection_ID <- anno$Skeletal_Code
+Source_Tissue <- anno$Skeletal_Element
 
+## Publication related columns
 AADR_Year_First_Publication <- anno$Year_First_Publication
+AADR_Publication <- anno$Publication
+AADR_Publication_DOI <- anno$Publication_DOI
 
-Publication_list <- anno$Publication %>%
+publication_list <- anno$Publication %>%
   stringr::str_extract_all(pattern = "[a-zA-Z]{5,}[0-9]{4}|1KGPhase3") %>%
   purrr::map(function(x) {
     if (all(is.na(x))) { NULL } else { x }
   })
-# cbind(Publication_list, anno$Publication) %>% unique %>% View()
+# cbind(publication_list, anno$Publication) %>% unique %>% View()
 
-Publication <- Publication_list %>%
-  purrr::map_chr(\(x) paste0(x, collapse = ";"))
+Publication <- publication_list %>%
+  purrr::map(\(x) c(x, "AADRv620", "AADR"))
 
-AADR_Publication <- anno$Publication
+# preparation for bibtex entry compilation in prepare_bib_file.R
+publications_and_dois_raw <- purrr::map2_dfr(
+  publication_list,
+  anno$Publication_DOI,
+  function(pubkeys, potentialdoi) {
+    pubkey <- if(!is.null(pubkeys)) { pubkeys[[1]] } else { NA_character_ }
+    doi <- stringr::str_extract(potentialdoi, "(?i)10.\\d{4,9}[-._;()/:A-Z0-9]+")
+    tibble::tibble(
+      key = pubkey,
+      doi = doi
+    )
+  }
+) %>% unique()
 
+key_and_dois <- publications_and_dois_raw %>%
+  dplyr::group_by(key) %>%
+  dplyr::slice_min(doi) %>%
+  dplyr::ungroup() %>%
+  dplyr::filter(!is.na(key))
+
+all_keys_as_used <- tibble::tibble(
+  key = publication_list %>% unlist() %>% unique()
+)
+
+all_keys_with_dois <- dplyr::full_join(key_and_dois, all_keys_as_used, by = "key")
+# this shows the entries without DOI -> must be added manually
+all_keys_with_dois %>%
+  dplyr::filter(is.na(doi))
+
+manually_recovered_dois <- tibble::tribble(
+  ~key, ~doi,
+  "VyasDryadDigitalRepository2017", "10.5061/dryad.1pm3r",
+)
+
+complete_keys_and_dois <- dplyr::rows_patch(all_keys_with_dois, manually_recovered_dois, by = "key")
+
+# this is to be used in prepare_bib_file.R
+saveRDS(
+  complete_keys_and_dois,
+  file = "AADR62.0_to_Poseidon2.7.1_HO/tmp/complete_keys_and_dois.rds"
+)
+
+## Dating related columns
+Date_Note <- anno$Date_Method
 Date_Type <- "modern"
-
 AADR_Date_Mean_BP <- anno$Date_Mean_BP
+
+##########
 
 AADR_Date_SD <- anno$Date_SD
 

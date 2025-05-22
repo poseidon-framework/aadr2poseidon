@@ -48,7 +48,7 @@ inds1240KBeyond <- readr::read_delim(
 ) %$% X2
 
 setdiff(indsOnlyInHO, inds1240KBeyond)
-setdiff(inds1240KBeyond, indsOnlyInHO)
+setdiff(inds1240KBeyond, indsOnlyInHO) # this should probably be empty
 
 #### write forgeScript files ###
 
