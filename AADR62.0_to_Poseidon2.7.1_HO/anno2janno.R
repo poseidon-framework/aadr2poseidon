@@ -48,7 +48,6 @@ mapping_reference <- readr::read_csv("AADR62.0_to_Poseidon2.7.1_HO/column_mappin
 colnames(anno) <- mapping_reference$`Simplified .anno column name`
 
 #### construct janno columns ####
-# for future versions note that some columns were entirely removed here, because they were empty
 
 Poseidon_ID <- anno$Genetic_ID %>%
   gsub(",", "_", .)
@@ -63,7 +62,7 @@ Genotype_Ploidy <- anno %$%
 
 Alternative_IDs <- anno$Master_ID
 Collection_ID <- anno$Skeletal_Code
-Source_Tissue <- anno$Skeletal_Element
+# table(anno$Skeletal_Element, useNA = "always")
 
 ## Publication related columns
 AADR_Year_First_Publication <- anno$Year_First_Publication
@@ -125,19 +124,47 @@ saveRDS(
 ## Dating related columns
 Date_Note <- anno$Date_Method
 Date_Type <- "modern"
+Date_BC_AD_Median <- 2000
 AADR_Date_Mean_BP <- anno$Date_Mean_BP
-
-##########
-
 AADR_Date_SD <- anno$Date_SD
-
 AADR_Date_Full_Info <- anno$Date_Full_Info
 
+# table(anno$Age_Death, useNA = "always")
+
+## Columns overlapping with the .ind file
+# read .fam file for correct group and sex information
+ind_file <- readr::read_tsv(
+  "AADR62.0_to_Poseidon2.7.1_HO/tmp/AADR_HO_without_1240K.fam",
+  col_names = c("group", "id", NA, NA, "sex", NA)
+  ) %>%
+  dplyr::mutate(
+    sex = dplyr::case_match(
+      sex,
+      0 ~ "U",
+      1 ~ "M",
+      2 ~ "F"
+    )
+  )
+
+tibble::tibble(.ind = ind_file$id, .anno = anno$Genetic_ID) %>%
+  dplyr::filter(.ind != .anno)
+tibble::tibble(.ind = ind_file$id, .anno = Poseidon_ID) %>%
+  dplyr::filter(.ind != .anno)
+tibble::tibble(.ind = ind_file$group, .anno = anno$Group_ID) %>%
+  dplyr::filter(.ind != .anno)
+tibble::tibble(.ind = ind_file$sex, .anno = anno$Molecular_Sex) %>%
+  dplyr::filter(.ind != .anno)
+
+# check for non-ASCII characters in the group names
+ind_file$group[grepl("[^ -~]", ind_file$group)]
+
+Genetic_Sex <- anno$Molecular_Sex
 Group_Name <- anno$Group_ID
 
+## Spatial columns
 Location <- anno$Locality
 
-country_lookup_table <- readLines("AADR54.1.p1_to_Poseidon2.7.0_HO/location_to_M49.tsv") %>%
+country_lookup_table <- readLines("AADR62.0_to_Poseidon2.7.1_HO/location_to_M49.tsv") %>%
   magrittr::extract(-2) %>%
   gsub(";", "\t", .) %>%
   paste0(collapse = "\n") %>%
@@ -157,14 +184,15 @@ lookup_alpha2 <- function(x) {
 }
 
 Country_ISO <- purrr::map_chr(anno$Political_Entity, lookup_alpha2)
-# cbind(Country_ISO, anno$Political_Entity) %>% as.data.frame() %>% dplyr::filter(is.na(Country_ISO))
+# table(Country_ISO, useNA = "always")
+# dplyr::bind_cols(iso = Country_ISO, pe = anno$Political_Entity) %>%
+# dplyr::filter(is.na(Country_ISO))
 
 Country <- anno$Political_Entity
-
 Latitude <- round(anno$Lat %>% as.numeric(), digits = 5)
-
 Longitude <- round(anno$Long %>% as.numeric(), digits = 5)
 
+## Columns related to genetic data preparation
 AADR_Pulldown_Strategy <- anno$Pulldown_Strategy
 
 # helper function to compare to strings irrespective of case
@@ -179,29 +207,51 @@ parse_capture_type <- function(x) {
     x %equalToLower% "Shotgun" ~ "Shotgun",
     x %equalToLower% "Shotgun.diploid" ~ "Shotgun",
     x %equalToLower% "Reference.Genome" ~ "ReferenceGenome" ,
-    TRUE ~ "OtherCapture"
+    TRUE ~ "OtherCapture"Date_Type
   )
 }
 
+# many of these columns are empty for the modern HO data
 Capture_Type <- parse_capture_type(anno$Data_Source)
-
 AADR_Data_Source <- anno$Data_Source
-
+# table(anno$No_Libraries, useNA = "always")
+# table(anno$SNPs_Autosomal_Targets_1240k, useNA = "always")
 AADR_SNPs_HO <- anno$SNPs_Autosomal_Targets_HO
+# table(anno$Y_Haplogroup_Terminal_Mutation, useNA = "always")
+# table(anno$Y_Haplogroup_ISOGG, useNA = "always")
+# table(anno$Coverage_mtDNA, useNA = "always")
+# table(anno$mtDNA_Haplogroup, useNA = "always")
+# table(anno$mtDNA_Match_Consensus, useNA = "always")
+# table(anno$Damage, useNA = "always")
+# table(anno$Sex_Ratio, useNA = "always")
+# table(anno$Library_Type, useNA = "always")
+AADR_Data_PID <- anno$Data_PID
+# table(anno$ROH_min4cM, useNA = "always")
+# table(anno$ROH_min20cM, useNA = "always")
+AADR_Suffices <- anno$Call_Suffix
+AADR_Y_Haplogroup_Manual <- anno$Y_Haplogroup_Manual
+# table(anno$ANGSD_MoM95CI, useNA = "always")
+# table(anno$hapCon_95CI, useNA = "always")
+# table(anno$Endogenous, useNA = "always")
 
-Genetic_Sex <- anno$Molecular_Sex
-
+## Assessment columns
 AADR_Assessment <- anno$Assessment
+AADR_Assessment_Warnings <- anno$Assessment_Warnings
 
 #### combine results ####
 
 res_janno_raw <- tibble::tibble(
   Poseidon_ID,
+  Genotype_Ploidy,
   Alternative_IDs,
+  Collection_ID,
   AADR_Year_First_Publication,
-  Publication,
+  Publication = I(Publication),
   AADR_Publication,
+  AADR_Publication_DOI,
+  AADR_Data_PID,
   Date_Type,
+  Date_BC_AD_Median,
   AADR_Date_Mean_BP,
   AADR_Date_SD,
   AADR_Date_Full_Info,
@@ -212,11 +262,14 @@ res_janno_raw <- tibble::tibble(
   Latitude,
   Longitude,
   AADR_Pulldown_Strategy,
+  AADR_Suffices,
   Capture_Type,
   AADR_Data_Source,
   AADR_SNPs_HO,
   Genetic_Sex,
-  AADR_Assessment
+  AADR_Y_Haplogroup_Manual,
+  AADR_Assessment,
+  AADR_Assessment_Warnings
 )
 
 res_janno <- janno::as.janno(res_janno_raw)
