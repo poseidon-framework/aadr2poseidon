@@ -279,10 +279,10 @@ res_janno <- janno::as.janno(res_janno_raw)
 
 janno::write_janno(
   res_janno,
-  path = "AADR62.0_to_Poseidon2.7.1_HO/tmp/AADR_HO_without_1240K_Publications_Incomplete.janno"
+  path = "AADR62.0_to_Poseidon2.7.1_HO/tmp/AADR_HO_without_1240K.janno"
 )
 
 #### inspect result ####
 
-issues <- janno::validate_janno("AADR62.0_to_Poseidon2.7.1_HO/tmp/AADR_HO_without_1240K_Publications_Incomplete.janno")
+issues <- janno::validate_janno("AADR62.0_to_Poseidon2.7.1_HO/tmp/AADR_HO_without_1240K.janno")
 issues %>% View()

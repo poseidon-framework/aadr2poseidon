@@ -1,128 +1,94 @@
 library(magrittr)
 
-# to start from scratch
-# file.remove(
-#   "AADR54.1.p1_to_Poseidon2.7.0_HO/tmp/DOIs.txt",
-#   "AADR54.1.p1_to_Poseidon2.7.0_HO/tmp/citation_keys.txt",
-#   "AADR54.1.p1_to_Poseidon2.7.0_HO/tmp/aadr2doi_result.txt",
-#   "AADR54.1.p1_to_Poseidon2.7.0_HO/tmp/References_raw.bib"
-# )
+#### prepare DOI list ####
 
-#### prepare a list of all required papers ####
-# this assumes the .janno file was created with the anno2janno.R script
+complete_keys_and_dois <- readRDS("AADR62.0_to_Poseidon2.7.1_HO/tmp/complete_keys_and_dois.rds")
 
-aadrJanno <- poseidonR::read_janno("AADR54.1.p1_to_Poseidon2.7.0_HO/tmp/AADR_HO_without_1240K_Publications_Incomplete.janno", validate = F)
-keys <- aadrJanno$Publication %>% unlist() %>% unique()
-writeLines(keys, "AADR54.1.p1_to_Poseidon2.7.0_HO/tmp/citation_keys.txt")
+unqiue_dois <- complete_keys_and_dois$doi %>% unique()
 
-#### compile list of DOIs ###
-
-# using aadr2doi: https://github.com/nevrome/aadr2doi
-system(paste(
-  "aadr2doi",
-  "--inFile AADR54.1.p1_to_Poseidon2.7.0_HO/tmp/citation_keys.txt",
-  "--aadrVersion 54.1.p1",
-  "--doiShape Short",
-  "--printKey",
-  "-o AADR54.1.p1_to_Poseidon2.7.0_HO/tmp/aadr2doi_result.txt"
-  ))
-
-aadr2doi_result <- readr::read_tsv(
-  "AADR54.1.p1_to_Poseidon2.7.0_HO/tmp/aadr2doi_result.txt",
-  col_names = c("key", "doi")
-)
-
-# manual step: add missing DOIs to DOIs.txt
-additional_dois <- tibble::tribble(
-  ~key, ~doi,
-  "LazaridisNature2016", "10.1038/nature19310",
-  "VyasAJPA2017", "10.1002/ajpa.23312",
-  "VyasDryadDigitalRepository2017", "10.5061/dryad.1pm3r"
-)
-
-# combine automatically retrieved and manually added dois
-combined_doi_table <- dplyr::bind_rows(aadr2doi_result, additional_dois)
-
-# identify doi duplicates
-doi_duplicates <- combined_doi_table %>%
-  dplyr::group_by(doi) %>%
-  dplyr::summarize(keys = list(key)) %>%
-  dplyr::filter(purrr::map_lgl(keys, \(x) length(x) > 1))
-
-final_doi_table <- combined_doi_table
-
-# write dois to file
-writeLines(final_doi_table$doi, "AADR54.1.p1_to_Poseidon2.7.0_HO/tmp/DOIs.txt")
+writeLines(unqiue_dois, "AADR62.0_to_Poseidon2.7.1_HO/tmp/DOIs.txt")
 
 #### resolve DOIs to BibTeX entries ####
 
 # using doi2bib: https://github.com/bibcure/doi2bib
+# runs for a couple of minutes
 system(paste(
   "doi2bib",
-  "-i AADR54.1.p1_to_Poseidon2.7.0_HO/tmp/DOIs.txt",
-  "-o AADR54.1.p1_to_Poseidon2.7.0_HO/tmp/References_raw.bib"
+  "-i AADR62.0_to_Poseidon2.7.1_HO/tmp/DOIs.txt",
+  "-o AADR62.0_to_Poseidon2.7.1_HO/tmp/References_raw.bib"
 ))
 
 #### clean resulting .bib file ####
 
+# validate result
+# system("biber --tool --validate-datamodel AADR62.0_to_Poseidon2.7.1_HO/tmp/References_raw.bib")
+
 # load result
-references <- bibtex::read.bib("AADR54.1.p1_to_Poseidon2.7.0_HO/tmp/References_raw.bib")
+in_references <- bibtex::read.bib("AADR62.0_to_Poseidon2.7.1_HO/tmp/References_raw.bib")
+
+# 1. manual step: add field "journal" to some entries
+# (some "journal = {bioRxiv}")
+
+in_references <- bibtex::read.bib("AADR62.0_to_Poseidon2.7.1_HO/tmp/References_raw.bib")
 
 # check which doi's are actually there
-dois_actually_in_bibtex <- references %>% purrr::map_chr(\(x) x$doi)
-setdiff(final_doi_table$doi, dois_actually_in_bibtex)
+dois_in_bibtex <- in_references %>% purrr::map_chr(\(x) {
+  if (is.null(x$doi)) { NA_character_ } else {x$doi}
+})
+requested_dois <- readLines("AADR62.0_to_Poseidon2.7.1_HO/tmp/DOIs.txt")
 
-# 2. manual step: add missing bibtex entries for some papers
-# 10.5061/dryad.1pm3r -> VyasDryadDigitalRepository2017
+setdiff(tolower(requested_dois), tolower(dois_in_bibtex))
 
-# 3. manual step: clean incorrectly formatted values
-# {PLoS ONE} {ONE} -> {PLoS ONE}
-# {Nat Ecol Evol}amp$\mathsemicolon$ Evolution} -> {Nat Ecol Evol}
-# {PLoS Genet} Genetics} -> {PLoS Genet}
+# 2. manual step: add missing bibtex entries/dois
 
 #### adjust citation keys in bib file ####
 
-in_references <- bibtex::read.bib("AADR54.1.p1_to_Poseidon2.7.0_HO/tmp/References_raw.bib")
+in_references <- bibtex::read.bib("AADR62.0_to_Poseidon2.7.1_HO/tmp/References_raw.bib")
 
-dois_in_bibtex <- in_references %>% purrr::map_chr(\(x) x$doi)
+dois_in_bibtex <- in_references %>% purrr::map_chr(\(x) {
+  if (is.null(x$doi)) { NA_character_ } else {x$doi}
+})
 keys_in_bibtex <- in_references %>% purrr::map_chr(\(x) attr(x, "key"))
-in_bibtex <- tibble::tibble(doi2bib_key = keys_in_bibtex, doi = dois_in_bibtex)
+in_bibtex <- tibble::tibble(
+  bib_entry_index = 1:length(in_references),
+  doi2bib_key = keys_in_bibtex,
+  doi = dois_in_bibtex
+)
+in_bibtex$doi <- tolower(in_bibtex$doi)
+complete_keys_and_dois$doi <- tolower(complete_keys_and_dois$doi)
+
+# note that this join may introduce doi duplicates!
+# the AADR includes the same publication under different publication keys
 merged_key_table <- dplyr::left_join(
-  in_bibtex %>% dplyr::mutate(doi = tolower(doi)),
-  final_doi_table %>% dplyr::mutate(doi = tolower(doi)),
+  in_bibtex,
+  complete_keys_and_dois,
   by = "doi"
 )
 
-out_references <- purrr::map2(
-  in_references, merged_key_table$key,
-  \(x, y) {
-    attr(x, "key") <- y
-    return(x)
+out_references <- purrr::pmap(
+  merged_key_table, function(bib_entry_index, doi2bib_key, doi, key) {
+    cur_reference <- in_references[[bib_entry_index]]
+    # see here for an explanation of the weird syntax below:
+    # https://stackoverflow.com/questions/9765493/how-do-i-reference-specific-tags-in-the-bibentry-class-using-the-or-conv
+    cur_reference$key <- key
+    return(cur_reference)
   }
 )
-class(out_references) <- "bibentry"
 
-#### write .bib file #### 
+#### write final .bib file #### 
 
-bibtex::write.bib(out_references, "AADR54.1.p1_to_Poseidon2.7.0_HO/tmp/References.bib")
-
-#### add AADR references to bib file and janno file ####
-
-# manual step: add bibtex entries for AADR and AADRv541p1 to bib file
-
-aadrJannoWithAADRRef <- aadrJanno %>%
-  dplyr::mutate(
-    Publication = purrr::map(
-      Publication, function(x) {
-        c(x, "AADR", "AADRv541p1")
-      }
+file.remove("AADR62.0_to_Poseidon2.7.1_HO/tmp/References.bib")
+purrr::walk(
+  out_references, function(bibentry) {
+    text <- format(bibentry, style = "bibtex")
+    write(
+      text,
+      file = "AADR62.0_to_Poseidon2.7.1_HO/tmp/References.bib",
+      append = TRUE
     )
-  )
-
-janno::write_janno(
-  aadrJannoWithAADRRef,
-  path = "AADR54.1.p1_to_Poseidon2.7.0_HO/tmp/AADR_HO_without_1240K.janno"
+  }
 )
 
-issues <- janno::validate_janno("AADR54.1.p1_to_Poseidon2.7.0_HO/tmp/AADR_HO_without_1240K.janno")
-issues %>% View()
+# manual step: add AADR references to References.bib
+# AADRv620: https://doi.org/10.7910/DVN/FFIDCW
+# AADR: http://dx.doi.org/10.1038/s41597-024-03031-7
