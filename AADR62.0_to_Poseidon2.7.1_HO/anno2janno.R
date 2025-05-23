@@ -62,12 +62,13 @@ Genotype_Ploidy <- anno %$%
 
 Alternative_IDs <- anno$Master_ID
 Collection_ID <- anno$Skeletal_Code
-# table(anno$Skeletal_Element, useNA = "always")
+# Source_Tissue: table(anno$Skeletal_Element, useNA = "always")
 
 ## Publication related columns
 AADR_Year_First_Publication <- anno$Year_First_Publication
 AADR_Publication <- anno$Publication
 AADR_Publication_DOI <- anno$Publication_DOI
+AADR_Data_PID <- anno$Data_PID
 
 publication_list <- anno$Publication %>%
   stringr::str_extract_all(pattern = "[a-zA-Z]{5,}[0-9]{4}|1KGPhase3") %>%
@@ -129,7 +130,7 @@ AADR_Date_Mean_BP <- anno$Date_Mean_BP
 AADR_Date_SD <- anno$Date_SD
 AADR_Date_Full_Info <- anno$Date_Full_Info
 
-# table(anno$Age_Death, useNA = "always")
+# AADR_Age_Death: table(anno$Age_Death, useNA = "always")
 
 ## Columns overlapping with the .ind file
 # read .fam file for correct group and sex information
@@ -207,32 +208,32 @@ parse_capture_type <- function(x) {
     x %equalToLower% "Shotgun" ~ "Shotgun",
     x %equalToLower% "Shotgun.diploid" ~ "Shotgun",
     x %equalToLower% "Reference.Genome" ~ "ReferenceGenome" ,
-    TRUE ~ "OtherCapture"Date_Type
+    TRUE ~ "OtherCapture"
   )
 }
 
 # many of these columns are empty for the modern HO data
+AADR_Suffices <- anno$Call_Suffix
 Capture_Type <- parse_capture_type(anno$Data_Source)
 AADR_Data_Source <- anno$Data_Source
-# table(anno$No_Libraries, useNA = "always")
-# table(anno$SNPs_Autosomal_Targets_1240k, useNA = "always")
+# Nr_Libraries: table(anno$No_Libraries, useNA = "always")
+# AADR_SNPs_1240K: table(anno$SNPs_Autosomal_Targets_1240k, useNA = "always")
 AADR_SNPs_HO <- anno$SNPs_Autosomal_Targets_HO
-# table(anno$Y_Haplogroup_Terminal_Mutation, useNA = "always")
-# table(anno$Y_Haplogroup_ISOGG, useNA = "always")
-# table(anno$Coverage_mtDNA, useNA = "always")
-# table(anno$mtDNA_Haplogroup, useNA = "always")
-# table(anno$mtDNA_Match_Consensus, useNA = "always")
-# table(anno$Damage, useNA = "always")
-# table(anno$Sex_Ratio, useNA = "always")
-# table(anno$Library_Type, useNA = "always")
-AADR_Data_PID <- anno$Data_PID
-# table(anno$ROH_min4cM, useNA = "always")
-# table(anno$ROH_min20cM, useNA = "always")
-AADR_Suffices <- anno$Call_Suffix
+# AADR_ROHmin4cM: table(anno$ROH_min4cM, useNA = "always")
+# AADR_ROHmin20cM: table(anno$ROH_min20cM, useNA = "always")
+# AADR_Y_Haplogroup_Terminal_Mutation: table(anno$Y_Haplogroup_Terminal_Mutation, useNA = "always")
+# AADR_Y_Haplogroup_ISOGG: table(anno$Y_Haplogroup_ISOGG, useNA = "always")
 AADR_Y_Haplogroup_Manual <- anno$Y_Haplogroup_Manual
-# table(anno$ANGSD_MoM95CI, useNA = "always")
-# table(anno$hapCon_95CI, useNA = "always")
-# table(anno$Endogenous, useNA = "always")
+# AADR_Coverage_mtDNA: table(anno$Coverage_mtDNA, useNA = "always")
+# MT_Haplogroup: table(anno$mtDNA_Haplogroup, useNA = "always")
+# AADR_MT_Match_Consensus: table(anno$mtDNA_Match_Consensus, useNA = "always")
+# Damage: table(anno$Damage, useNA = "always")
+# AADR_Sex_Ratio: table(anno$Sex_Ratio, useNA = "always")
+# AADR_ANGSD_MoM95: table(anno$ANGSD_MoM95CI, useNA = "always")
+# AADR_hapConX_95: table(anno$hapCon_95CI, useNA = "always")
+# AADR_Library_Type: table(anno$Library_Type, useNA = "always")
+# Library_Names: table(anno$Libraries, useNA = "always")
+# AADR_Endogenous: table(anno$Endogenous, useNA = "always")
 
 ## Assessment columns
 AADR_Assessment <- anno$Assessment
@@ -278,10 +279,10 @@ res_janno <- janno::as.janno(res_janno_raw)
 
 janno::write_janno(
   res_janno,
-  path = "AADR54.1.p1_to_Poseidon2.7.0_HO/tmp/AADR_HO_without_1240K_Publications_Incomplete.janno"
+  path = "AADR62.0_to_Poseidon2.7.1_HO/tmp/AADR_HO_without_1240K_Publications_Incomplete.janno"
 )
 
 #### inspect result ####
 
-issues <- janno::validate_janno("AADR54.1.p1_to_Poseidon2.7.0_HO/tmp/AADR_HO_without_1240K_Publications_Incomplete.janno")
+issues <- janno::validate_janno("AADR62.0_to_Poseidon2.7.1_HO/tmp/AADR_HO_without_1240K_Publications_Incomplete.janno")
 issues %>% View()
