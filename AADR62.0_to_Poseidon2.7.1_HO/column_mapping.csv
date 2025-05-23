@@ -1,0 +1,43 @@
+Representation in the .janno file,anno2janno transformation,Simplified .anno column name,AADR .anno file column name
+Poseidon_ID + Genotype_Ploidy,"Replaced > and < with GT and LT, because > and < are reserved characters in the trident forge selection language in the IDs. The genotype ploidy is derived from the suffixes (.DG, .SG, .AG, .TW, etc.).",Genetic_ID ,"Genetic ID (suffixes: "".DG"" is a high coverage shotgun genome with diploid genotype calls, "".AG"" is shotgun data with each position in the genome represented by a randomly chosen sequence, "".HO"" is Affymetrix Human Origins genotype data)"
+Alternative_IDs,No change,Master_ID,Master ID
+Collection_ID,No change,Skeletal_Code,Skeletal code
+Source_Tissue,No change,Skeletal_Element ,Skeletal element
+Non-native column: AADR_Year_First_Publication,No change,Year_First_Publication,"Year data from this individual was first published [for a present-day individuals we give the data of the data reported here; missing GreenScience 2010 (Vi33.15, Vi33.26), Olalde2018 (I2657), RasmussenNature2010 (Australian)]"
+Publication + Non-native column: AADR_Publication,For the Publication column the information was reduced to simple keys in a list column. These keys are linked to the attached .bib file. The AADR_Publication column keeps the original structure.,Publication,Publication abbreviation
+Non-native column: AADR_Publication_DOI,No change,Publication_DOI,doi for publication of this representation of the data
+Non-native column: AADR_Data_PID,No change,Data_PID,Link to the most permanent repository hosting these data
+Date_Note,No change,Date_Method,"Method for Determining Date; unless otherwise specified, calibrations use 95.4% intervals from OxCal v4.4.2 Bronk Ramsey (2009); r5; Atmospheric data from Reimer et al (2020)"
+Date_BC_AD_Median + Non-native column: AADR_Date_Mean_BP,"Transformed to BC/AD ages. Present-day reference samples have been set to 2000 AD, not 1950 AD.",Date_Mean_BP,"Date mean in BP in years before 1950 CE [OxCal mu for a direct radiocarbon date, and average of range for a contextual date]"
+Non-native column: AADR_Date_SD,No change,Date_SD,"Date standard deviation in BP [OxCal sigma for a direct radiocarbon date, and standard deviation of the uniform distribution between the two bounds for a contextual date]"
+Date_C14_Labnr + Date_C14_Uncal_BP + Date_C14_Uncal_BP_Err + Date_BC_AD_Start + Date_BC_AD_Stop + Date_Type + Non-native column: AADR_Date_Full_Info,Parsed and pulled apart to fit into the .janno Date_* columns. The AADR_Date_Full_Info column keeps the original structure.,Date_Full_Info,"Full Date One of two formats. (Format 1) 95.4% CI calibrated radiocarbon age (Conventional Radiocarbon Age BP, Lab number) e.g. 2624-2350 calBCE (3990±40 BP, Ua-35016). (Format 2) Archaeological context range, e.g. 2500-1700 BCE"
+Non-native column: AADR_Age_Death,No change,Age_Death,"Age at death, Morphological sex from physical anthropology"
+Group_Name,No change,Group_ID,Group ID
+Location,No change,Locality,Locality
+Country_ISO + Country,For Country_ISO the country entries were mapped to ISO-alpha2 codes. The column Country has the entries of Political_Entity unchanged.,Political_Entity,Political Entity
+Latitude,Rounded to 5 decimal places,Lat,Lat.
+Longitude,Rounded to 5 decimal places,Long,Long.
+Non-native column: AADR_Pulldown_Strategy,No change,Pulldown_Strategy,Pulldown Strategy
+Non-native column: AADR_Suffices,No change,Call_Suffix,Suffices (indicating data types used for sources which can be a subset of that in bam)
+Capture_Type + Non-native column: AADR_Data_Source,"For the Capture_Type column the entities defined in the Poseidon schema were extracted. All other entities, including mixed entries, were set to OtherCapture. The AADR_Data_Source column keeps the original structure.",Data_Source,Data type
+Nr_Libraries,No change,No_Libraries,No. Libraries
+Non-native column: AADR_SNPs_1240K,No change,SNPs_Autosomal_Targets_1240k,SNPs hit on autosomal targets (Computed using easystats on 1240k snpset)
+Non-native column: AADR_SNPs_HO,No change,SNPs_Autosomal_Targets_HO,SNPs hit on autosomal targets (Computed using easystats on HO snpset)
+Genetic_Sex,"Only kept M, F and U",Molecular_Sex,Molecular Sex
+Non-native column: AADR_ROHmin4cM,No change,ROH_min4cM,Sum total of ROH segments >4 cM
+Non-native column: AADR_ROHmin20cM,No change,ROH_min20cM,Sum total of ROH segments >20cM
+Y_Haplogroup + Non-native column: AADR_Y_Haplogroup_Terminal_Mutation,For Y_Haplogroup n/a (female) was turned simply to n/a to correctly specify the information as missing.,Y_Haplogroup_Terminal_Mutation,Y haplogroup in terminal mutation notation automatically called based on Yfull with the software described in Lazaridis et al. Science 2022
+Non-native column: AADR_Y_Haplogroup_ISOGG,No change,Y_Haplogroup_ISOGG,Y haplogroup  in ISOGG v15.73 notation automatically called based on Yfull with the software described in Lazaridis et al. Science 2022
+Non-native column: AADR_Y_Haplogroup_Manual,No change,Y_Haplogroup_Manual,Y haplogroup manually called if different from automatic
+Non-native column: AADR_Coverage_mtDNA,No change,Coverage_mtDNA,mtDNA coverage (merged data)
+MT_Haplogroup,No change,mtDNA_Haplogroup,mtDNA haplogroup if >2x or published
+Non-native column: AADR_MT_Match_Consensus,No change,mtDNA_Match_Consensus,mtDNA match to consensus if >2x (merged data)
+Damage,No change,Damage,Damage rate in first nucleotide on sequences overlapping 1240k targets (merged data)
+Non-native column: AADR_Sex_Ratio,No change,Sex_Ratio,Sex ratio [Y/(Y+X) counts] (merged data)
+Non-native column: AADR_ANGSD_MoM95,No change,ANGSD_MoM95CI,ANGSD MOM 95% CI truncated at 0 (only if male and >=200 SNPs)
+Non-native column: AADR_hapConX_95,No change,hapCon_95CI,hapConX 95% CI truncated at 0 (only if male and >=2000 SNPs covered on X chromosome)
+UDG + Library_Built + Non-native column: AADR_Library_Type,Extracted information for the janno columns UDG and Library_Built. The AADR_Library_Type column keeps the original structure.,Library_Type,"Library type (minus=no.damage.correction, half=damage.retained.at.last.position, plus=damage.fully.corrected, ds=double.stranded.library.preparation, ss=single.stranded.library.preparation)"
+Library_Names,"For Library_Names the lists of libraries were split by , to form a list column (separated by ;). Leading and trailing whitespaces were removed.",Libraries,Libraries
+Non-native column: AADR_Endogenous,No change,Endogenous,endogenous by library (computed on shotgun data)
+Non-native column: AADR_Assessment,No change,Assessment,ASSESSMENT
+Non-native column: AADR_Assessment_Warnings,No change,Assessment_Warnings,ASSESSMENT WARNING
