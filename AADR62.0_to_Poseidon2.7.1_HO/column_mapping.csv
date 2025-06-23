@@ -19,7 +19,7 @@ Latitude,Rounded to 5 decimal places,Lat,Lat.
 Longitude,Rounded to 5 decimal places,Long,Long.
 Non-native column: AADR_Pulldown_Strategy,No change,Pulldown_Strategy,Pulldown Strategy
 Non-native column: AADR_Suffices,No change,Call_Suffix,Suffices (indicating data types used for sources which can be a subset of that in bam)
-Capture_Type + Non-native column: AADR_Data_Source,"For the Capture_Type column the entities defined in the Poseidon schema were extracted. All other entities, including mixed entries, were set to OtherCapture. The AADR_Data_Source column keeps the original structure.",Data_Source,Data type
+Non-native column: AADR_Data_Source,No change,Data_Source,Data type
 Nr_Libraries,No change,No_Libraries,No. Libraries
 Non-native column: AADR_SNPs_1240K,No change,SNPs_Autosomal_Targets_1240k,SNPs hit on autosomal targets (Computed using easystats on 1240k snpset)
 Non-native column: AADR_SNPs_HO,No change,SNPs_Autosomal_Targets_HO,SNPs hit on autosomal targets (Computed using easystats on HO snpset)

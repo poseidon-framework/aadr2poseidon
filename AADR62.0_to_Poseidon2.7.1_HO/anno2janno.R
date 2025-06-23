@@ -56,6 +56,8 @@ Poseidon_ID <- anno$Genetic_ID %>%
 Genotype_Ploidy <- anno %$%
   dplyr::case_when(
     grepl(".DG$", Genetic_ID) ~ "diploid",
+    grepl(".SDG$", Genetic_ID) ~ "diploid",
+    grepl(".HO$", Genetic_ID) ~ "diploid",
     .default = "haploid"
   )
 # tibble::tibble(anno$Genetic_ID, Genotype_Ploidy) %>% View()
@@ -201,20 +203,8 @@ AADR_Pulldown_Strategy <- anno$Pulldown_Strategy
   tolower(a) == tolower(b)
 }
 
-parse_capture_type <- function(x) {
-  dplyr::case_when( 
-    x %equalToLower% "1240K" ~ "1240K",
-    x %equalToLower% "Twist1.4M" ~ "TwistAncientDNA",
-    x %equalToLower% "Shotgun" ~ "Shotgun",
-    x %equalToLower% "Shotgun.diploid" ~ "Shotgun",
-    x %equalToLower% "Reference.Genome" ~ "ReferenceGenome" ,
-    TRUE ~ "OtherCapture"
-  )
-}
-
 # many of these columns are empty for the modern HO data
 AADR_Suffices <- anno$Call_Suffix
-Capture_Type <- parse_capture_type(anno$Data_Source)
 AADR_Data_Source <- anno$Data_Source
 # Nr_Libraries: table(anno$No_Libraries, useNA = "always")
 # AADR_SNPs_1240K: table(anno$SNPs_Autosomal_Targets_1240k, useNA = "always")

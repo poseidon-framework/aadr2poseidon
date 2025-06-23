@@ -31,6 +31,8 @@ Poseidon_ID <- anno$Genetic_ID %>%
 Genotype_Ploidy <- anno %$%
   dplyr::case_when(
     grepl(".DG$", Genetic_ID) ~ "diploid",
+    grepl(".SDG$", Genetic_ID) ~ "diploid",
+    grepl(".HO$", Genetic_ID) ~ "diploid",
     .default = "haploid"
   )
 # tibble::tibble(anno$Genetic_ID, Genotype_Ploidy) %>% View()
