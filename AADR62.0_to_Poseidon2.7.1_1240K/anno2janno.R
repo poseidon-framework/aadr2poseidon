@@ -131,6 +131,18 @@ Date_BC_AD_Median <- ifelse(
 )
 AADR_Date_SD <- anno$Date_SD
 
+# inspect deviations between mean ages and age ranges
+# round(purrr::map2_dbl(
+#   date_string_parsing_result$Date_BC_AD_Start, date_string_parsing_result$Date_BC_AD_Stop,
+#   function(x, y) mean(c(x,y))
+# )) -> a
+# Date_BC_AD_Median -> b
+# a - b
+# anno$Genetic_ID[which(
+#   !(date_string_parsing_result$Date_BC_AD_Start <= Date_BC_AD_Median &
+#       date_string_parsing_result$Date_BC_AD_Stop >= Date_BC_AD_Median)
+# )]
+
 # inspect the parsing results
 # ap <- dplyr::bind_cols(
 #   full = AADR_Date_Full_Info,
