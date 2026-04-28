@@ -47,26 +47,34 @@ parseArchContextAge = do
     ageRange <- parseAgeRange
     return (ArchContextAge ageRange)
 
-data AgeRange = AgeRange Int Int deriving Show
+data AgeRange = AgeRange (Maybe Int) Int deriving Show
 parseAgeRange = do
     start <- parseStart
     stop <- P.optionMaybe parseStop
     case (start,stop) of
         -- only one date case
-        ((start',Just BCE), Nothing)          -> return (AgeRange ((-1)*start') ((-1)*start'))
-        ((start',Just CE ), Nothing)          -> return (AgeRange start' start')
+        ((True ,start',Just BCE), Nothing)          -> return (AgeRange Nothing ((-1)*start'))
+        ((False,start',Just BCE), Nothing)          -> return (AgeRange (Just ((-1)*start')) ((-1)*start'))
+        ((False,start',Just CE ), Nothing)          -> return (AgeRange (Just start') start')
         -- crossing BC/AD case
-        ((start',Just BCE), Just (stop',CE))  -> return (AgeRange ((-1)*start') stop')
+        ((False,start',Just BCE), Just (stop',CE))  -> return (AgeRange (Just ((-1)*start')) stop')
         -- regular range case
-        ((start',Nothing),  Just (stop',BCE)) -> return (AgeRange ((-1)*start') ((-1)*stop'))
-        ((start',Nothing),  Just (stop', CE)) -> return (AgeRange start' stop')
+        ((False,start',Nothing),  Just (stop',BCE)) -> return (AgeRange (Just ((-1)*start')) ((-1)*stop'))
+        ((False,start',Nothing),  Just (stop', CE)) -> return (AgeRange (Just start') stop')
+        -- anything else
+        _ -> error "huhu"
 
-parseStart :: P.Parser (Int,Maybe BCECE)
+maybe2Bool :: Maybe a -> Bool
+maybe2Bool (Just _) = True
+maybe2Bool Nothing = False
+
+parseStart :: P.Parser (Bool,Int,Maybe BCECE)
 parseStart = do
+    olderThan <- maybe2Bool <$> P.optionMaybe (P.char '>')
     start <- parsePositiveInt
     _ <- P.optional P.space
     bcece <- P.optionMaybe parseBCECE
-    return (start,bcece)
+    return (olderThan,start,bcece)
 
 parseStop :: P.Parser (Int,BCECE)
 parseStop = do
