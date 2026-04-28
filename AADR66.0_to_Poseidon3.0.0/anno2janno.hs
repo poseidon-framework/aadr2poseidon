@@ -182,7 +182,16 @@ parseSingleC14 = do
     return (SingleC14 mean sd labcodes)
 
 parseLabItem :: P.Parser (Maybe T.Text)
-parseLabItem = (Just <$> parseLabCode) P.<|> (skipSquareBlock >> return Nothing)
+parseLabItem =
+      P.try labWithComment
+  P.<|> (skipSquareBlock >> return Nothing)
+
+labWithComment :: P.Parser (Maybe T.Text)
+labWithComment = do
+    code <- parseLabCode
+    _ <- P.many P.space
+    _ <- P.optional skipParenBlock
+    return (Just code)
 
 skipSquareBlock :: P.Parser ()
 skipSquareBlock = do
