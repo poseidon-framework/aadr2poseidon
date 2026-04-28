@@ -18,27 +18,20 @@ import qualified Text.Parsec        as P
 import qualified Text.Parsec.Combinator as P
 import qualified Data.Text.Encoding as TE
 import qualified Text.Parsec.Text as P
--- import qualified Text.Parsec.Number as P
 
 data AnnoRow = AnnoRow {
       _annoGeneticID :: T.Text
     , _annoFullDate :: FullDate
     , _annoAdditionalColumns :: Csv.NamedRecord
-} deriving Show
+    } deriving Show
 
 data FullDate = 
       Present
-    | ArchContextAge {
-        _acrStart :: Int
-      , _acrStop :: Int
-      }
-    | C14Age {
-        _cstart :: Int
-      , _cstop :: Int
-      --, _cCombinedBP = C14
+    | ArchContextAge AgeRange
+    | C14Age {_cRange :: AgeRange --, _cCombinedBP = C14
       , _cDates :: [C14]
-      }
-    deriving Show
+      } 
+      deriving Show
 
 instance Csv.FromField FullDate where
     parseField bs =
@@ -51,34 +44,50 @@ parseFullDate = P.try parseArchContextAge P.<|> parseC14Age
 
 parseArchContextAge :: P.Parser FullDate
 parseArchContextAge = do
+    ageRange <- parseAgeRange
+    return (ArchContextAge ageRange)
+
+data AgeRange = AgeRange Int Int deriving Show
+parseAgeRange = do
+    start <- parseStart
+    stop <- P.optionMaybe parseStop
+    case (start,stop) of
+        -- only one date case
+        ((start',Just BCE), Nothing)          -> return (AgeRange ((-1)*start') ((-1)*start'))
+        ((start',Just CE ), Nothing)          -> return (AgeRange start' start')
+        -- crossing BC/AD case
+        ((start',Just BCE), Just (stop',CE))  -> return (AgeRange ((-1)*start') stop')
+        -- regular range case
+        ((start',Nothing),  Just (stop',BCE)) -> return (AgeRange ((-1)*start') ((-1)*stop'))
+        ((start',Nothing),  Just (stop', CE)) -> return (AgeRange start' stop')
+
+parseStart :: P.Parser (Int,Maybe BCECE)
+parseStart = do
     start <- parsePositiveInt
+    _ <- P.optional P.space
+    bcece <- P.optionMaybe parseBCECE
+    return (start,bcece)
+
+parseStop :: P.Parser (Int,BCECE)
+parseStop = do
+    _ <- P.optional P.space
     _ <- P.char '-'
+    _ <- P.optional P.space
     stop <- parsePositiveInt
-    _ <- P.space
-    bcece <- parseBCE P.<|> parseCE
-    case bcece of
-        BCE -> return (ArchContextAge ((-1)*start) ((-1)*stop))
-        CE -> return (ArchContextAge start stop)
+    _ <- P.optional P.space
+    bcece <- parseBCECE
+    return (stop,bcece)
 
 data BCECE = BCE | CE
-parseBCE = do _ <- P.string "BCE"; return BCE
-parseCE = do _ <- P.string "CE"; return CE
-
-data CalBCECE = CalBCE | CalCE
-parseCalBCE = do _ <- P.string "calBCE"; return CalBCE
-parseCalCE = do _ <- P.string "calCE"; return CalCE
+parseBCECE = P.try parseBCE P.<|> parseCE
+parseBCE = do _ <- P.choice [P.string "calBCE", P.string "BCE"]; return BCE
+parseCE = do _ <- P.choice [P.string "calCE", P.string "CE"]; return CE
 
 parseC14Age :: P.Parser FullDate
 parseC14Age = do
-    start <- parsePositiveInt
-    _ <- P.char '-'
-    stop <- parsePositiveInt
-    _ <- P.space
-    calbcece <- P.try parseCalBCE P.<|> parseCalCE
+    ageRange <- parseAgeRange
     dates <- P.sepBy parseC14 (P.char ' ')
-    case calbcece of
-        CalBCE -> return (C14Age ((-1)*start) ((-1)*stop) dates)
-        CalCE -> return (C14Age start stop dates)
+    return (C14Age ageRange dates)
 
 data C14 = C14 {
       _c14Mean :: Int
