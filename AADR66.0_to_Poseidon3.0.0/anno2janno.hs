@@ -19,6 +19,7 @@ import qualified Text.Parsec.Combinator as P
 import qualified Data.Text.Encoding as TE
 import qualified Text.Parsec.Text as P
 import Data.List
+import Data.Maybe
 
 data AnnoRow = AnnoRow {
       _annoGeneticID :: T.Text
@@ -48,12 +49,14 @@ parseFullDate = parsePresent P.<|> P.try parseC14Age P.<|> P.try parseArchContex
 
 parsePresent = do
     _ <- P.string "present"
+    _ <- P.many P.space
     _ <- P.eof
     return Present
 
 parseArchContextAge :: P.Parser FullDate
 parseArchContextAge = do
     ageRange <- parseAgeRange
+    _ <- P.many P.space
     _ <- P.eof
     return (ArchContextAge ageRange)
 
@@ -114,6 +117,7 @@ parseC14Age = do
     ageRange <- parseAgeRange
     _ <- P.many P.space
     dates <- parseC14
+    _ <- P.many P.space
     _ <- P.eof
     return (C14Age ageRange dates)
 
@@ -123,11 +127,32 @@ data C14 =
       , _c14Sd :: Int
       , _c14Labcode :: [T.Text]
       }
+    | Combine (Maybe C14) [C14]
     | OnlyLabcode T.Text
     deriving Show
 
 parseC14 :: P.Parser C14
-parseC14 = P.try parseSingleC14 P.<|> parseOnlyLabcode
+parseC14 = P.try parseCombine P.<|> P.try parseSingleC14 P.<|> parseOnlyLabcode
+
+parseCombine :: P.Parser C14
+parseCombine = do
+    union <- P.optionMaybe parseSingleC14
+    _ <- P.many P.space
+    _ <- P.char '['
+    _ <- parseUntilParen
+    _ <- P.many P.space
+    inputc14s <- fmap catMaybes $ P.many $ do
+        _ <- parseUntilParen
+        P.choice
+          [ Just <$> P.try parseSingleC14
+          , Just <$> P.try parseOnlyLabcode
+          , skipParenBlock >> return Nothing
+          ]
+    _ <- P.optional (P.char ')')
+    _ <- P.optional (P.char ']')
+    return (Combine union inputc14s)
+
+parseUntilParen = P.manyTill P.anyChar (P.lookAhead (P.oneOf "()[]"))
 
 parseOnlyLabcode :: P.Parser C14
 parseOnlyLabcode = do
@@ -137,23 +162,39 @@ parseOnlyLabcode = do
     return (OnlyLabcode labcode)
 
 parseLabCode :: P.Parser T.Text
-parseLabCode = T.pack <$> P.many1 (P.alphaNum P.<|> P.char '-')
+parseLabCode = T.pack <$> P.many1 (P.alphaNum P.<|> P.char '-' P.<|> P.char '.')
 
 parseSingleC14 :: P.Parser C14
 parseSingleC14 = do
     _ <- P.char '('
     mean <- parsePositiveInt
-    _ <- P.oneOf "±"
+    _ <- P.string "±" P.<|> P.try (P.string "?±") P.<|> P.string "?"
     sd <- parsePositiveInt
     _ <- P.many P.space
     _ <- P.optional (P.string "BP")
     labcodes <- P.option [] $ do 
        _ <- P.string ","
        _ <- P.many P.space
-       codes <- P.sepBy parseLabCode (P.string ", ")
-       return codes
+       items <- P.sepBy parseLabItem (P.string ", ")
+       return [ code | Just code <- items ]
+    _ <- parseUntilParen
     _ <- P.char ')'
     return (SingleC14 mean sd labcodes)
+
+parseLabItem :: P.Parser (Maybe T.Text)
+parseLabItem = (Just <$> parseLabCode) P.<|> (skipSquareBlock >> return Nothing)
+
+skipSquareBlock :: P.Parser ()
+skipSquareBlock = do
+    _ <- P.char '['
+    _ <- P.manyTill P.anyChar (P.char ']')
+    return ()
+
+skipParenBlock :: P.Parser ()
+skipParenBlock = do
+    _ <- P.char '('
+    _ <- P.manyTill P.anyChar (P.char ')')
+    return ()
 
 parsePositiveInt :: P.Parser Int
 parsePositiveInt = fromIntegral <$> parseWord
