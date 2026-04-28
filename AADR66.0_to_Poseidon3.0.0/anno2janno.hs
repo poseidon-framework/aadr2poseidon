@@ -40,7 +40,11 @@ instance Csv.FromField FullDate where
             Right fd -> pure fd
 
 parseFullDate :: P.Parser FullDate
-parseFullDate = P.try parseArchContextAge P.<|> parseC14Age
+parseFullDate = parsePresent P.<|> P.try parseArchContextAge P.<|> parseC14Age
+
+parsePresent = do
+    _ <- P.string "present"
+    return Present
 
 parseArchContextAge :: P.Parser FullDate
 parseArchContextAge = do
@@ -50,7 +54,7 @@ parseArchContextAge = do
 data AgeRange = AgeRange (Maybe Int) Int deriving Show
 parseAgeRange = do
     start <- parseStart
-    stop <- P.optionMaybe parseStop
+    stop <- P.optionMaybe (P.try parseStop)
     case (start,stop) of
         -- only one date case
         ((True ,start',Just BCE), Nothing)          -> return (AgeRange Nothing ((-1)*start'))
@@ -62,7 +66,7 @@ parseAgeRange = do
         ((False,start',Nothing),  Just (stop',BCE)) -> return (AgeRange (Just ((-1)*start')) ((-1)*stop'))
         ((False,start',Nothing),  Just (stop', CE)) -> return (AgeRange (Just start') stop')
         -- anything else
-        _ -> error "huhu"
+        _ -> error $ show (start,stop)
 
 maybe2Bool :: Maybe a -> Bool
 maybe2Bool (Just _) = True
@@ -86,10 +90,10 @@ parseStop = do
     bcece <- parseBCECE
     return (stop,bcece)
 
-data BCECE = BCE | CE
+data BCECE = BCE | CE deriving Show
 parseBCECE = P.try parseBCE P.<|> parseCE
-parseBCE = do _ <- P.choice [P.string "calBCE", P.string "BCE"]; return BCE
-parseCE = do _ <- P.choice [P.string "calCE", P.string "CE"]; return CE
+parseBCE = do _ <- P.choice [P.string "BCE", P.try (P.string "calBCE"), P.try (P.string "cal BCE")]; return BCE
+parseCE = do _ <- P.choice [P.string "CE", P.try (P.string "calCE"), P.try (P.string "cal CE")]; return CE
 
 parseC14Age :: P.Parser FullDate
 parseC14Age = do
