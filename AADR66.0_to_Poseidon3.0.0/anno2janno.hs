@@ -18,12 +18,16 @@ import qualified Text.Parsec        as P
 import qualified Text.Parsec.Combinator as P
 import qualified Data.Text.Encoding as TE
 import qualified Text.Parsec.Text as P
+import Data.List
 
 data AnnoRow = AnnoRow {
       _annoGeneticID :: T.Text
     , _annoFullDate :: FullDate
     , _annoAdditionalColumns :: Csv.NamedRecord
-    } deriving Show
+    }
+    
+instance Show AnnoRow where
+    show (AnnoRow a b _) = T.unpack a ++ ": " ++ show b
 
 data FullDate = 
       Present
@@ -40,7 +44,7 @@ instance Csv.FromField FullDate where
             Right fd -> pure fd
 
 parseFullDate :: P.Parser FullDate
-parseFullDate = parsePresent P.<|> P.try parseArchContextAge P.<|> parseC14Age
+parseFullDate = parsePresent P.<|> parseC14Age P.<|> P.try parseArchContextAge
 
 parsePresent = do
     _ <- P.string "present"
@@ -109,14 +113,27 @@ parseC14Age = do
     dates <- P.sepBy parseC14 (P.char ' ')
     return (C14Age ageRange dates)
 
-data C14 = C14 {
-      _c14Mean :: Int
-    , _c14Sd :: Int
-    , _c14Labcode :: [T.Text]
-} deriving Show
+data C14 =
+      NormalC14 {
+        _c14Mean :: Int
+      , _c14Sd :: Int
+      , _c14Labcode :: [T.Text]
+      }
+    | OnlyLabcode T.Text
+    deriving Show
 
 parseC14 :: P.Parser C14
-parseC14 = do
+parseC14 = P.try parseNormalC14 P.<|> parseOnlyLabcode
+
+parseOnlyLabcode :: P.Parser C14
+parseOnlyLabcode = do
+    _ <- P.char '('
+    labcode <- P.sepBy1 (P.many1 P.alphaNum) (P.char '-')
+    _ <- P.char ')'
+    return (OnlyLabcode $ T.pack $ intercalate "-" labcode)
+
+parseNormalC14 :: P.Parser C14
+parseNormalC14 = do
     _ <- P.char '('
     mean <- parsePositiveInt
     _ <- P.oneOf "±"
@@ -126,7 +143,7 @@ parseC14 = do
        _ <- P.string ", "
        fmap T.pack <$> P.sepBy (P.many1 P.anyChar) (P.string ", ")
     _ <- P.char ')'
-    return (C14 mean sd labcodes)
+    return (NormalC14 mean sd labcodes)
 
 parsePositiveInt :: P.Parser Int
 parsePositiveInt = fromIntegral <$> parseWord
@@ -161,4 +178,4 @@ readAnno path = do
 main :: IO ()
 main = do
     anno <- readAnno "tmp/v66.1240K.aadr.PUB.anno"
-    print $ V.head anno
+    print $ anno V.! 0
