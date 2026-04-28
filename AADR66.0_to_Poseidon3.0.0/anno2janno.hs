@@ -54,19 +54,25 @@ parseArchContextAge = do
 data AgeRange = AgeRange (Maybe Int) Int deriving Show
 parseAgeRange = do
     start <- parseStart
-    stop <- P.optionMaybe (P.try parseStop)
+    _ <- P.many P.space
+    stop <- P.optionMaybe parseStop
     case (start,stop) of
         -- only one date case
         ((True ,start',Just BCE), Nothing)          -> return (AgeRange Nothing ((-1)*start'))
         ((False,start',Just BCE), Nothing)          -> return (AgeRange (Just ((-1)*start')) ((-1)*start'))
         ((False,start',Just CE ), Nothing)          -> return (AgeRange (Just start') start')
+        ((False,start',Just BP ), Nothing)          -> return (AgeRange (Just $ bp2bcece start') (bp2bcece start'))
         -- crossing BC/AD case
         ((False,start',Just BCE), Just (stop',CE))  -> return (AgeRange (Just ((-1)*start')) stop')
         -- regular range case
         ((False,start',Nothing),  Just (stop',BCE)) -> return (AgeRange (Just ((-1)*start')) ((-1)*stop'))
         ((False,start',Nothing),  Just (stop', CE)) -> return (AgeRange (Just start') stop')
+        ((False,start',Nothing),  Just (stop', BP)) -> return (AgeRange (Just $ bp2bcece start') (bp2bcece stop'))
         -- anything else
         _ -> error $ show (start,stop)
+
+bp2bcece :: Int -> Int
+bp2bcece x = ((-1)*x) + 1950
 
 maybe2Bool :: Maybe a -> Bool
 maybe2Bool (Just _) = True
@@ -76,24 +82,26 @@ parseStart :: P.Parser (Bool,Int,Maybe BCECE)
 parseStart = do
     olderThan <- maybe2Bool <$> P.optionMaybe (P.char '>')
     start <- parsePositiveInt
-    _ <- P.optional P.space
+    _ <- P.many P.space
     bcece <- P.optionMaybe parseBCECE
     return (olderThan,start,bcece)
 
 parseStop :: P.Parser (Int,BCECE)
 parseStop = do
-    _ <- P.optional P.space
-    _ <- P.char '-'
-    _ <- P.optional P.space
+    _ <- P.oneOf "-–"
+    _ <- P.many P.space
     stop <- parsePositiveInt
-    _ <- P.optional P.space
+    _ <- P.many P.space
     bcece <- parseBCECE
     return (stop,bcece)
 
-data BCECE = BCE | CE deriving Show
-parseBCECE = P.try parseBCE P.<|> parseCE
+
+
+data BCECE = BCE | CE | BP deriving Show
+parseBCECE = P.try parseBCE P.<|> parseCE P.<|> parseBP
 parseBCE = do _ <- P.choice [P.string "BCE", P.try (P.string "calBCE"), P.try (P.string "cal BCE")]; return BCE
 parseCE = do _ <- P.choice [P.string "CE", P.try (P.string "calCE"), P.try (P.string "cal CE")]; return CE
+parseBP = do _ <- P.string "BP"; return BP
 
 parseC14Age :: P.Parser FullDate
 parseC14Age = do
