@@ -33,26 +33,28 @@ data FullDate =
       Present
     | ArchContextAge AgeRange
     | C14Age {_cRange :: AgeRange --, _cCombinedBP = C14
-      , _cDates :: [C14]
+      , _cDates :: C14
       } 
       deriving Show
 
 instance Csv.FromField FullDate where
     parseField bs =
         case P.parse parseFullDate "Full Date" (TE.decodeUtf8 bs) of
-            Left err  -> fail (show err)
+            Left err -> fail (show err)
             Right fd -> pure fd
 
 parseFullDate :: P.Parser FullDate
-parseFullDate = parsePresent P.<|> parseC14Age P.<|> P.try parseArchContextAge
+parseFullDate = parsePresent P.<|> P.try parseC14Age P.<|> P.try parseArchContextAge
 
 parsePresent = do
     _ <- P.string "present"
+    _ <- P.eof
     return Present
 
 parseArchContextAge :: P.Parser FullDate
 parseArchContextAge = do
     ageRange <- parseAgeRange
+    _ <- P.eof
     return (ArchContextAge ageRange)
 
 data AgeRange = AgeRange (Maybe Int) Int deriving Show
@@ -110,11 +112,13 @@ parseBP = do _ <- P.string "BP"; return BP
 parseC14Age :: P.Parser FullDate
 parseC14Age = do
     ageRange <- parseAgeRange
-    dates <- P.sepBy parseC14 (P.char ' ')
+    _ <- P.many P.space
+    dates <- parseC14
+    _ <- P.eof
     return (C14Age ageRange dates)
 
 data C14 =
-      NormalC14 {
+      SingleC14 {
         _c14Mean :: Int
       , _c14Sd :: Int
       , _c14Labcode :: [T.Text]
@@ -123,27 +127,33 @@ data C14 =
     deriving Show
 
 parseC14 :: P.Parser C14
-parseC14 = P.try parseNormalC14 P.<|> parseOnlyLabcode
+parseC14 = P.try parseSingleC14 P.<|> parseOnlyLabcode
 
 parseOnlyLabcode :: P.Parser C14
 parseOnlyLabcode = do
     _ <- P.char '('
-    labcode <- P.sepBy1 (P.many1 P.alphaNum) (P.char '-')
+    labcode <- parseLabCode
     _ <- P.char ')'
-    return (OnlyLabcode $ T.pack $ intercalate "-" labcode)
+    return (OnlyLabcode labcode)
 
-parseNormalC14 :: P.Parser C14
-parseNormalC14 = do
+parseLabCode :: P.Parser T.Text
+parseLabCode = T.pack <$> P.many1 (P.alphaNum P.<|> P.char '-')
+
+parseSingleC14 :: P.Parser C14
+parseSingleC14 = do
     _ <- P.char '('
     mean <- parsePositiveInt
     _ <- P.oneOf "±"
     sd <- parsePositiveInt
-    _ <- P.string " BP"
+    _ <- P.many P.space
+    _ <- P.optional (P.string "BP")
     labcodes <- P.option [] $ do 
-       _ <- P.string ", "
-       fmap T.pack <$> P.sepBy (P.many1 P.anyChar) (P.string ", ")
+       _ <- P.string ","
+       _ <- P.many P.space
+       codes <- P.sepBy parseLabCode (P.string ", ")
+       return codes
     _ <- P.char ')'
-    return (NormalC14 mean sd labcodes)
+    return (SingleC14 mean sd labcodes)
 
 parsePositiveInt :: P.Parser Int
 parsePositiveInt = fromIntegral <$> parseWord
@@ -178,4 +188,4 @@ readAnno path = do
 main :: IO ()
 main = do
     anno <- readAnno "tmp/v66.1240K.aadr.PUB.anno"
-    print $ anno V.! 0
+    print $ anno V.! 11888
