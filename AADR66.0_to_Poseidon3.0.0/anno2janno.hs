@@ -4,39 +4,62 @@
  --package text,cassava,bytestring,vector,unordered-containers,parsec
  -}
 
-{-# LANGUAGE OverloadedStrings      #-}
+{-# LANGUAGE OverloadedStrings #-}
 
-import qualified Data.Text as T
-import qualified Data.Csv as Csv
-import qualified Data.ByteString.Lazy as BL
-import qualified Data.ByteString.Char8 as B8
-import qualified Data.Vector as V
-import qualified Data.HashMap.Strict as HM
-import           Control.Applicative   (empty)
-import           Data.Char                     (ord)
-import qualified Text.Parsec        as P
+import           Control.Applicative    (empty)
+import qualified Data.ByteString.Char8  as B8
+import qualified Data.ByteString.Lazy   as BL
+import           Data.Char              (ord)
+import qualified Data.Csv               as Csv
+import qualified Data.HashMap.Strict    as HM
+import           Data.List
+import           Data.Maybe
+import qualified Data.Text              as T
+import qualified Data.Text.Encoding     as TE
+import qualified Data.Vector            as V
+import qualified Text.Parsec            as P
 import qualified Text.Parsec.Combinator as P
-import qualified Data.Text.Encoding as TE
-import qualified Text.Parsec.Text as P
-import Data.List
-import Data.Maybe
+import qualified Text.Parsec.Text       as P
 
+main :: IO ()
+main = do
+    anno <- readAnno "tmp/v66.1240K.aadr.PUB.anno"
+    print $ anno V.! 11888
+
+readAnno :: FilePath -> IO (V.Vector AnnoRow)
+readAnno path = do
+    bs <- BL.readFile path
+    case Csv.decodeByNameWith (Csv.DecodeOptions $ fromIntegral (ord '\t')) bs of
+      Left err     -> fail err
+      Right (_, v) -> pure v
+
+-- #### AnnoRow data type #### --
 data AnnoRow = AnnoRow {
-      _annoGeneticID :: T.Text
-    , _annoFullDate :: FullDate
-    , _annoAdditionalColumns :: Csv.NamedRecord
+      _annoGeneticID      :: T.Text
+    , _annoFullDate       :: FullDate
+    , _annoColumnsHashmap :: Csv.NamedRecord
     }
-    
+
 instance Show AnnoRow where
     show (AnnoRow a b _) = T.unpack a ++ ": " ++ show b
 
-data FullDate = 
-      Present
-    | ArchContextAge AgeRange
-    | C14Age {_cRange :: AgeRange --, _cCombinedBP = C14
-      , _cDates :: C14
-      } 
-      deriving Show
+instance Csv.FromNamedRecord AnnoRow where
+    parseNamedRecord m = do
+        geneticID <- filterLookup m "Genetic ID (suffices: \".DG\" is a high coverage shotgun genome with diploid genotype calls; \".SG\" is a high coverage shotgun genome with diploid genotype calls; \".AG,  .TW, .BY, .AA, .EC, .WGC\"  are Agilent 1240K or Twist Ancient DNA or \"Big Yoruba\" or \"Archaic Admixture\" or \"Exome\" or \"Whole-Genome Capture\" data respectively; each analyzed position is represented by a randomly chosen sequence allowing for combinations when merged (separable by readgroups if possible).  \".HO\" is Affymetrix Human Origins genotype data and \"REF\" is reference haploid data."
+        fullDate <- filterLookup m "Full Date One of two formats. (Format 1) 95.4% CI calibrated radiocarbon age (Conventional Radiocarbon Age BP, Lab number) e.g. 2624-2350 calBCE (3990+-40 BP, Ua-35016). (Format 2) Archaeological context range, e.g. 2500-1700 BCE"
+        pure $ AnnoRow {
+              _annoGeneticID = geneticID
+            , _annoFullDate  = fullDate
+            , _annoColumnsHashmap = m
+            }
+
+filterLookup :: Csv.FromField a => Csv.NamedRecord -> B8.ByteString -> Csv.Parser a
+filterLookup m name = maybe empty Csv.parseField $ HM.lookup name m
+
+-- #### age parser #### --
+-- full date
+data FullDate = Present | ArchContextAge AgeRange | C14Age AgeRange C14
+    deriving Show
 
 instance Csv.FromField FullDate where
     parseField bs =
@@ -60,7 +83,10 @@ parseArchContextAge = do
     _ <- P.eof
     return (ArchContextAge ageRange)
 
-data AgeRange = AgeRange (Maybe Int) Int deriving Show
+-- age range
+data AgeRange = AgeRange (Maybe Int) Int
+    deriving Show
+
 parseAgeRange = do
     start <- parseStart
     _ <- P.many P.space
@@ -85,7 +111,7 @@ bp2bcece x = ((-1)*x) + 1950
 
 maybe2Bool :: Maybe a -> Bool
 maybe2Bool (Just _) = True
-maybe2Bool Nothing = False
+maybe2Bool Nothing  = False
 
 parseStart :: P.Parser (Bool,Int,Maybe BCECE)
 parseStart = do
@@ -105,13 +131,14 @@ parseStop = do
     return (stop,bcece)
 
 
-
 data BCECE = BCE | CE | BP deriving Show
+
 parseBCECE = P.try parseBCE P.<|> parseCE P.<|> parseBP
 parseBCE = do _ <- P.choice [P.string "BCE", P.try (P.string "calBCE"), P.try (P.string "cal BCE")]; return BCE
-parseCE = do _ <- P.choice [P.string "CE", P.try (P.string "calCE"), P.try (P.string "cal CE")]; return CE
-parseBP = do _ <- P.string "BP"; return BP
+parseCE  = do _ <- P.choice [P.string "CE",  P.try (P.string "calCE"),  P.try (P.string "cal CE")];  return CE
+parseBP  = do _ <- P.string "BP"; return BP
 
+-- c14
 parseC14Age :: P.Parser FullDate
 parseC14Age = do
     ageRange <- parseAgeRange
@@ -122,12 +149,8 @@ parseC14Age = do
     return (C14Age ageRange dates)
 
 data C14 =
-      SingleC14 {
-        _c14MeanSd :: (Int, Int)
-      , _c14FRE :: Maybe (Int, Int)
-      , _c14Labcode :: [T.Text]
-      }
-    | Combine (Maybe C14) [C14]
+      SingleC14 {_c14MeanSd :: (Int, Int), _c14FRE :: Maybe (Int, Int), _c14Labcode :: [T.Text]}
+    | Combine {_c14Union :: Maybe C14, _c14Components :: [C14]}
     | OnlyLabcode T.Text
     deriving Show
 
@@ -140,11 +163,11 @@ parseCombine = do
     _ <- P.many P.space
     _ <- P.char '['
     _ <- parseUntilParen
-    inputc14s <- P.many $ do
+    componentC14s <- P.many $ do
         _ <- parseUntilParen
         P.try parseSingleC14 P.<|> parseOnlyLabcode
     _ <- P.optional (P.char ']')
-    return (Combine union inputc14s)
+    return (Combine union componentC14s)
 
 parseUntilParen = P.manyTill P.anyChar (P.lookAhead (P.oneOf "()[]"))
 
@@ -166,7 +189,7 @@ parseSingleC14 = do
         _ <- P.string ","
         _ <- P.many P.space
         parseFRE
-    labcodes <- P.option [] $ do 
+    labcodes <- P.option [] $ do
        _ <- P.string ","
        _ <- P.many P.space
        P.sepBy parseLabCode (P.string ", ")
@@ -201,29 +224,3 @@ parseWord = read <$> parseNumber
 
 parseNumber :: P.Parser [Char]
 parseNumber = P.many1 P.digit
-
-instance Csv.FromNamedRecord AnnoRow where
-    parseNamedRecord m = do
-        geneticID <- filterLookup m "Genetic ID (suffices: \".DG\" is a high coverage shotgun genome with diploid genotype calls; \".SG\" is a high coverage shotgun genome with diploid genotype calls; \".AG,  .TW, .BY, .AA, .EC, .WGC\"  are Agilent 1240K or Twist Ancient DNA or \"Big Yoruba\" or \"Archaic Admixture\" or \"Exome\" or \"Whole-Genome Capture\" data respectively; each analyzed position is represented by a randomly chosen sequence allowing for combinations when merged (separable by readgroups if possible).  \".HO\" is Affymetrix Human Origins genotype data and \"REF\" is reference haploid data."
-        fullDate <- filterLookup m "Full Date One of two formats. (Format 1) 95.4% CI calibrated radiocarbon age (Conventional Radiocarbon Age BP, Lab number) e.g. 2624-2350 calBCE (3990+-40 BP, Ua-35016). (Format 2) Archaeological context range, e.g. 2500-1700 BCE"
-        additionalColumns <- pure m -- pure (CsvNamedRecord (m `HM.difference` jannoRefHashMap))
-        pure $ AnnoRow {
-              _annoGeneticID = geneticID
-            , _annoFullDate  = fullDate
-            , _annoAdditionalColumns = additionalColumns
-            }
-
-filterLookup :: Csv.FromField a => Csv.NamedRecord -> B8.ByteString -> Csv.Parser a
-filterLookup m name = maybe empty Csv.parseField $ HM.lookup name m
-
-readAnno :: FilePath -> IO (V.Vector AnnoRow)
-readAnno path = do
-    bs <- BL.readFile path
-    case Csv.decodeByNameWith (Csv.DecodeOptions $ fromIntegral (ord '\t')) bs of
-      Left err -> fail err
-      Right (_, v) -> pure v
-      
-main :: IO ()
-main = do
-    anno <- readAnno "tmp/v66.1240K.aadr.PUB.anno"
-    print $ anno V.! 11888
