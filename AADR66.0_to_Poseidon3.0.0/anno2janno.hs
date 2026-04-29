@@ -24,7 +24,9 @@ import qualified Text.Parsec.Text       as P
 main :: IO ()
 main = do
     anno <- readAnno "tmp/v66.1240K.aadr.PUB.anno"
-    print $ anno V.! 11888
+    let testAnno = anno V.! 11888
+        janno = anno2janno testAnno
+    print janno
 
 readAnno :: FilePath -> IO (V.Vector AnnoRow)
 readAnno path = do
@@ -33,7 +35,7 @@ readAnno path = do
       Left err     -> fail err
       Right (_, v) -> pure v
 
--- #### AnnoRow data type #### --
+-- #### Input data type: AnnoRow #### --
 data AnnoRow = AnnoRow {
       _annoGeneticID      :: T.Text
     , _annoFullDate       :: FullDate
@@ -56,10 +58,67 @@ instance Csv.FromNamedRecord AnnoRow where
 filterLookup :: Csv.FromField a => Csv.NamedRecord -> B8.ByteString -> Csv.Parser a
 filterLookup m name = maybe empty Csv.parseField $ HM.lookup name m
 
+-- #### Output data type: JannoRow #### --
+data JannoRow = JannoRow {
+      jPoseidonID        :: T.Text
+    , jDateType          :: Maybe T.Text
+    , jDateC14Labnr      :: Maybe (ListColumn T.Text)
+    , jDateC14UncalBP    :: Maybe (ListColumn Int)
+    , jDateC14UncalBPErr :: Maybe (ListColumn Int)
+    , jDateBCADStart     :: Maybe Int
+    , jDateBCADMedian    :: Maybe Int
+    , jDateBCADStop      :: Maybe Int
+    --, jAADRColumns       :: Csv.NamedRecord
+    }
+    deriving Show
+
+newtype ListColumn a = ListColumn {getListColumn :: [a]}
+    deriving (Eq, Ord, Show)
+
+instance (Csv.ToField a, Show a) => Csv.ToField (ListColumn a) where
+    toField x = B8.intercalate ";" $ map Csv.toField $ getListColumn x
+
+anno2janno :: AnnoRow -> JannoRow
+anno2janno anno =
+    JannoRow {
+        jPoseidonID        = _annoGeneticID anno
+      , jDateType          = jDateType'
+      , jDateC14Labnr      = Nothing
+      , jDateC14UncalBP    = Nothing
+      , jDateC14UncalBPErr = Nothing
+      , jDateBCADStart     = jDateBCADStart'
+      , jDateBCADMedian    = Nothing
+      , jDateBCADStop      = jDateBCADStop'
+      --, jAADRColumns       = Nothing
+      }
+    where
+        jDateType' = case _annoFullDate anno of
+            ArchContextAge ar    -> Just "contextual"
+            C14Age _ (OnlyLabcode {}) -> Just "contextual"
+            C14Age _ (SingleC14 {}) -> Just "C14"
+            --C14Age _ (SingleC14 {}) -> "C14"
+            Present              -> Just "modern"
+        singleC14s = case _annoFullDate anno of
+            C14Age _ c14@(SingleC14 {}) -> [c14]
+            _ -> []
+        jDateC14Labnr = T.concat <> map (_c14Labcode) singleC14s
+        jDateBCADStart' = case _annoFullDate anno of
+            ArchContextAge ar -> _arStart ar
+            C14Age ar _       -> _arStart ar
+            Present           -> Nothing
+        jDateBCADStop' = case _annoFullDate anno of
+            ArchContextAge ar -> Just $ _arStop ar
+            C14Age ar _       -> Just $ _arStop ar
+            Present           -> Nothing
+        
+        
+
 -- #### age parser #### --
 -- full date
 data FullDate = Present | ArchContextAge AgeRange | C14Age AgeRange C14
     deriving Show
+
+
 
 instance Csv.FromField FullDate where
     parseField bs =
@@ -84,7 +143,7 @@ parseArchContextAge = do
     return (ArchContextAge ageRange)
 
 -- age range
-data AgeRange = AgeRange (Maybe Int) Int
+data AgeRange = AgeRange { _arStart :: Maybe Int, _arStop :: Int }
     deriving Show
 
 parseAgeRange = do
@@ -129,7 +188,6 @@ parseStop = do
     _ <- P.many P.space
     bcece <- parseBCECE
     return (stop,bcece)
-
 
 data BCECE = BCE | CE | BP deriving Show
 
@@ -216,6 +274,7 @@ parseMeanSd = do
     _ <- P.optional (P.string "BP")
     return (mean,sd)
 
+-- #### parser helpers #### --
 parsePositiveInt :: P.Parser Int
 parsePositiveInt = fromIntegral <$> parseWord
 
