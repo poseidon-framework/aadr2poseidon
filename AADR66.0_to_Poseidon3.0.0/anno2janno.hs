@@ -123,8 +123,8 @@ parseC14Age = do
 
 data C14 =
       SingleC14 {
-        _c14Mean :: Int
-      , _c14Sd :: Int
+        _c14MeanSd :: (Int, Int)
+      , _c14FRE :: Maybe (Int, Int)
       , _c14Labcode :: [T.Text]
       }
     | Combine (Maybe C14) [C14]
@@ -140,15 +140,9 @@ parseCombine = do
     _ <- P.many P.space
     _ <- P.char '['
     _ <- parseUntilParen
-    _ <- P.many P.space
-    inputc14s <- fmap catMaybes $ P.many $ do
+    inputc14s <- P.many $ do
         _ <- parseUntilParen
-        P.choice
-          [ Just <$> P.try parseSingleC14
-          , Just <$> P.try parseOnlyLabcode
-          , skipParenBlock >> return Nothing
-          ]
-    _ <- P.optional (P.char ')')
+        P.try parseSingleC14 P.<|> parseOnlyLabcode
     _ <- P.optional (P.char ']')
     return (Combine union inputc14s)
 
@@ -167,43 +161,37 @@ parseLabCode = T.pack <$> P.many1 (P.alphaNum P.<|> P.char '-' P.<|> P.char '.')
 parseSingleC14 :: P.Parser C14
 parseSingleC14 = do
     _ <- P.char '('
-    mean <- parsePositiveInt
-    _ <- P.string "±" P.<|> P.try (P.string "?±") P.<|> P.string "?"
-    sd <- parsePositiveInt
-    _ <- P.many P.space
-    _ <- P.optional (P.string "BP")
+    meansd <- parseMeanSd
+    meansdFRE <- P.optionMaybe $ P.try $ do
+        _ <- P.string ","
+        _ <- P.many P.space
+        parseFRE
     labcodes <- P.option [] $ do 
        _ <- P.string ","
        _ <- P.many P.space
-       items <- P.sepBy parseLabItem (P.string ", ")
-       return [ code | Just code <- items ]
+       P.sepBy parseLabCode (P.string ", ")
     _ <- parseUntilParen
     _ <- P.char ')'
-    return (SingleC14 mean sd labcodes)
+    return (SingleC14 meansd meansdFRE labcodes)
 
-parseLabItem :: P.Parser (Maybe T.Text)
-parseLabItem =
-      P.try labWithComment
-  P.<|> (skipSquareBlock >> return Nothing)
-
-labWithComment :: P.Parser (Maybe T.Text)
-labWithComment = do
-    code <- parseLabCode
-    _ <- P.many P.space
-    _ <- P.optional skipParenBlock
-    return (Just code)
-
-skipSquareBlock :: P.Parser ()
-skipSquareBlock = do
+parseFRE :: P.Parser (Int,Int)
+parseFRE = do
     _ <- P.char '['
-    _ <- P.manyTill P.anyChar (P.char ']')
-    return ()
+    _ <- P.optional $ P.string "FRE:"
+    (mean,sd) <- parseMeanSd
+    _ <- P.char ']'
+    return (mean,sd)
 
-skipParenBlock :: P.Parser ()
-skipParenBlock = do
-    _ <- P.char '('
-    _ <- P.manyTill P.anyChar (P.char ')')
-    return ()
+parseMeanSd :: P.Parser (Int,Int)
+parseMeanSd = do
+    mean <- parsePositiveInt
+    _ <- P.many P.space
+    _ <- P.string "±" P.<|> P.try (P.string "?±") P.<|> P.string "?"
+    _ <- P.many P.space
+    sd <- parsePositiveInt
+    _ <- P.many P.space
+    _ <- P.optional (P.string "BP")
+    return (mean,sd)
 
 parsePositiveInt :: P.Parser Int
 parsePositiveInt = fromIntegral <$> parseWord
