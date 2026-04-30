@@ -40,6 +40,8 @@ data AnnoRow = AnnoRow {
       _annoGeneticID      :: T.Text
     , _annoFullDate       :: FullDate
     , _annoMeanDate       :: Int
+    , _annoLongitude      :: Maybe Double
+    , _annoLatitude       :: Maybe Double
     , _annoColumnsHashmap :: Csv.NamedRecord
     } deriving Show
 
@@ -48,15 +50,31 @@ instance Csv.FromNamedRecord AnnoRow where
         geneticID <- filterLookup m "Genetic ID (suffices: \".DG\" is a high coverage shotgun genome with diploid genotype calls; \".SG\" is a high coverage shotgun genome with diploid genotype calls; \".AG,  .TW, .BY, .AA, .EC, .WGC\"  are Agilent 1240K or Twist Ancient DNA or \"Big Yoruba\" or \"Archaic Admixture\" or \"Exome\" or \"Whole-Genome Capture\" data respectively; each analyzed position is represented by a randomly chosen sequence allowing for combinations when merged (separable by readgroups if possible).  \".HO\" is Affymetrix Human Origins genotype data and \"REF\" is reference haploid data."
         fullDate <- filterLookup m "Full Date One of two formats. (Format 1) 95.4% CI calibrated radiocarbon age (Conventional Radiocarbon Age BP, Lab number) e.g. 2624-2350 calBCE (3990+-40 BP, Ua-35016). (Format 2) Archaeological context range, e.g. 2500-1700 BCE"
         meanDate <- filterLookup m "Date mean in BP in years before 1950 CE [OxCal mu for a direct radiocarbon date, and average of range for a contextual date]"
+        longitude <- filterLookupOptional m "Longitude"
+        latitude <- filterLookupOptional m "Latitude"
         pure $ AnnoRow {
               _annoGeneticID = geneticID
             , _annoFullDate  = fullDate
             , _annoMeanDate  = meanDate
+            , _annoLongitude = longitude
+            , _annoLatitude  = latitude
             , _annoColumnsHashmap = m
             }
 
 filterLookup :: Csv.FromField a => Csv.NamedRecord -> B8.ByteString -> Csv.Parser a
-filterLookup m name = maybe empty Csv.parseField $ HM.lookup name m
+filterLookup m name = maybe empty Csv.parseField $ cleanInput $ HM.lookup name m
+
+filterLookupOptional :: Csv.FromField a => Csv.NamedRecord -> B8.ByteString -> Csv.Parser (Maybe a)
+filterLookupOptional m name = maybe (pure Nothing) (\bs -> Just <$> Csv.parseField bs) $ cleanInput $ HM.lookup name m
+
+cleanInput :: Maybe B8.ByteString -> Maybe B8.ByteString
+cleanInput Nothing           = Nothing
+cleanInput (Just rawInputBS) = transNA rawInputBS
+    where
+        transNA ".."  = Nothing
+        transNA ""    = Nothing
+        transNA "n/a" = Nothing
+        transNA x     = Just x
 
 -- #### Output data type: JannoRow #### --
 data JannoRow = JannoRow {
@@ -68,6 +86,8 @@ data JannoRow = JannoRow {
     , jDateBCADStart     :: Maybe Int
     , jDateBCADMedian    :: Int
     , jDateBCADStop      :: Int
+    , jLongitude         :: Maybe Double
+    , jLatitude          :: Maybe Double
     --, jAADRColumns       :: Csv.NamedRecord
     }
     deriving Show
@@ -89,6 +109,8 @@ anno2janno anno =
       , jDateBCADStart     = fst $ getAgeRange $ _annoFullDate anno
       , jDateBCADMedian    = bp2bcece $ _annoMeanDate anno
       , jDateBCADStop      = snd $ getAgeRange $ _annoFullDate anno
+      , jLongitude         = _annoLongitude anno
+      , jLatitude          = _annoLatitude anno
       --, jAADRColumns       = Nothing
       }
 
