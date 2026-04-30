@@ -61,13 +61,13 @@ filterLookup m name = maybe empty Csv.parseField $ HM.lookup name m
 -- #### Output data type: JannoRow #### --
 data JannoRow = JannoRow {
       jPoseidonID        :: T.Text
-    , jDateType          :: Maybe T.Text
-    , jDateC14Labnr      :: Maybe (ListColumn T.Text)
-    , jDateC14UncalBP    :: Maybe (ListColumn Int)
-    , jDateC14UncalBPErr :: Maybe (ListColumn Int)
+    , jDateType          :: T.Text
+    , jDateC14Labnr      :: [T.Text]
+    , jDateC14UncalBP    :: [Int]
+    , jDateC14UncalBPErr :: [Int]
     , jDateBCADStart     :: Maybe Int
     , jDateBCADMedian    :: Maybe Int
-    , jDateBCADStop      :: Maybe Int
+    , jDateBCADStop      :: Int
     --, jAADRColumns       :: Csv.NamedRecord
     }
     deriving Show
@@ -82,37 +82,35 @@ anno2janno :: AnnoRow -> JannoRow
 anno2janno anno =
     JannoRow {
         jPoseidonID        = _annoGeneticID anno
-      , jDateType          = Nothing --jDateType'
-      , jDateC14Labnr      = Nothing
-      , jDateC14UncalBP    = Nothing
-      , jDateC14UncalBPErr = Nothing
-      , jDateBCADStart     = jDateBCADStart'
+      , jDateType          = getDateType $ _annoFullDate anno
+      , jDateC14Labnr      = map getLabCode $ getC14 $ _annoFullDate anno
+      , jDateC14UncalBP    = map (fst . getMeanSD) $ getC14 $ _annoFullDate anno
+      , jDateC14UncalBPErr = map (snd . getMeanSD) $ getC14 $ _annoFullDate anno
+      , jDateBCADStart     = fst $ getAgeRange $ _annoFullDate anno
       , jDateBCADMedian    = Nothing
-      , jDateBCADStop      = jDateBCADStop'
+      , jDateBCADStop      = snd $ getAgeRange $ _annoFullDate anno
       --, jAADRColumns       = Nothing
       }
-    where
-        --jDateType' = case _annoFullDate anno of
-        --    ArchContextAge ar    -> Just "contextual"
-        --    C14Age _ (OnlyLabcode {}) -> Just "contextual"
-        --    C14Age _ (SingleC14 {}) -> Just "C14"
-            --C14Age _ (SingleC14 {}) -> "C14"
-        --    Present              -> Just "modern"
-        --singleC14s = case _annoFullDate anno of
-        --    C14Age _ c14@(SingleC14 {}) -> [c14]
-        --    C14Age _ (Combine _ components) -> [c14]
-        --    _ -> []
-        -- jDateC14Labnr = T.concat <> map (_c14Labcode) singleC14s
-        jDateBCADStart' = case _annoFullDate anno of
-            ArchContextAge ar -> _arStart ar
-            C14Age ar _       -> _arStart ar
-            Present           -> Nothing
-        jDateBCADStop' = case _annoFullDate anno of
-            ArchContextAge ar -> Just $ _arStop ar
-            C14Age ar _       -> Just $ _arStop ar
-            Present           -> Nothing
-        
-        
+
+-- extract age info
+getDateType :: FullDate -> T.Text
+getDateType Present = "modern"
+getDateType x | null (getC14 x) = "contextual"
+              | otherwise = "C14"
+getC14 :: FullDate -> [C14]
+getC14 (ArchContextAge _) = []
+getC14 (C14Age _ (One (ProperC14 x))) = [x]
+getC14 (C14Age _ (Combine (CombineC14 _ xs))) = mapMaybe unwrapProper xs
+getC14 Present = []
+getLabCode :: C14 -> T.Text
+getLabCode (C14 _ _ labcodes) = T.intercalate "/" labcodes
+getMeanSD :: C14 -> (Int,Int)
+getMeanSD (C14 _ (Just fremeansd) _) = fremeansd
+getMeanSD (C14 meansd _ _) = meansd
+getAgeRange :: FullDate -> (Maybe Int, Int)
+getAgeRange (ArchContextAge (AgeRange start stop)) = (start, stop)
+getAgeRange (C14Age (AgeRange start stop) _) = (start, stop)
+getAgeRange Present = (Just 2000, 2000)
 
 -- #### age parser #### --
 -- full date
@@ -213,7 +211,8 @@ data C14Info =
 parseC14Info :: P.Parser C14Info
 parseC14Info = P.try (Combine <$> parseCombineC14) P.<|> (One <$> parseOneC14)
 
-data CombineC14 = CombineC14 {
+data CombineC14 = 
+    CombineC14 {
     _c14Union :: Maybe C14,
     _c14Components :: [OneC14]
     } deriving Show
@@ -233,6 +232,10 @@ parseCombineC14 = do
 parseUntilParen = P.manyTill P.anyChar (P.lookAhead (P.oneOf "()[]"))
 
 data OneC14 = ProperC14 C14 | OnlyLabcode T.Text deriving Show
+
+unwrapProper :: OneC14 -> Maybe C14
+unwrapProper (ProperC14 x) = Just x
+unwrapProper _ = Nothing
 
 parseOneC14 :: P.Parser OneC14
 parseOneC14 = P.try (ProperC14 <$> parseC14) P.<|> parseOnlyLabcode
