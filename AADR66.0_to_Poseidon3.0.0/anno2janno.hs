@@ -82,7 +82,7 @@ anno2janno :: AnnoRow -> JannoRow
 anno2janno anno =
     JannoRow {
         jPoseidonID        = _annoGeneticID anno
-      , jDateType          = jDateType'
+      , jDateType          = Nothing --jDateType'
       , jDateC14Labnr      = Nothing
       , jDateC14UncalBP    = Nothing
       , jDateC14UncalBPErr = Nothing
@@ -92,16 +92,17 @@ anno2janno anno =
       --, jAADRColumns       = Nothing
       }
     where
-        jDateType' = case _annoFullDate anno of
-            ArchContextAge ar    -> Just "contextual"
-            C14Age _ (OnlyLabcode {}) -> Just "contextual"
-            C14Age _ (SingleC14 {}) -> Just "C14"
+        --jDateType' = case _annoFullDate anno of
+        --    ArchContextAge ar    -> Just "contextual"
+        --    C14Age _ (OnlyLabcode {}) -> Just "contextual"
+        --    C14Age _ (SingleC14 {}) -> Just "C14"
             --C14Age _ (SingleC14 {}) -> "C14"
-            Present              -> Just "modern"
-        singleC14s = case _annoFullDate anno of
-            C14Age _ c14@(SingleC14 {}) -> [c14]
-            _ -> []
-        jDateC14Labnr = T.concat <> map (_c14Labcode) singleC14s
+        --    Present              -> Just "modern"
+        --singleC14s = case _annoFullDate anno of
+        --    C14Age _ c14@(SingleC14 {}) -> [c14]
+        --    C14Age _ (Combine _ components) -> [c14]
+        --    _ -> []
+        -- jDateC14Labnr = T.concat <> map (_c14Labcode) singleC14s
         jDateBCADStart' = case _annoFullDate anno of
             ArchContextAge ar -> _arStart ar
             C14Age ar _       -> _arStart ar
@@ -115,10 +116,8 @@ anno2janno anno =
 
 -- #### age parser #### --
 -- full date
-data FullDate = Present | ArchContextAge AgeRange | C14Age AgeRange C14
+data FullDate = Present | ArchContextAge AgeRange | C14Age AgeRange C14Info
     deriving Show
-
-
 
 instance Csv.FromField FullDate where
     parseField bs =
@@ -201,35 +200,44 @@ parseC14Age :: P.Parser FullDate
 parseC14Age = do
     ageRange <- parseAgeRange
     _ <- P.many P.space
-    dates <- parseC14
+    c14 <- parseC14Info
     _ <- P.many P.space
     _ <- P.eof
-    return (C14Age ageRange dates)
+    return (C14Age ageRange c14)
 
-data C14 =
-      SingleC14 {_c14MeanSd :: (Int, Int), _c14FRE :: Maybe (Int, Int), _c14Labcode :: [T.Text]}
-    | Combine {_c14Union :: Maybe C14, _c14Components :: [C14]}
-    | OnlyLabcode T.Text
+data C14Info =
+      One OneC14
+    | Combine CombineC14
     deriving Show
 
-parseC14 :: P.Parser C14
-parseC14 = P.try parseCombine P.<|> P.try parseSingleC14 P.<|> parseOnlyLabcode
+parseC14Info :: P.Parser C14Info
+parseC14Info = P.try (Combine <$> parseCombineC14) P.<|> (One <$> parseOneC14)
 
-parseCombine :: P.Parser C14
-parseCombine = do
-    union <- P.optionMaybe parseSingleC14
+data CombineC14 = CombineC14 {
+    _c14Union :: Maybe C14,
+    _c14Components :: [OneC14]
+    } deriving Show
+
+parseCombineC14 :: P.Parser CombineC14
+parseCombineC14 = do
+    union <- P.optionMaybe parseC14
     _ <- P.many P.space
     _ <- P.char '['
     _ <- parseUntilParen
     componentC14s <- P.many $ do
         _ <- parseUntilParen
-        P.try parseSingleC14 P.<|> parseOnlyLabcode
+        parseOneC14
     _ <- P.optional (P.char ']')
-    return (Combine union componentC14s)
+    return (CombineC14 union componentC14s)
 
 parseUntilParen = P.manyTill P.anyChar (P.lookAhead (P.oneOf "()[]"))
 
-parseOnlyLabcode :: P.Parser C14
+data OneC14 = ProperC14 C14 | OnlyLabcode T.Text deriving Show
+
+parseOneC14 :: P.Parser OneC14
+parseOneC14 = P.try (ProperC14 <$> parseC14) P.<|> parseOnlyLabcode
+
+parseOnlyLabcode :: P.Parser OneC14
 parseOnlyLabcode = do
     _ <- P.char '('
     labcode <- parseLabCode
@@ -239,8 +247,14 @@ parseOnlyLabcode = do
 parseLabCode :: P.Parser T.Text
 parseLabCode = T.pack <$> P.many1 (P.alphaNum P.<|> P.char '-' P.<|> P.char '.')
 
-parseSingleC14 :: P.Parser C14
-parseSingleC14 = do
+data C14 = C14 {
+      _c14MeanSd :: (Int, Int)
+    , _c14FRE :: Maybe (Int, Int)
+    , _c14Labcode :: [T.Text]
+    } deriving Show
+
+parseC14 :: P.Parser C14
+parseC14 = do
     _ <- P.char '('
     meansd <- parseMeanSd
     meansdFRE <- P.optionMaybe $ P.try $ do
@@ -253,7 +267,7 @@ parseSingleC14 = do
        P.sepBy parseLabCode (P.string ", ")
     _ <- parseUntilParen
     _ <- P.char ')'
-    return (SingleC14 meansd meansdFRE labcodes)
+    return (C14 meansd meansdFRE labcodes)
 
 parseFRE :: P.Parser (Int,Int)
 parseFRE = do
