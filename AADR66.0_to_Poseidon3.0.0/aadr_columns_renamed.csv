@@ -1,5 +1,5 @@
 Simplified .anno column name,AADR .anno file column name
-Genetic_ID ,"Genetic ID (suffices: "".DG"" is a high coverage shotgun genome with diploid genotype calls; "".SG"" is a high coverage shotgun genome with diploid genotype calls; "".AG,  .TW, .BY, .AA, .EC, .WGC""  are Agilent 1240K or Twist Ancient DNA or ""Big Yoruba"" or ""Archaic Admixture"" or ""Exome"" or ""Whole-Genome Capture"" data respectively; each analyzed position is represented by a randomly chosen sequence allowing for combinations when merged (separable by readgroups if possible).  "".HO"" is Affymetrix Human Origins genotype data and ""REF"" is reference haploid data."
+Genetic_ID,"Genetic ID (suffices: "".DG"" is a high coverage shotgun genome with diploid genotype calls; "".SG"" is a high coverage shotgun genome with diploid genotype calls; "".AG,  .TW, .BY, .AA, .EC, .WGC""  are Agilent 1240K or Twist Ancient DNA or ""Big Yoruba"" or ""Archaic Admixture"" or ""Exome"" or ""Whole-Genome Capture"" data respectively; each analyzed position is represented by a randomly chosen sequence allowing for combinations when merged (separable by readgroups if possible).  "".HO"" is Affymetrix Human Origins genotype data and ""REF"" is reference haploid data."
 Persistent_Genetic_ID,Persistent Genetic ID
 Individual_ID,Individual ID
 Skeletal_Code,Skeletal code

@@ -23,17 +23,67 @@ import qualified Text.Parsec.Text       as P
 
 main :: IO ()
 main = do
-    anno <- readAnno "tmp/v66.1240K.aadr.PUB.anno"
+    nameMap <- readColumnNameMap "aadr_columns_renamed.csv"
+    anno <- readAnno nameMap "tmp/v66.1240K.aadr.PUB.anno"
     let testAnno = anno V.! 89
         janno = anno2janno testAnno
     print janno
 
-readAnno :: FilePath -> IO (V.Vector AnnoRow)
-readAnno path = do
+readAnno :: ColumnNameMap -> FilePath -> IO (V.Vector AnnoRow)
+readAnno nameMap path = do
     bs <- BL.readFile path
     case Csv.decodeByNameWith (Csv.DecodeOptions $ fromIntegral (ord '\t')) bs of
       Left err     -> fail err
-      Right (_, v) -> pure v
+      Right (header, records) -> do
+          reportHeaderRenamings nameMap header
+          V.mapM (parseRenamed nameMap) records
+
+parseRenamed :: ColumnNameMap -> Csv.NamedRecord -> IO AnnoRow
+parseRenamed nameMap record = do
+  let renamed = renameColumns nameMap record
+  case Csv.runParser (Csv.parseNamedRecord renamed) of
+    Left err -> fail err
+    Right r  -> pure r
+
+reportHeaderRenamings :: ColumnNameMap -> Csv.Header -> IO ()
+reportHeaderRenamings nameMap header = do
+    putStrLn "Header rename mapping:"
+    mapM_ reportOne (V.toList header)
+  where
+    reportOne k = case HM.lookup k nameMap of
+        Nothing -> B8.putStrLn $ color red $ "> [UNCHANGED] " <> k
+        Just k' -> B8.putStrLn $ color green $ "> " <> k <> " -> " <> k'
+
+color :: B8.ByteString -> B8.ByteString -> B8.ByteString
+color c s = c <> s <> reset
+green, red, reset :: B8.ByteString
+green = "\ESC[32m"
+red   = "\ESC[31m"
+reset = "\ESC[0m"
+
+-- #### Column name change #### --
+data ColumnNameMapRow = ColumnNameMapRow
+  { simplifiedName :: B8.ByteString
+  , originalName   :: B8.ByteString
+  } deriving Show
+
+instance Csv.FromNamedRecord ColumnNameMapRow where
+  parseNamedRecord m =
+    ColumnNameMapRow
+      <$> m Csv..: "Simplified .anno column name"
+      <*> m Csv..: "AADR .anno file column name"
+
+type ColumnNameMap = HM.HashMap B8.ByteString B8.ByteString
+
+readColumnNameMap :: FilePath -> IO ColumnNameMap
+readColumnNameMap path = do
+  bs <- BL.readFile path
+  case Csv.decodeByNameWith (Csv.DecodeOptions $ fromIntegral (ord ',')) bs of
+    Left err -> fail err
+    Right (_, v) -> pure $ HM.fromList [(originalName r, simplifiedName r) | r <- V.toList v]
+
+renameColumns :: ColumnNameMap -> Csv.NamedRecord -> Csv.NamedRecord
+renameColumns nameMap = HM.fromList . map (\(k,v) -> (HM.lookupDefault k k nameMap, v)) . HM.toList
 
 -- #### Input data type: AnnoRow #### --
 data AnnoRow = AnnoRow {
@@ -47,11 +97,11 @@ data AnnoRow = AnnoRow {
 
 instance Csv.FromNamedRecord AnnoRow where
     parseNamedRecord m = do
-        geneticID <- filterLookup m "Genetic ID (suffices: \".DG\" is a high coverage shotgun genome with diploid genotype calls; \".SG\" is a high coverage shotgun genome with diploid genotype calls; \".AG,  .TW, .BY, .AA, .EC, .WGC\"  are Agilent 1240K or Twist Ancient DNA or \"Big Yoruba\" or \"Archaic Admixture\" or \"Exome\" or \"Whole-Genome Capture\" data respectively; each analyzed position is represented by a randomly chosen sequence allowing for combinations when merged (separable by readgroups if possible).  \".HO\" is Affymetrix Human Origins genotype data and \"REF\" is reference haploid data."
-        fullDate <- filterLookup m "Full Date One of two formats. (Format 1) 95.4% CI calibrated radiocarbon age (Conventional Radiocarbon Age BP, Lab number) e.g. 2624-2350 calBCE (3990+-40 BP, Ua-35016). (Format 2) Archaeological context range, e.g. 2500-1700 BCE"
-        meanDate <- filterLookup m "Date mean in BP in years before 1950 CE [OxCal mu for a direct radiocarbon date, and average of range for a contextual date]"
-        longitude <- filterLookupOptional m "Longitude"
-        latitude <- filterLookupOptional m "Latitude"
+        geneticID <- filterLookup m "Genetic_ID"
+        fullDate  <- filterLookup m "Date_Full_Info"
+        meanDate  <- filterLookup m "Date_Mean_BP"
+        longitude <- filterLookupOptional m "Long"
+        latitude  <- filterLookupOptional m "Lat"
         pure $ AnnoRow {
               _annoGeneticID = geneticID
             , _annoFullDate  = fullDate
