@@ -1,50 +1,50 @@
 Simplified .anno column name,AADR .anno file column name
-Genetic_ID,"Genetic ID (suffices: "".DG"" is a high coverage shotgun genome with diploid genotype calls; "".SG"" is a high coverage shotgun genome with diploid genotype calls; "".AG,  .TW, .BY, .AA, .EC, .WGC""  are Agilent 1240K or Twist Ancient DNA or ""Big Yoruba"" or ""Archaic Admixture"" or ""Exome"" or ""Whole-Genome Capture"" data respectively; each analyzed position is represented by a randomly chosen sequence allowing for combinations when merged (separable by readgroups if possible).  "".HO"" is Affymetrix Human Origins genotype data and ""REF"" is reference haploid data."
-Persistent_Genetic_ID,Persistent Genetic ID
-Individual_ID,Individual ID
-Skeletal_Code,Skeletal code
-Skeletal_Element ,Skeletal element
-First_Publication,"First publication: Abbreviation for earliest paper that reported data from this individual (this is not always the same as the data being analyzed, which may be from a different or improved dataset)"
-Publication,Publication abbreviation
-Publication_DOI,doi for publication of this representation of the data
-Data_PID,Link to the most permanent repository hosting these data
-Date_Method,"Method for Determining Date; unless otherwise specified, calibrations use 95.4% intervals from OxCal v4.4.2 Bronk Ramsey (2009); r5; Atmospheric data from Reimer et al (2020)"
-Date_Mean_BP,"Date mean in BP in years before 1950 CE [OxCal mu for a direct radiocarbon date, and average of range for a contextual date]"
-Date_SD,"Date standard deviation in BP [OxCal sigma for a direct radiocarbon date, and standard deviation of the uniform distribution between the two bounds for a contextual date]"
-Date_Full_Info,"Full Date One of two formats. (Format 1) 95.4% CI calibrated radiocarbon age (Conventional Radiocarbon Age BP, Lab number) e.g. 2624-2350 calBCE (3990+-40 BP, Ua-35016). (Format 2) Archaeological context range, e.g. 2500-1700 BCE"
-Age_Death,"Age at death, Morphological sex from physical anthropology"
-Group_ID,Group ID
-Locality,Locality
-Political_Entity,Political Entity
-Lat,Latitude
-Long,Longitude
-Pulldown_Strategy,Pulldown Strategy
-Call_Suffix,Suffices (indicating data types used for sources which can be a subset of that in bam)
-Data_Source,Data type
-No_Libraries,No. Libraries
-Coverage_Autosomal_Targets,Mean coverage on 1.15M autosomal targets for full bam (if no off-target entry not up-to-date)
-Coverage_Autosomal_Non_Targets,"Mean coverage on non-targeted autosomal SNPs for full bam - not yet computed if """".."""" and bam restricted to on-target SNPs if """"0"""""
-SNPs_Autosomal_Targets_2M,SNPs hit on autosomal targets (Computed using easystats on enhance 2M capture subset) 
-SNPs_Autosomal_Targets_1240k,SNPs hit on autosomal targets (Computed using easystats on 1240k snpset)
-SNPs_Autosomal_Targets_HO,SNPs hit on autosomal targets (Computed using easystats on HO snpset)
-SNPs_Autosomal_Targets_Compatibility,SNPs hit on autosomal targets (Computed using easystats on Compatibility snpset)
-SNPs_Autosomal_Targets_Compatibility_HO,SNPs hit on autosomal targets (Computed using easystats on Compatibility_HO snpset)
-Molecular_Sex,Molecular Sex
-Family_Relations,Family relations
-ROH_min4cM,Sum total of ROH segments >4 cM
-ROH_min20cM,Sum total of ROH segments >20cM
-Y_Haplogroup_Terminal_Mutation,Y haplogroup in terminal mutation notation automatically called based on Y-full 12.03 with the software described in Lazaridis et al. Science 2022
-Y_Haplogroup_ISOGG,Y haplogroup  in ISOGG notation automatically called based on Yfull 12.03 with the software described in Lazaridis et al. Science 2022
-Y_Haplogroup_Manual,Y haplogroup manually called if different from automatic
-Coverage_mtDNA,mtDNA coverage (merged data)
-mtDNA_Haplogroup,mtDNA haplogroup if >2x or published
-mtDNA_Match_Consensus,"mtDNA match to consensus if >10x (merged data) [estimates are typically off by (uncorrected + power(10,-0.271*LOG(mt-coverage)-1.120)]"
-Damage,Damage rate in first nucleotide on sequences overlapping 1240k targets (merged data)
-Sex_Ratio,Sex ratio [Y/(Y+X) counts] (merged data)
-ANGSD_MoM95CI,ANGSD MOM 95% CI truncated at 0 (only if male and >=200 SNPs) [estimates are typically 0.005 too high]
-hapCon_95CI,hapConX 95% CI truncated at 0 (only if male and >=2000 SNPs covered on X chromosome) [estimates are typically 0.005 too high]
-Library_Type,"Library type (minus=no.damage.correction, half=damage.retained.at.last.position, plus=damage.fully.corrected, ds=double.stranded.library.preparation, ss=single.stranded.library.preparation)"
-Libraries,Libraries
-Endogenous,endogenous by library (computed on shotgun data)
-Assessment,ASSESSMENT
-Assessment_Warnings,"ASSESSMENT WARNINGS: X contamination interval is listed if lower bound is >=0.005 for either ANGSD or hapConX, ""QUESTIONABLE"" if lower bound is 0.015-0.035 for hapConX (or ANGSD if no hapConX computation), ""CRITICAL"" or ""FAIL"" if lower bound is >0.03  for hapConX (or ANGSD if no hapConX computation) |mtcontam confidence interval is listed if coverage >10 and upper bound is <0.98, ""QUESTIONABLE"" if upper bound is 0.9-0.95; ""CRITICAL"" if upper bound is <0.9, QUESTIONABLE status gets overriden by ANGSD or hapConX if upper bound of contamination estimate is <0.01 | damage for ds.half is ""CRITICAL/FAIL"" if <0.01, and recorded but passed if 0.01-0.03; libraries with untreated last base are ""CRITICAL"" or ""FAIL"" if <0.01, ""QUESTIONABLE"" if 0.01-0.03, and recorded but passed if 0.03-0.1 | sex.ratio is QUESTIONABLE if [0.03,0.1) or (0.30,0.32]; CRITICAL/FAIL if [0.1,0.3] | f4(All,Damage;CEU,CHB) for non-damage-restricted samples is ""CRITICAL/FAIL"" if |Z|>=3.5, QUESTIONABLE if 3.5>Z>=3.0, listed if Z>=2.0"
+AADR_Genetic_ID,"Genetic ID (suffices: "".DG"" is a high coverage shotgun genome with diploid genotype calls; "".SG"" is a high coverage shotgun genome with diploid genotype calls; "".AG,  .TW, .BY, .AA, .EC, .WGC""  are Agilent 1240K or Twist Ancient DNA or ""Big Yoruba"" or ""Archaic Admixture"" or ""Exome"" or ""Whole-Genome Capture"" data respectively; each analyzed position is represented by a randomly chosen sequence allowing for combinations when merged (separable by readgroups if possible).  "".HO"" is Affymetrix Human Origins genotype data and ""REF"" is reference haploid data."
+AADR_Persistent_Genetic_ID,Persistent Genetic ID
+AADR_Individual_ID,Individual ID
+AADR_Skeletal_Code,Skeletal code
+AADR_Skeletal_Element,Skeletal element
+AADR_First_Publication,"First publication: Abbreviation for earliest paper that reported data from this individual (this is not always the same as the data being analyzed, which may be from a different or improved dataset)"
+AADR_Publication,Publication abbreviation
+AADR_Publication_DOI,doi for publication of this representation of the data
+AADR_Data_PID,Link to the most permanent repository hosting these data
+AADR_Date_Method,"Method for Determining Date; unless otherwise specified, calibrations use 95.4% intervals from OxCal v4.4.2 Bronk Ramsey (2009); r5; Atmospheric data from Reimer et al (2020)"
+AADR_Date_Mean_BP,"Date mean in BP in years before 1950 CE [OxCal mu for a direct radiocarbon date, and average of range for a contextual date]"
+AADR_Date_SD,"Date standard deviation in BP [OxCal sigma for a direct radiocarbon date, and standard deviation of the uniform distribution between the two bounds for a contextual date]"
+AADR_Date_Full_Info,"Full Date One of two formats. (Format 1) 95.4% CI calibrated radiocarbon age (Conventional Radiocarbon Age BP, Lab number) e.g. 2624-2350 calBCE (3990+-40 BP, Ua-35016). (Format 2) Archaeological context range, e.g. 2500-1700 BCE"
+AADR_Age_Death,"Age at death, Morphological sex from physical anthropology"
+AADR_Group_ID,Group ID
+AADR_Locality,Locality
+AADR_Political_Entity,Political Entity
+AADR_Lat,Latitude
+AADR_Long,Longitude
+AADR_Pulldown_Strategy,Pulldown Strategy
+AADR_Call_Suffix,Suffices (indicating data types used for sources which can be a subset of that in bam)
+AADR_Data_Source,Data type
+AADR_No_Libraries,No. Libraries
+AADR_Coverage_Autosomal_Targets,Mean coverage on 1.15M autosomal targets for full bam (if no off-target entry not up-to-date)
+AADR_Coverage_Autosomal_Non_Targets,"Mean coverage on non-targeted autosomal SNPs for full bam - not yet computed if """".."""" and bam restricted to on-target SNPs if """"0"""""
+AADR_SNPs_Autosomal_Targets_2M,SNPs hit on autosomal targets (Computed using easystats on enhance 2M capture subset) 
+AADR_SNPs_Autosomal_Targets_1240k,SNPs hit on autosomal targets (Computed using easystats on 1240k snpset)
+AADR_SNPs_Autosomal_Targets_HO,SNPs hit on autosomal targets (Computed using easystats on HO snpset)
+AADR_SNPs_Autosomal_Targets_Compatibility,SNPs hit on autosomal targets (Computed using easystats on Compatibility snpset)
+AADR_SNPs_Autosomal_Targets_Compatibility_HO,SNPs hit on autosomal targets (Computed using easystats on Compatibility_HO snpset)
+AADR_Molecular_Sex,Molecular Sex
+AADR_Family_Relations,Family relations
+AADR_ROH_min4cM,Sum total of ROH segments >4 cM
+AADR_ROH_min20cM,Sum total of ROH segments >20cM
+AADR_Y_Haplogroup_Terminal_Mutation,Y haplogroup in terminal mutation notation automatically called based on Y-full 12.03 with the software described in Lazaridis et al. Science 2022
+AADR_Y_Haplogroup_ISOGG,Y haplogroup  in ISOGG notation automatically called based on Yfull 12.03 with the software described in Lazaridis et al. Science 2022
+AADR_Y_Haplogroup_Manual,Y haplogroup manually called if different from automatic
+AADR_Coverage_mtDNA,mtDNA coverage (merged data)
+AADR_mtDNA_Haplogroup,mtDNA haplogroup if >2x or published
+AADR_mtDNA_Match_Consensus,"mtDNA match to consensus if >10x (merged data) [estimates are typically off by (uncorrected + power(10,-0.271*LOG(mt-coverage)-1.120)]"
+AADR_Damage,Damage rate in first nucleotide on sequences overlapping 1240k targets (merged data)
+AADR_Sex_Ratio,Sex ratio [Y/(Y+X) counts] (merged data)
+AADR_ANGSD_MoM95CI,ANGSD MOM 95% CI truncated at 0 (only if male and >=200 SNPs) [estimates are typically 0.005 too high]
+AADR_hapCon_95CI,hapConX 95% CI truncated at 0 (only if male and >=2000 SNPs covered on X chromosome) [estimates are typically 0.005 too high]
+AADR_Library_Type,"Library type (minus=no.damage.correction, half=damage.retained.at.last.position, plus=damage.fully.corrected, ds=double.stranded.library.preparation, ss=single.stranded.library.preparation)"
+AADR_Libraries,Libraries
+AADR_Endogenous,endogenous by library (computed on shotgun data)
+AADR_Assessment,ASSESSMENT
+AADR_Assessment_Warnings,"ASSESSMENT WARNINGS: X contamination interval is listed if lower bound is >=0.005 for either ANGSD or hapConX, ""QUESTIONABLE"" if lower bound is 0.015-0.035 for hapConX (or ANGSD if no hapConX computation), ""CRITICAL"" or ""FAIL"" if lower bound is >0.03  for hapConX (or ANGSD if no hapConX computation) |mtcontam confidence interval is listed if coverage >10 and upper bound is <0.98, ""QUESTIONABLE"" if upper bound is 0.9-0.95; ""CRITICAL"" if upper bound is <0.9, QUESTIONABLE status gets overriden by ANGSD or hapConX if upper bound of contamination estimate is <0.01 | damage for ds.half is ""CRITICAL/FAIL"" if <0.01, and recorded but passed if 0.01-0.03; libraries with untreated last base are ""CRITICAL"" or ""FAIL"" if <0.01, ""QUESTIONABLE"" if 0.01-0.03, and recorded but passed if 0.03-0.1 | sex.ratio is QUESTIONABLE if [0.03,0.1) or (0.30,0.32]; CRITICAL/FAIL if [0.1,0.3] | f4(All,Damage;CEU,CHB) for non-damage-restricted samples is ""CRITICAL/FAIL"" if |Z|>=3.5, QUESTIONABLE if 3.5>Z>=3.0, listed if Z>=2.0"

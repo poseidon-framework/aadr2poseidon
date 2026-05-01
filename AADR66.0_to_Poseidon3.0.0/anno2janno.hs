@@ -24,11 +24,11 @@ import qualified Text.Parsec.Text       as P
 main :: IO ()
 main = do
     nameMap <- readColumnNameMap "aadr_columns_renamed.csv"
-    anno <- readAnno nameMap "tmp/v66.1240K.aadr.PUB.anno"
+    (forwardHeader, anno) <- readAnno nameMap "tmp/v66.1240K.aadr.PUB.anno"
     let janno = V.map anno2janno anno
-    writeJanno "tmp/output.janno" janno
+    writeJanno "tmp/output.janno" forwardHeader janno
 
-readAnno :: ColumnNameMap -> FilePath -> IO (V.Vector AnnoRow)
+readAnno :: ColumnNameMap -> FilePath -> IO (Csv.Header, V.Vector AnnoRow)
 readAnno nameMap path = do
     bs <- BL.readFile path
     case Csv.decodeByNameWith (Csv.DecodeOptions $ fromIntegral (ord '\t')) bs of
@@ -36,7 +36,9 @@ readAnno nameMap path = do
       Right (header, records) -> do
           -- reportHeaderRenamings nameMap header
           -- inefficient to do the renaming on the per-row level, but it's convenient
-          V.mapM (parseRenamed nameMap) records
+          let renamedHeader = V.map (\k -> HM.lookupDefault k k nameMap) header
+          rows <- V.mapM (parseRenamed nameMap) records
+          pure (renamedHeader, rows)
 
 parseRenamed :: ColumnNameMap -> Csv.NamedRecord -> IO AnnoRow
 parseRenamed nameMap record = do
@@ -54,10 +56,11 @@ reportHeaderRenamings nameMap header = do
         Nothing -> B8.putStrLn $ color red $ "> [UNCHANGED] " <> k
         Just k' -> B8.putStrLn $ color green $ "> " <> k <> " -> " <> k'
 
-writeJanno :: FilePath -> V.Vector JannoRow -> IO ()
-writeJanno path rows = do
+writeJanno :: FilePath -> Csv.Header -> V.Vector JannoRow -> IO ()
+writeJanno path forwardHeader rows = do
     let opts = Csv.defaultEncodeOptions { Csv.encDelimiter = fromIntegral (ord '\t') }
-        bs = Csv.encodeByNameWith opts (Csv.headerOrder (undefined :: JannoRow)) (V.toList rows)
+        fullHeader = Csv.header (jannoHeader ++ V.toList forwardHeader)
+        bs = Csv.encodeByNameWith opts fullHeader (V.toList rows)
     BL.writeFile path bs
 
 -- #### Column name change #### --
@@ -96,11 +99,11 @@ data AnnoRow = AnnoRow {
 
 instance Csv.FromNamedRecord AnnoRow where
     parseNamedRecord m = do
-        geneticID <- filterLookup m "Genetic_ID"
-        fullDate  <- filterLookup m "Date_Full_Info"
-        meanDate  <- filterLookup m "Date_Mean_BP"
-        longitude <- filterLookupOptional m "Long"
-        latitude  <- filterLookupOptional m "Lat"
+        geneticID <- filterLookup m "AADR_Genetic_ID"
+        fullDate  <- filterLookup m "AADR_Date_Full_Info"
+        meanDate  <- filterLookup m "AADR_Date_Mean_BP"
+        longitude <- filterLookupOptional m "AADR_Long"
+        latitude  <- filterLookupOptional m "AADR_Lat"
         pure $ AnnoRow {
               _annoGeneticID = geneticID
             , _annoFullDate  = fullDate
@@ -137,7 +140,7 @@ data JannoRow = JannoRow {
     , jDateBCADStop      :: Int
     , jLongitude         :: Maybe Double
     , jLatitude          :: Maybe Double
-    --, jAADRColumns       :: Csv.NamedRecord
+    , jAADRColumns       :: Csv.NamedRecord
     }
     deriving Show
 
@@ -159,7 +162,7 @@ anno2janno anno =
       , jDateBCADStop      = snd $ getAgeRange $ _annoFullDate anno
       , jLongitude         = _annoLongitude anno
       , jLatitude          = _annoLatitude anno
-      -- , jAADRColumns       = Nothing
+      , jAADRColumns       = _annoColumnsHashmap anno
       }
 
 instance Csv.DefaultOrdered JannoRow where
@@ -208,7 +211,7 @@ instance Csv.ToNamedRecord JannoRow where
         , "Date_BC_AD_Stop"                 Csv..= jDateBCADStop j
         , "Longitude"                       Csv..= jLongitude j
         , "Latitude"                        Csv..= jLatitude j
-        ]
+        ] `HM.union` jAADRColumns j
 
 explicitNA :: Csv.NamedRecord -> Csv.NamedRecord
 explicitNA = HM.map (\x -> if B8.null x then "n/a" else x)
