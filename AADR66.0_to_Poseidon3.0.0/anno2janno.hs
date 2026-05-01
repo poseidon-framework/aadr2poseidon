@@ -20,12 +20,14 @@ import qualified Data.Vector            as V
 import qualified Text.Parsec            as P
 import qualified Text.Parsec.Combinator as P
 import qualified Text.Parsec.Text       as P
+import qualified Data.Text.IO as TIO
 
 main :: IO ()
 main = do
+    indFile <- readIndFile "tmp/v66.1240K.aadr.PUB.ind"
     nameMap <- readColumnNameMap "aadr_columns_renamed.csv"
     (forwardHeader, anno) <- readAnno nameMap "tmp/v66.1240K.aadr.PUB.anno"
-    let janno = V.map anno2janno anno
+    let janno = V.map anno2janno $ V.zip indFile anno
     writeJanno "tmp/output.janno" forwardHeader janno
 
 readAnno :: ColumnNameMap -> FilePath -> IO (Csv.Header, V.Vector AnnoRow)
@@ -63,9 +65,30 @@ writeJanno path forwardHeader rows = do
         bs = Csv.encodeByNameWith opts fullHeader (V.toList rows)
     BL.writeFile path bs
 
+-- ### .ind file ### --
+data IndFileRow = IndFileRow {
+    _iPoseidonID :: T.Text
+  , _iSex :: Char
+  , _iGroupName :: T.Text
+  }
+
+readIndFile :: FilePath -> IO (V.Vector IndFileRow)
+readIndFile path = do
+    contents <- TIO.readFile path
+    V.fromList <$> mapM parseIndLine (filter (not . T.null) $ T.lines contents)
+
+parseIndLine :: T.Text -> IO IndFileRow
+parseIndLine line =
+    case T.words line of
+        [poseidonID, sexTxt, groupName] ->
+            case T.unpack sexTxt of
+                [sex] -> pure $ IndFileRow poseidonID sex groupName
+                _     -> fail $ "Invalid sex field in line: " ++ T.unpack line
+        _ -> fail $ "Invalid .ind line: " ++ T.unpack line
+
 -- #### Column name change #### --
-data ColumnNameMapRow = ColumnNameMapRow
-  { simplifiedName :: B8.ByteString
+data ColumnNameMapRow = ColumnNameMapRow {
+    simplifiedName :: B8.ByteString
   , originalName   :: B8.ByteString
   } deriving Show
 
@@ -99,11 +122,11 @@ data AnnoRow = AnnoRow {
 
 instance Csv.FromNamedRecord AnnoRow where
     parseNamedRecord m = do
-        geneticID <- filterLookup m "AADR_Genetic_ID"
-        fullDate  <- filterLookup m "AADR_Date_Full_Info"
-        meanDate  <- filterLookup m "AADR_Date_Mean_BP"
-        longitude <- filterLookupOptional m "AADR_Long"
-        latitude  <- filterLookupOptional m "AADR_Lat"
+        geneticID  <- filterLookup m "AADR_Genetic_ID"
+        fullDate   <- filterLookup m "AADR_Date_Full_Info"
+        meanDate   <- filterLookup m "AADR_Date_Mean_BP"
+        longitude  <- filterLookupOptional m "AADR_Long"
+        latitude   <- filterLookupOptional m "AADR_Lat"
         pure $ AnnoRow {
               _annoGeneticID = geneticID
             , _annoFullDate  = fullDate
@@ -131,6 +154,8 @@ cleanInput (Just rawInputBS) = transNA rawInputBS
 -- #### Output data type: JannoRow #### --
 data JannoRow = JannoRow {
       jPoseidonID        :: T.Text
+    , jGeneticSex        :: Char
+    , jGroupName         :: T.Text
     , jDateType          :: T.Text
     , jDateC14Labnr      :: ListColumn T.Text
     , jDateC14UncalBP    :: ListColumn Int
@@ -149,10 +174,12 @@ newtype ListColumn a = ListColumn {getListColumn :: [a]}
 instance (Csv.ToField a, Show a) => Csv.ToField (ListColumn a) where
     toField x = B8.intercalate ";" $ map Csv.toField $ getListColumn x
 
-anno2janno :: AnnoRow -> JannoRow
-anno2janno anno =
+anno2janno :: (IndFileRow, AnnoRow) -> JannoRow
+anno2janno (ind, anno) =
     JannoRow {
-        jPoseidonID        = _annoGeneticID anno
+        jPoseidonID        = _iPoseidonID ind --_annoGeneticID anno
+      , jGeneticSex        = _iSex ind
+      , jGroupName         = _iGroupName ind
       , jDateType          = getDateType $ _annoFullDate anno
       , jDateC14Labnr      = ListColumn $ map getLabCode $ getC14 $ _annoFullDate anno
       , jDateC14UncalBP    = ListColumn $ map (fst . getMeanSD) $ getC14 $ _annoFullDate anno
@@ -170,8 +197,8 @@ instance Csv.DefaultOrdered JannoRow where
 jannoHeader :: [B8.ByteString]
 jannoHeader = [
       "Poseidon_ID"
-    --, "Genetic_Sex"
-    --, "Group_Name"
+    , "Genetic_Sex"
+    , "Group_Name"
     --, "Individual_ID"
     --, "Species"
     --, "Alternative_IDs", "Alternative_IDs_Context"
@@ -202,6 +229,8 @@ jannoHeader = [
 instance Csv.ToNamedRecord JannoRow where
     toNamedRecord j = explicitNA $ Csv.namedRecord [
           "Poseidon_ID"                     Csv..= jPoseidonID j
+        , "Genetic_Sex"                     Csv..= jGeneticSex j
+        , "Group_Name"                      Csv..= jGroupName j
         , "Date_Type"                       Csv..= jDateType j
         , "Date_C14_Labnr"                  Csv..= jDateC14Labnr j
         , "Date_C14_Uncal_BP"               Csv..= jDateC14UncalBP j

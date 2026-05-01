@@ -5,7 +5,7 @@ mkdir tmp
 # download relevant files
 # v66.1240K.aadr.PUB
 wget https://dataverse.harvard.edu/api/access/datafile/13663706 -O tmp/v66.1240K.aadr.PUB.anno
-
+wget https://dataverse.harvard.edu/api/access/datafile/13663698 -O tmp/v66.1240K.aadr.PUB.ind
 
 
 
