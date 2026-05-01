@@ -113,6 +113,7 @@ renameColumns nameMap = HM.fromList . map (\(k,v) -> (HM.lookupDefault k k nameM
 -- #### Input data type: AnnoRow #### --
 data AnnoRow = AnnoRow {
       _annoGeneticID      :: T.Text
+    , _annoSuffix         :: T.Text
     , _annoFullDate       :: FullDate
     , _annoMeanDate       :: Int
     , _annoLongitude      :: Maybe Double
@@ -123,12 +124,14 @@ data AnnoRow = AnnoRow {
 instance Csv.FromNamedRecord AnnoRow where
     parseNamedRecord m = do
         geneticID  <- filterLookup m "AADR_Genetic_ID"
+        suffix     <- filterLookup m "AADR_Call_Suffix"
         fullDate   <- filterLookup m "AADR_Date_Full_Info"
         meanDate   <- filterLookup m "AADR_Date_Mean_BP"
         longitude  <- filterLookupOptional m "AADR_Long"
         latitude   <- filterLookupOptional m "AADR_Lat"
         pure $ AnnoRow {
               _annoGeneticID = geneticID
+            , _annoSuffix    = suffix
             , _annoFullDate  = fullDate
             , _annoMeanDate  = meanDate
             , _annoLongitude = longitude
@@ -165,6 +168,7 @@ data JannoRow = JannoRow {
     , jDateBCADStop      :: Int
     , jLongitude         :: Maybe Double
     , jLatitude          :: Maybe Double
+    , jGenotypePloidy    :: T.Text
     , jAADRColumns       :: Csv.NamedRecord
     }
     deriving Show
@@ -173,24 +177,6 @@ newtype ListColumn a = ListColumn {getListColumn :: [a]}
     deriving (Eq, Ord, Show)
 instance (Csv.ToField a, Show a) => Csv.ToField (ListColumn a) where
     toField x = B8.intercalate ";" $ map Csv.toField $ getListColumn x
-
-anno2janno :: (IndFileRow, AnnoRow) -> JannoRow
-anno2janno (ind, anno) =
-    JannoRow {
-        jPoseidonID        = _iPoseidonID ind --_annoGeneticID anno
-      , jGeneticSex        = _iSex ind
-      , jGroupName         = _iGroupName ind
-      , jDateType          = getDateType $ _annoFullDate anno
-      , jDateC14Labnr      = ListColumn $ map getLabCode $ getC14 $ _annoFullDate anno
-      , jDateC14UncalBP    = ListColumn $ map (fst . getMeanSD) $ getC14 $ _annoFullDate anno
-      , jDateC14UncalBPErr = ListColumn $ map (snd . getMeanSD) $ getC14 $ _annoFullDate anno
-      , jDateBCADStart     = fst $ getAgeRange $ _annoFullDate anno
-      , jDateBCADMedian    = bp2bcece $ _annoMeanDate anno
-      , jDateBCADStop      = snd $ getAgeRange $ _annoFullDate anno
-      , jLongitude         = _annoLongitude anno
-      , jLatitude          = _annoLatitude anno
-      , jAADRColumns       = _annoColumnsHashmap anno
-      }
 
 instance Csv.DefaultOrdered JannoRow where
     headerOrder _ = Csv.header jannoHeader
@@ -215,7 +201,8 @@ jannoHeader = [
     --, "MT_Haplogroup", "Y_Haplogroup"
     --, "Source_Material"
     --, "Nr_Libraries", "Library_Names"
-    --, "Capture_Type", "UDG", "Library_Built", "Genotype_Ploidy"
+    --, "Capture_Type", "UDG", "Library_Built",
+    , "Genotype_Ploidy"
     --, "Data_Preparation_Pipeline_URL"
     --, "Endogenous", "Nr_SNPs", "Coverage_on_Target_SNPs", "Damage"
     --, "Contamination", "Contamination_Err", "Contamination_Meas"
@@ -240,10 +227,39 @@ instance Csv.ToNamedRecord JannoRow where
         , "Date_BC_AD_Stop"                 Csv..= jDateBCADStop j
         , "Longitude"                       Csv..= jLongitude j
         , "Latitude"                        Csv..= jLatitude j
+        , "Genotype_Ploidy"                 Csv..= jGenotypePloidy j
         ] `HM.union` jAADRColumns j
 
 explicitNA :: Csv.NamedRecord -> Csv.NamedRecord
 explicitNA = HM.map (\x -> if B8.null x then "n/a" else x)
+
+-- #### anno2janno transformation #### --
+
+anno2janno :: (IndFileRow, AnnoRow) -> JannoRow
+anno2janno (ind, anno) =
+    JannoRow {
+                             -- using the .anno data here ensures equal order
+        jPoseidonID        = _annoGeneticID anno -- _iPoseidonID ind
+      , jGeneticSex        = _iSex ind
+      , jGroupName         = _iGroupName ind
+      , jDateType          = getDateType $ _annoFullDate anno
+      , jDateC14Labnr      = ListColumn $ map getLabCode $ getC14 $ _annoFullDate anno
+      , jDateC14UncalBP    = ListColumn $ map (fst . getMeanSD) $ getC14 $ _annoFullDate anno
+      , jDateC14UncalBPErr = ListColumn $ map (snd . getMeanSD) $ getC14 $ _annoFullDate anno
+      , jDateBCADStart     = fst $ getAgeRange $ _annoFullDate anno
+      , jDateBCADMedian    = bp2bcece $ _annoMeanDate anno
+      , jDateBCADStop      = snd $ getAgeRange $ _annoFullDate anno
+      , jLongitude         = _annoLongitude anno
+      , jLatitude          = _annoLatitude anno
+      , jGenotypePloidy    = suffix2ploidy $ _annoSuffix anno
+      , jAADRColumns       = _annoColumnsHashmap anno
+      }
+
+suffix2ploidy :: T.Text -> T.Text
+suffix2ploidy x | T.isSuffixOf "DG" x = "diploid"
+                | T.isSuffixOf "SG" x = "diploid"
+                | T.isSuffixOf "HO" x = "diploid"
+                | otherwise = "haploid"
 
 -- extract age info
 getDateType :: FullDate -> T.Text
