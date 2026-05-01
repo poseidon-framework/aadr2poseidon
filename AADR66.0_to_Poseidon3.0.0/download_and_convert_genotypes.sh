@@ -23,5 +23,5 @@ EOF
 convertf -p tmp/convertf_parfile_AADR_v66_1240K
 
 # convert to binary PLINK
-#trident genoconvert -p tmp/AADR_1240K.geno --outFormat PLINK
+trident genoconvert -p tmp/AADR_v66_1240K.geno --outFormat PLINK --zip
 
