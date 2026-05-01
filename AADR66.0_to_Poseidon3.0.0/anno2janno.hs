@@ -25,9 +25,8 @@ main :: IO ()
 main = do
     nameMap <- readColumnNameMap "aadr_columns_renamed.csv"
     anno <- readAnno nameMap "tmp/v66.1240K.aadr.PUB.anno"
-    let testAnno = anno V.! 89
-        janno = anno2janno testAnno
-    print janno
+    let janno = V.map anno2janno anno
+    writeJanno "tmp/output.janno" janno
 
 readAnno :: ColumnNameMap -> FilePath -> IO (V.Vector AnnoRow)
 readAnno nameMap path = do
@@ -35,7 +34,8 @@ readAnno nameMap path = do
     case Csv.decodeByNameWith (Csv.DecodeOptions $ fromIntegral (ord '\t')) bs of
       Left err     -> fail err
       Right (header, records) -> do
-          reportHeaderRenamings nameMap header
+          -- reportHeaderRenamings nameMap header
+          -- inefficient to do the renaming on the per-row level, but it's convenient
           V.mapM (parseRenamed nameMap) records
 
 parseRenamed :: ColumnNameMap -> Csv.NamedRecord -> IO AnnoRow
@@ -54,12 +54,11 @@ reportHeaderRenamings nameMap header = do
         Nothing -> B8.putStrLn $ color red $ "> [UNCHANGED] " <> k
         Just k' -> B8.putStrLn $ color green $ "> " <> k <> " -> " <> k'
 
-color :: B8.ByteString -> B8.ByteString -> B8.ByteString
-color c s = c <> s <> reset
-green, red, reset :: B8.ByteString
-green = "\ESC[32m"
-red   = "\ESC[31m"
-reset = "\ESC[0m"
+writeJanno :: FilePath -> V.Vector JannoRow -> IO ()
+writeJanno path rows = do
+    let opts = Csv.defaultEncodeOptions { Csv.encDelimiter = fromIntegral (ord '\t') }
+        bs = Csv.encodeByNameWith opts (Csv.headerOrder (undefined :: JannoRow)) (V.toList rows)
+    BL.writeFile path bs
 
 -- #### Column name change #### --
 data ColumnNameMapRow = ColumnNameMapRow
@@ -130,9 +129,9 @@ cleanInput (Just rawInputBS) = transNA rawInputBS
 data JannoRow = JannoRow {
       jPoseidonID        :: T.Text
     , jDateType          :: T.Text
-    , jDateC14Labnr      :: [T.Text]
-    , jDateC14UncalBP    :: [Int]
-    , jDateC14UncalBPErr :: [Int]
+    , jDateC14Labnr      :: ListColumn T.Text
+    , jDateC14UncalBP    :: ListColumn Int
+    , jDateC14UncalBPErr :: ListColumn Int
     , jDateBCADStart     :: Maybe Int
     , jDateBCADMedian    :: Int
     , jDateBCADStop      :: Int
@@ -144,7 +143,6 @@ data JannoRow = JannoRow {
 
 newtype ListColumn a = ListColumn {getListColumn :: [a]}
     deriving (Eq, Ord, Show)
-
 instance (Csv.ToField a, Show a) => Csv.ToField (ListColumn a) where
     toField x = B8.intercalate ";" $ map Csv.toField $ getListColumn x
 
@@ -153,16 +151,67 @@ anno2janno anno =
     JannoRow {
         jPoseidonID        = _annoGeneticID anno
       , jDateType          = getDateType $ _annoFullDate anno
-      , jDateC14Labnr      = map getLabCode $ getC14 $ _annoFullDate anno
-      , jDateC14UncalBP    = map (fst . getMeanSD) $ getC14 $ _annoFullDate anno
-      , jDateC14UncalBPErr = map (snd . getMeanSD) $ getC14 $ _annoFullDate anno
+      , jDateC14Labnr      = ListColumn $ map getLabCode $ getC14 $ _annoFullDate anno
+      , jDateC14UncalBP    = ListColumn $ map (fst . getMeanSD) $ getC14 $ _annoFullDate anno
+      , jDateC14UncalBPErr = ListColumn $ map (snd . getMeanSD) $ getC14 $ _annoFullDate anno
       , jDateBCADStart     = fst $ getAgeRange $ _annoFullDate anno
       , jDateBCADMedian    = bp2bcece $ _annoMeanDate anno
       , jDateBCADStop      = snd $ getAgeRange $ _annoFullDate anno
       , jLongitude         = _annoLongitude anno
       , jLatitude          = _annoLatitude anno
-      --, jAADRColumns       = Nothing
+      -- , jAADRColumns       = Nothing
       }
+
+instance Csv.DefaultOrdered JannoRow where
+    headerOrder _ = Csv.header jannoHeader
+jannoHeader :: [B8.ByteString]
+jannoHeader = [
+      "Poseidon_ID"
+    --, "Genetic_Sex"
+    --, "Group_Name"
+    --, "Individual_ID"
+    --, "Species"
+    --, "Alternative_IDs", "Alternative_IDs_Context"
+    --, "Relation_To", "Relation_Degree", "Relation_Type"
+    --, "Collection_ID", "Custodian_Institution"
+    --, "Cultural_Era", "Cultural_Era_URL", "Archaeological_Culture", "Archaeological_Culture_URL"
+    --, "Country", "Country_ISO"
+    --, "Location", "Site",
+    , "Latitude", "Longitude"
+    , "Date_Type"
+    , "Date_C14_Labnr", "Date_C14_Uncal_BP", "Date_C14_Uncal_BP_Err"
+    , "Date_BC_AD_Start", "Date_BC_AD_Median", "Date_BC_AD_Stop"
+    --, "Chromosomal_Anomalies"
+    --, "MT_Haplogroup", "Y_Haplogroup"
+    --, "Source_Material"
+    --, "Nr_Libraries", "Library_Names"
+    --, "Capture_Type", "UDG", "Library_Built", "Genotype_Ploidy"
+    --, "Data_Preparation_Pipeline_URL"
+    --, "Endogenous", "Nr_SNPs", "Coverage_on_Target_SNPs", "Damage"
+    --, "Contamination", "Contamination_Err", "Contamination_Meas"
+    --, "Genetic_Source_Accession_IDs"
+    --, "Primary_Contact"
+    --, "Publication"
+    --, "Note"
+    --, "Keywords"
+    ]
+        
+instance Csv.ToNamedRecord JannoRow where
+    toNamedRecord j = explicitNA $ Csv.namedRecord [
+          "Poseidon_ID"                     Csv..= jPoseidonID j
+        , "Date_Type"                       Csv..= jDateType j
+        , "Date_C14_Labnr"                  Csv..= jDateC14Labnr j
+        , "Date_C14_Uncal_BP"               Csv..= jDateC14UncalBP j
+        , "Date_C14_Uncal_BP_Err"           Csv..= jDateC14UncalBPErr j
+        , "Date_BC_AD_Start"                Csv..= jDateBCADStart j
+        , "Date_BC_AD_Median"               Csv..= jDateBCADMedian j
+        , "Date_BC_AD_Stop"                 Csv..= jDateBCADStop j
+        , "Longitude"                       Csv..= jLongitude j
+        , "Latitude"                        Csv..= jLatitude j
+        ]
+
+explicitNA :: Csv.NamedRecord -> Csv.NamedRecord
+explicitNA = HM.map (\x -> if B8.null x then "n/a" else x)
 
 -- extract age info
 getDateType :: FullDate -> T.Text
@@ -171,9 +220,12 @@ getDateType x | null (getC14 x) = "contextual"
               | otherwise = "C14"
 getC14 :: FullDate -> [C14]
 getC14 (ArchContextAge _) = []
-getC14 (C14Age _ (One (ProperC14 x))) = [x]
+getC14 (C14Age _ (One x)) = mapMaybe unwrapProper [x]
 getC14 (C14Age _ (Combine (CombineC14 _ xs))) = mapMaybe unwrapProper xs
 getC14 Present = []
+unwrapProper :: OneC14 -> Maybe C14
+unwrapProper (ProperC14 x) = Just x
+unwrapProper _ = Nothing
 getLabCode :: C14 -> T.Text
 getLabCode (C14 _ _ labcodes) = T.intercalate "/" labcodes
 getMeanSD :: C14 -> (Int,Int)
@@ -305,10 +357,6 @@ parseUntilParen = P.manyTill P.anyChar (P.lookAhead (P.oneOf "()[]"))
 
 data OneC14 = ProperC14 C14 | OnlyLabcode T.Text deriving Show
 
-unwrapProper :: OneC14 -> Maybe C14
-unwrapProper (ProperC14 x) = Just x
-unwrapProper _ = Nothing
-
 parseOneC14 :: P.Parser OneC14
 parseOneC14 = P.try (ProperC14 <$> parseC14) P.<|> parseOnlyLabcode
 
@@ -363,7 +411,7 @@ parseMeanSd = do
     _ <- P.optional (P.string "BP")
     return (mean,sd)
 
--- #### parser helpers #### --
+-- #### helper functions #### --
 parsePositiveInt :: P.Parser Int
 parsePositiveInt = fromIntegral <$> parseWord
 
@@ -372,3 +420,10 @@ parseWord = read <$> parseNumber
 
 parseNumber :: P.Parser [Char]
 parseNumber = P.many1 P.digit
+
+color :: B8.ByteString -> B8.ByteString -> B8.ByteString
+color c s = c <> s <> reset
+green, red, reset :: B8.ByteString
+green = "\ESC[32m"
+red   = "\ESC[31m"
+reset = "\ESC[0m"
