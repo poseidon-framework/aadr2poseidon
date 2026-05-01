@@ -9,7 +9,7 @@
 import           Control.Applicative    (empty)
 import qualified Data.ByteString.Char8  as B8
 import qualified Data.ByteString.Lazy   as BL
-import           Data.Char              (ord)
+import           Data.Char              (ord,isAscii,isAlphaNum)
 import qualified Data.Csv               as Csv
 import qualified Data.HashMap.Strict    as HM
 import           Data.List
@@ -257,9 +257,12 @@ anno2janno (ind, anno) =
       , jLongitude         = _annoLongitude anno
       , jLatitude          = _annoLatitude anno
       , jGenotypePloidy    = suffix2ploidy $ _annoSuffix anno
-      , jPublication       = _annoPublication anno
+      , jPublication       = cleanPubKeys $ _annoPublication anno
       , jAADRColumns       = _annoColumnsHashmap anno
       }
+
+cleanPubKeys :: T.Text -> T.Text
+cleanPubKeys = T.filter (\x -> isAlphaNum x && isAscii x)
 
 suffix2ploidy :: T.Text -> T.Text
 suffix2ploidy x | T.isSuffixOf "DG" x = "diploid"
