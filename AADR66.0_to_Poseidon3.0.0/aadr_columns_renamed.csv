@@ -24,11 +24,11 @@ AADR_Data_Source,Data type
 AADR_No_Libraries,No. Libraries
 AADR_Coverage_Autosomal_Targets,Mean coverage on 1.15M autosomal targets for full bam (if no off-target entry not up-to-date)
 AADR_Coverage_Autosomal_Non_Targets,"Mean coverage on non-targeted autosomal SNPs for full bam - not yet computed if """".."""" and bam restricted to on-target SNPs if """"0"""""
-AADR_SNPs_Autosomal_Targets_2M,SNPs hit on autosomal targets (Computed using easystats on enhance 2M capture subset) 
-AADR_SNPs_Autosomal_Targets_1240k,SNPs hit on autosomal targets (Computed using easystats on 1240k snpset)
-AADR_SNPs_Autosomal_Targets_HO,SNPs hit on autosomal targets (Computed using easystats on HO snpset)
-AADR_SNPs_Autosomal_Targets_Compatibility,SNPs hit on autosomal targets (Computed using easystats on Compatibility snpset)
-AADR_SNPs_Autosomal_Targets_Compatibility_HO,SNPs hit on autosomal targets (Computed using easystats on Compatibility_HO snpset)
+AADR_SNPs_2M,SNPs hit on autosomal targets (Computed using easystats on enhance 2M capture subset) 
+AADR_SNPs_1240k,SNPs hit on autosomal targets (Computed using easystats on 1240k snpset)
+AADR_SNPs_HO,SNPs hit on autosomal targets (Computed using easystats on HO snpset)
+AADR_SNPs_Compatibility,SNPs hit on autosomal targets (Computed using easystats on Compatibility snpset)
+AADR_SNPs_Compatibility_HO,SNPs hit on autosomal targets (Computed using easystats on Compatibility_HO snpset)
 AADR_Molecular_Sex,Molecular Sex
 AADR_Family_Relations,Family relations
 AADR_ROH_min4cM,Sum total of ROH segments >4 cM
