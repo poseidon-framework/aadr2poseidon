@@ -118,24 +118,27 @@ data AnnoRow = AnnoRow {
     , _annoMeanDate       :: Int
     , _annoLongitude      :: Maybe Double
     , _annoLatitude       :: Maybe Double
+    , _annoPublication    :: T.Text
     , _annoColumnsHashmap :: Csv.NamedRecord
     } deriving Show
 
 instance Csv.FromNamedRecord AnnoRow where
     parseNamedRecord m = do
-        geneticID  <- filterLookup m "AADR_Genetic_ID"
-        suffix     <- filterLookup m "AADR_Call_Suffix"
-        fullDate   <- filterLookup m "AADR_Date_Full_Info"
-        meanDate   <- filterLookup m "AADR_Date_Mean_BP"
-        longitude  <- filterLookupOptional m "AADR_Long"
-        latitude   <- filterLookupOptional m "AADR_Lat"
+        geneticID   <- filterLookup m "AADR_Genetic_ID"
+        suffix      <- filterLookup m "AADR_Call_Suffix"
+        fullDate    <- filterLookup m "AADR_Date_Full_Info"
+        meanDate    <- filterLookup m "AADR_Date_Mean_BP"
+        longitude   <- filterLookupOptional m "AADR_Long"
+        latitude    <- filterLookupOptional m "AADR_Lat"
+        publication <- filterLookup m "AADR_Publication"
         pure $ AnnoRow {
-              _annoGeneticID = geneticID
-            , _annoSuffix    = suffix
-            , _annoFullDate  = fullDate
-            , _annoMeanDate  = meanDate
-            , _annoLongitude = longitude
-            , _annoLatitude  = latitude
+              _annoGeneticID   = geneticID
+            , _annoSuffix      = suffix
+            , _annoFullDate    = fullDate
+            , _annoMeanDate    = meanDate
+            , _annoLongitude   = longitude
+            , _annoLatitude    = latitude
+            , _annoPublication = publication
             , _annoColumnsHashmap = m
             }
 
@@ -169,6 +172,7 @@ data JannoRow = JannoRow {
     , jLongitude         :: Maybe Double
     , jLatitude          :: Maybe Double
     , jGenotypePloidy    :: T.Text
+    , jPublication       :: T.Text
     , jAADRColumns       :: Csv.NamedRecord
     }
     deriving Show
@@ -208,7 +212,7 @@ jannoHeader = [
     --, "Contamination", "Contamination_Err", "Contamination_Meas"
     --, "Genetic_Source_Accession_IDs"
     --, "Primary_Contact"
-    --, "Publication"
+    , "Publication"
     --, "Note"
     --, "Keywords"
     ]
@@ -228,6 +232,7 @@ instance Csv.ToNamedRecord JannoRow where
         , "Longitude"                       Csv..= jLongitude j
         , "Latitude"                        Csv..= jLatitude j
         , "Genotype_Ploidy"                 Csv..= jGenotypePloidy j
+        , "Publication"                     Csv..= jPublication j
         ] `HM.union` jAADRColumns j
 
 explicitNA :: Csv.NamedRecord -> Csv.NamedRecord
@@ -252,6 +257,7 @@ anno2janno (ind, anno) =
       , jLongitude         = _annoLongitude anno
       , jLatitude          = _annoLatitude anno
       , jGenotypePloidy    = suffix2ploidy $ _annoSuffix anno
+      , jPublication       = _annoPublication anno
       , jAADRColumns       = _annoColumnsHashmap anno
       }
 
