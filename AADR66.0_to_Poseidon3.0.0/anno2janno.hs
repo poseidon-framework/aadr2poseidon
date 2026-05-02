@@ -444,7 +444,7 @@ parseC14 = do
     labcodes <- P.option [] $ do
        _ <- P.string ","
        _ <- P.many P.space
-       P.sepBy parseLabCode (P.string ", ")
+       P.sepBy parseLabCode (P.string ", " P.<|> P.try (P.string " & "))
     _ <- parseUntilParen
     _ <- P.char ')'
     return (C14 meansd meansdFRE labcodes)
