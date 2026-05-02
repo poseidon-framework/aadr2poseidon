@@ -22,13 +22,24 @@ import qualified Text.Parsec.Combinator as P
 import qualified Text.Parsec.Text       as P
 import qualified Data.Text.IO as TIO
 
+--input  = "v66.1240K.aadr.PUB"
+--output = "AADR_v66_1240K"
+input  = "v66.2M.aadr.PUB"
+output = "AADR_v66_2M"
+--input  = "v66.2M_compatibility.aadr.PUB"
+--output = "AADR_v66_2M_compatibility"
+--input  = "v66.HO.aadr.PUB"
+--output = "AADR_v66_HO"
+--input  = "v66.compatibility_HO.aadr.PUB"
+--output = "AADR_v66_HO_compatibility"
+
 main :: IO ()
 main = do
-    indFile <- readIndFile "tmp/v66.1240K.aadr.PUB.ind"
+    indFile <- readIndFile $ "tmp/" ++  input ++ ".ind"
     nameMap <- readColumnNameMap "aadr_columns_renamed.csv"
-    (forwardHeader, anno) <- readAnno nameMap "tmp/v66.1240K.aadr.PUB.anno"
+    (forwardHeader, anno) <- readAnno nameMap $ "tmp/" ++ input ++ ".anno"
     let janno = V.map anno2janno $ V.zip indFile anno
-    writeJanno "tmp/output.janno" forwardHeader janno
+    writeJanno ("tmp/" ++  output ++ ".janno") forwardHeader janno
 
 readAnno :: ColumnNameMap -> FilePath -> IO (Csv.Header, V.Vector AnnoRow)
 readAnno nameMap path = do
