@@ -24,14 +24,14 @@ import qualified Data.Text.IO as TIO
 
 --input  = "v66.1240K.aadr.PUB"
 --output = "AADR_v66_1240K"
-input  = "v66.2M.aadr.PUB"
-output = "AADR_v66_2M"
+--input  = "v66.2M.aadr.PUB"
+--output = "AADR_v66_2M"
 --input  = "v66.2M_compatibility.aadr.PUB"
 --output = "AADR_v66_2M_compatibility"
 --input  = "v66.HO.aadr.PUB"
 --output = "AADR_v66_HO"
---input  = "v66.compatibility_HO.aadr.PUB"
---output = "AADR_v66_HO_compatibility"
+input  = "v66.compatibility_HO.aadr.PUB"
+output = "AADR_v66_HO_compatibility"
 
 main :: IO ()
 main = do
@@ -50,14 +50,19 @@ readAnno nameMap path = do
           -- reportHeaderRenamings nameMap header
           -- inefficient to do the renaming on the per-row level, but it's convenient
           let renamedHeader = V.map (\k -> HM.lookupDefault k k nameMap) header
-          rows <- V.mapM (parseRenamed nameMap) records
+          rows <- V.imapM (parseRenamedWithRow nameMap) records
           pure (renamedHeader, rows)
 
-parseRenamed :: ColumnNameMap -> Csv.NamedRecord -> IO AnnoRow
-parseRenamed nameMap record = do
+parseRenamedWithRow :: ColumnNameMap -> Int -> Csv.NamedRecord -> IO AnnoRow
+parseRenamedWithRow nameMap i record = do
   let renamed = renameColumns nameMap record
+      rowNum = i + 2  -- +1 because imapM is 0-based, +1 because header is line 1
   case Csv.runParser (Csv.parseNamedRecord renamed) of
-    Left err -> fail err
+    Left err -> do
+      let gid = fromMaybe "<unknown>" (HM.lookup "AADR_Genetic_ID" renamed)
+      fail $ "Error in .anno row " ++ show rowNum
+          ++ " (AADR_Genetic_ID = " ++ B8.unpack gid ++ "):\n"
+          ++ err
     Right r  -> pure r
 
 reportHeaderRenamings :: ColumnNameMap -> Csv.Header -> IO ()
@@ -295,10 +300,10 @@ unwrapProper :: OneC14 -> Maybe C14
 unwrapProper (ProperC14 x) = Just x
 unwrapProper _ = Nothing
 getLabCode :: C14 -> T.Text
-getLabCode (C14 _ _ labcodes) = T.intercalate "/" labcodes
+getLabCode (C14 _ _ labcodes _) = T.intercalate "/" labcodes
 getMeanSD :: C14 -> (Int,Int)
-getMeanSD (C14 _ (Just fremeansd) _) = fremeansd
-getMeanSD (C14 meansd _ _) = meansd
+getMeanSD (C14 _ (Just fremeansd) _ _) = fremeansd
+getMeanSD (C14 meansd _ _ _) = meansd
 getAgeRange :: FullDate -> (Maybe Int, Int)
 getAgeRange (ArchContextAge (AgeRange start stop)) = (start, stop)
 getAgeRange (C14Age (AgeRange start stop) _) = (start, stop)
@@ -311,9 +316,43 @@ data FullDate = Present | ArchContextAge AgeRange | C14Age AgeRange C14Info
 
 instance Csv.FromField FullDate where
     parseField bs =
-        case P.parse parseFullDate "Full Date" (TE.decodeUtf8 bs) of
+        let raw = TE.decodeUtf8 bs
+            fixed = normalizeFullDate raw
+        in case P.parse parseFullDate "Full Date" fixed of
             Left err -> fail (show err)
             Right fd -> pure fd
+
+normalizeFullDate :: T.Text -> T.Text
+normalizeFullDate x = fromMaybe x (lookup x rules)
+rules :: [(T.Text, T.Text)]
+rules =
+    [ ( "7502-7325 calBCE (8703±27 BP) [R_Combine: TRa-954, TUa-1257, TRa-952, TUa-2106, TRa-951, TRa-953, TUa-2107)]"
+      , "7502-7325 calBCE (8703±27 BP) [R_Combine: (TRa-954), (TUa-1257), (TRa-952), (TUa-2106), (TRa-951), (TRa-953), (TUa-2107)]")
+    , ( "54-668 CE [union of two dates: (54-130 calCE), (548-668 calCE)]"
+      , "54-668 CE")
+    , ( "650-1026 calCE [union of two dates: (650-980 calCE), (890-1026 calCE)]"
+      , "650-1026 calCE")
+    , ( "988-1163 calCE (1065±, EZV-00225)"
+      , "988-1163 calCE (EZV-00225)")
+    , ( "2271-2039 calBCE (3741±20 BP) (R_Combine: (3770±30, Beta-446187), (3720±25, PSUAMS-7848)]"
+      , "2271-2039 calBCE (3741±20 BP) [R_Combine: (3770±30, Beta-446187), (3720±25, PSUAMS-7848)]")
+    , ( "3933-3382 calBCE (4875±80 BP, OxA-646), 3951-3641 calBCE (4970±80 BP, OxA-738), 3944-3527 calBCE (4915±80 BP, OxA-739)"
+      , "3933-3382 calBCE [(4875±80 BP, OxA-646), (4970±80 BP, OxA-738), (4915±80 BP, OxA-739)]")
+    , ( "8282-7608 calBCE (8870±130 BP, OxA-7109 (Ly-612)"
+      , "8282-7608 calBCE (8870±130 BP, OxA-7109, Ly-612)")
+    , ( "35170-34519 calBCE (ETH-99101.1.1/MAMS-42268(R-EVA-3335)"
+      , "35170-34519 calBCE [(ETH-99101.1.1), (MAMS-42268), (R-EVA-3335)]")
+    , ( "39956-35756 calBCE (34950±990 BP) [R_Combine: (34290±970-870 BP, GrA-22810), (>35200 BP, OxA-11711)]"
+      , "39956-35756 calBCE (34950±990 BP) [R_Combine: (34290±970-870 BP, GrA-22810), (OxA-11711)]")
+    , ( "1437-1473 calCE (429±16 BP, MAMS-35124); 1441-1617 calCE (405±21 BP, MAMS-58729)"
+      , "1437-1473 calCE [(429±16 BP, MAMS-35124), (405±21 BP, MAMS-58729)]")
+    , ( "1516-1810 calCE±40 CE (237±40 BP, LTL20392A)"
+      , "1516-1810 calCE (237±40 BP, LTL20392A)")
+    , ( "411-381 calBCE (uncalibrated 2330±20 BP)"
+      , "411-381 calBCE")
+    , ( "1880-1420 calBCE (MAMS-40615*)"
+      , "1880-1420 calBCE (MAMS-40615)")
+    ]
 
 parseFullDate :: P.Parser FullDate
 parseFullDate = parsePresent P.<|> P.try parseC14Age P.<|> P.try parseArchContextAge
@@ -436,12 +475,20 @@ parseOnlyLabcode = do
     return (OnlyLabcode labcode)
 
 parseLabCode :: P.Parser T.Text
-parseLabCode = T.pack <$> P.many1 (P.alphaNum P.<|> P.char '-' P.<|> P.char '.')
+parseLabCode = T.pack <$> P.many1 (
+          P.alphaNum
+    P.<|> P.char '-'
+    P.<|> P.char '.'
+    P.<|> P.char '/'
+    P.<|> P.try (P.string " - " >> return '-')
+    P.<|> P.try (P.string " / " >> return '/')
+    )
 
 data C14 = C14 {
       _c14MeanSd :: (Int, Int)
     , _c14FRE :: Maybe (Int, Int)
     , _c14Labcode :: [T.Text]
+    , _c14Comment :: Maybe T.Text
     } deriving Show
 
 parseC14 :: P.Parser C14
@@ -453,12 +500,16 @@ parseC14 = do
         _ <- P.many P.space
         parseFRE
     labcodes <- P.option [] $ do
-       _ <- P.string ","
-       _ <- P.many P.space
-       P.sepBy parseLabCode (P.string ", " P.<|> P.try (P.string " & "))
+        _ <- P.string ","
+        _ <- P.many P.space
+        P.sepBy parseLabCode (P.string ", " P.<|> P.try (P.string " & "))
+    _ <- P.many P.space
+    comment <- P.optionMaybe $ P.try $ do
+        _ <- P.many P.space
+        parseC14Comment
     _ <- parseUntilParen
     _ <- P.char ')'
-    return (C14 meansd meansdFRE labcodes)
+    return (C14 meansd meansdFRE labcodes comment)
 
 parseFRE :: P.Parser (Int,Int)
 parseFRE = do
@@ -467,6 +518,13 @@ parseFRE = do
     (mean,sd) <- parseMeanSd
     _ <- P.char ']'
     return (mean,sd)
+
+parseC14Comment :: P.Parser T.Text
+parseC14Comment = do
+    _ <- P.char '('
+    comment <- T.pack <$> parseUntilParen
+    _ <- P.char ')'
+    return comment
 
 parseMeanSd :: P.Parser (Int,Int)
 parseMeanSd = do
