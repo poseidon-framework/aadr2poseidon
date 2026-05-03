@@ -360,6 +360,10 @@ rules =
       , "411-381 calBCE")
     , ( "1880-1420 calBCE (MAMS-40615*)"
       , "1880-1420 calBCE (MAMS-40615)")
+    , ( "3984-3368 calCE [Union of 3984-3796 calBCE (5110±40 BP, Beta-194927), 3624-3368 calBCE (4690±40 BP, Beta-202619)]"
+      , "3984-3368 calBCE [(5110±40 BP, Beta-194927), (4690±40 BP, Beta-202619)]")
+    , ( "3000-1000 CE"
+      , "3000-1000 BCE")
     ]
 
 parseFullDate :: P.Parser FullDate
