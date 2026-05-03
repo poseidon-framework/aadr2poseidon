@@ -22,16 +22,16 @@ import qualified Text.Parsec.Combinator as P
 import qualified Text.Parsec.Text       as P
 import qualified Data.Text.IO as TIO
 
---input  = "v66.1240K.aadr.PUB"
---output = "AADR_v66_1240K"
+input  = "v66.1240K.aadr.PUB"
+output = "AADR_v66_1240K"
 --input  = "v66.2M.aadr.PUB"
 --output = "AADR_v66_2M"
 --input  = "v66.2M_compatibility.aadr.PUB"
 --output = "AADR_v66_2M_compatibility"
 --input  = "v66.HO.aadr.PUB"
 --output = "AADR_v66_HO"
-input  = "v66.compatibility_HO.aadr.PUB"
-output = "AADR_v66_HO_compatibility"
+--input  = "v66.compatibility_HO.aadr.PUB"
+--output = "AADR_v66_HO_compatibility"
 
 main :: IO ()
 main = do
@@ -39,7 +39,7 @@ main = do
     nameMap <- readColumnNameMap "aadr_columns_renamed.csv"
     (forwardHeader, anno) <- readAnno nameMap $ "tmp/" ++ input ++ ".anno"
     let janno = V.map anno2janno $ V.zip indFile anno
-    writeJanno ("tmp/" ++  output ++ ".janno") forwardHeader janno
+    writeJanno ("tmp/" ++  output ++ "/" ++  output ++ ".janno") forwardHeader janno
 
 readAnno :: ColumnNameMap -> FilePath -> IO (Csv.Header, V.Vector AnnoRow)
 readAnno nameMap path = do
@@ -273,12 +273,15 @@ anno2janno (ind, anno) =
       , jLongitude         = _annoLongitude anno
       , jLatitude          = _annoLatitude anno
       , jGenotypePloidy    = suffix2ploidy $ _annoSuffix anno
-      , jPublication       = cleanPubKeys $ _annoPublication anno
+      , jPublication       = addAADRPubKeys $ cleanPubKeys $ _annoPublication anno
       , jAADRColumns       = _annoColumnsHashmap anno
       }
 
 cleanPubKeys :: T.Text -> T.Text
 cleanPubKeys = T.filter (\x -> isAlphaNum x && isAscii x)
+
+addAADRPubKeys :: T.Text -> T.Text
+addAADRPubKeys x = x <> ";AADRv660;AADR"
 
 suffix2ploidy :: T.Text -> T.Text
 suffix2ploidy x | T.isSuffixOf "DG" x = "diploid"
