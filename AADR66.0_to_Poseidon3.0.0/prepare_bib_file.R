@@ -2,13 +2,19 @@ library(magrittr)
 
 #### prepare DOI list ####
 
-package <- "AADR_v66_1240K"
+janno_1240K <- janno::read_janno("tmp/AADR_v66_1240K/AADR_v66_1240K.janno", validate = F)
+janno_2M <- janno::read_janno("tmp/AADR_v66_2M/AADR_v66_2M.janno", validate = F)
+janno_2M_compatibility <- janno::read_janno("tmp/AADR_v66_2M_compatibility/AADR_v66_2M_compatibility.janno", validate = F)
+janno_HO <- janno::read_janno("tmp/AADR_v66_HO/AADR_v66_HO.janno", validate = F)
+janno_HO_compatibility <- janno::read_janno("tmp/AADR_v66_HO_compatibility/AADR_v66_HO_compatibility.janno", validate = F)
 
-j <- janno::read_janno("tmp/output.janno", validate = F)
+j <- dplyr::bind_rows(
+  janno_1240K, janno_2M, janno_2M_compatibility, janno_HO, janno_HO_compatibility
+)
 
 j_pub <- j %>%
   dplyr::transmute(
-    pubkey = purrr::map_chr(Publication, \(x) { tail(x, n = 1) }),
+    pubkey = purrr::map_chr(Publication, \(x) { head(x, n = 1) }),
     doi_url = AADR_Publication_DOI,
     doi = gsub("https://doi.org/", "", AADR_Publication_DOI)
   ) %>%
@@ -18,7 +24,7 @@ j_pub_solvable <- j_pub %>% dplyr::filter(grepl("https", doi_url))
 
 unique_dois <- j_pub_solvable$doi %>% unique()
 
-writeLines(unique_dois, paste0("tmp/", package, "_DOIs.txt"))
+writeLines(unique_dois, "tmp/bibtex_DOIs.txt")
 
 #### resolve DOIs to BibTeX entries ####
 
@@ -26,8 +32,8 @@ writeLines(unique_dois, paste0("tmp/", package, "_DOIs.txt"))
 # runs for a couple of minutes
 system(paste0(
   "doi2bib",
-  " -i tmp/", package, "_DOIs.txt",
-  " -o tmp/", package, "_bibtex_raw.bib"
+  " -i tmp/bibtex_DOIs.txt",
+  " -o tmp/bibtex_raw_entries.bib"
 ))
 
 #### clean resulting .bib file ####
@@ -36,12 +42,13 @@ system(paste0(
 # system(paste0("biber --tool --validate-datamodel tmp/", package, "_bibtex_raw.bib"))
 
 # load result
-in_references <- bibtex::read.bib(paste0("tmp/", package, "_bibtex_raw.bib"))
+in_references <- bibtex::read.bib(paste0("tmp/bibtex_raw_entries.bib"))
 
-# 1. manual step: add field "journal" to some entries
+# 1. manual step: add field "journal" to some entries in "mod" version
+file.copy("tmp/bibtex_raw_entries.bib", "tmp/bibtex_mod_entries.bib")
 # (some "journal = {bioRxiv}")
 
-in_references <- bibtex::read.bib(paste0("tmp/", package, "_bibtex_raw.bib"))
+in_references <- bibtex::read.bib(paste0("tmp/bibtex_mod_entries.bib"))
 
 # check which doi's are actually there
 dois_in_bibtex <- in_references %>% purrr::map_chr(\(x) {
@@ -81,13 +88,13 @@ out_references <- purrr::pmap(
 
 #### write final .bib file #### 
 
-file.remove(paste0("tmp/", package, "_bibtex.bib"))
+file.remove(paste0("tmp/bibtex.bib"))
 purrr::walk(
   out_references, function(bibentry) {
     text <- format(bibentry, style = "bibtex")
     write(
       text,
-      file = paste0("tmp/", package, "_bibtex.bib"),
+      file = paste0("tmp/bibtex.bib"),
       append = TRUE
     )
   }
