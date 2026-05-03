@@ -130,6 +130,7 @@ renameColumns nameMap = HM.fromList . map (\(k,v) -> (HM.lookupDefault k k nameM
 data AnnoRow = AnnoRow {
       _annoGeneticID      :: T.Text
     , _annoSuffix         :: T.Text
+    , _annoIndividualID   :: T.Text
     , _annoFullDate       :: FullDate
     , _annoMeanDate       :: Int
     , _annoLongitude      :: Maybe Double
@@ -140,21 +141,23 @@ data AnnoRow = AnnoRow {
 
 instance Csv.FromNamedRecord AnnoRow where
     parseNamedRecord m = do
-        geneticID   <- filterLookup m "AADR_Genetic_ID"
-        suffix      <- filterLookup m "AADR_Call_Suffix"
-        fullDate    <- filterLookup m "AADR_Date_Full_Info"
-        meanDate    <- filterLookup m "AADR_Date_Mean_BP"
-        longitude   <- filterLookupOptional m "AADR_Long"
-        latitude    <- filterLookupOptional m "AADR_Lat"
-        publication <- filterLookup m "AADR_Publication"
+        geneticID    <- filterLookup m "AADR_Genetic_ID"
+        suffix       <- filterLookup m "AADR_Call_Suffix"
+        individualID <- filterLookup m "AADR_Individual_ID"
+        fullDate     <- filterLookup m "AADR_Date_Full_Info"
+        meanDate     <- filterLookup m "AADR_Date_Mean_BP"
+        longitude    <- filterLookupOptional m "AADR_Long"
+        latitude     <- filterLookupOptional m "AADR_Lat"
+        publication  <- filterLookup m "AADR_Publication"
         pure $ AnnoRow {
-              _annoGeneticID   = geneticID
-            , _annoSuffix      = suffix
-            , _annoFullDate    = fullDate
-            , _annoMeanDate    = meanDate
-            , _annoLongitude   = longitude
-            , _annoLatitude    = latitude
-            , _annoPublication = publication
+              _annoGeneticID    = geneticID
+            , _annoSuffix       = suffix
+            , _annoIndividualID = individualID
+            , _annoFullDate     = fullDate
+            , _annoMeanDate     = meanDate
+            , _annoLongitude    = longitude
+            , _annoLatitude     = latitude
+            , _annoPublication  = publication
             , _annoColumnsHashmap = m
             }
 
@@ -178,6 +181,7 @@ data JannoRow = JannoRow {
       jPoseidonID        :: T.Text
     , jGeneticSex        :: Char
     , jGroupName         :: T.Text
+    , jIndividualID      :: T.Text
     , jDateType          :: T.Text
     , jDateC14Labnr      :: ListColumn T.Text
     , jDateC14UncalBP    :: ListColumn Int
@@ -205,7 +209,7 @@ jannoHeader = [
       "Poseidon_ID"
     , "Genetic_Sex"
     , "Group_Name"
-    --, "Individual_ID"
+    , "Individual_ID"
     --, "Species"
     --, "Alternative_IDs", "Alternative_IDs_Context"
     --, "Relation_To", "Relation_Degree", "Relation_Type"
@@ -238,6 +242,7 @@ instance Csv.ToNamedRecord JannoRow where
           "Poseidon_ID"                     Csv..= jPoseidonID j
         , "Genetic_Sex"                     Csv..= jGeneticSex j
         , "Group_Name"                      Csv..= jGroupName j
+        , "Individual_ID"                   Csv..= jIndividualID j
         , "Date_Type"                       Csv..= jDateType j
         , "Date_C14_Labnr"                  Csv..= jDateC14Labnr j
         , "Date_C14_Uncal_BP"               Csv..= jDateC14UncalBP j
@@ -263,6 +268,7 @@ anno2janno (ind, anno) =
         jPoseidonID        = _annoGeneticID anno -- _iPoseidonID ind
       , jGeneticSex        = _iSex ind
       , jGroupName         = _iGroupName ind
+      , jIndividualID      = _annoIndividualID anno
       , jDateType          = getDateType $ _annoFullDate anno
       , jDateC14Labnr      = ListColumn $ map getLabCode $ getC14 $ _annoFullDate anno
       , jDateC14UncalBP    = ListColumn $ map (fst . getMeanSD) $ getC14 $ _annoFullDate anno
