@@ -89,7 +89,7 @@ out_references <- purrr::pmap(
   }
 )
 
-#### write final .bib file #### 
+#### write .bib file ####
 
 file.remove(paste0("tmp/bibtex.bib"))
 purrr::walk(
@@ -114,3 +114,11 @@ file.copy("tmp/bibtex.bib", "tmp/bibtex_mod.bib")
 # Unpublished: ?
 # AgelarakisAgelarakisJournalModernHellenism2026: https://reich.hms.harvard.edu/sites/reich.hms.harvard.edu/files/inline-files/014_%2BSt%2BIsidore%2BArticle%2B-Agelarakis_2026_0.pdf
 # MaierReicheLife2023: https://doi.org/10.7554/eLife.85492
+
+#### copy files to output directory ####
+file.copy("tmp/bibtex_mod.bib", "tmp/AADR_v66_1240K/AADR_v66_1240K.bib")
+file.copy("tmp/bibtex_mod.bib", "tmp/AADR_v66_2M/AADR_v66_2M.bib")
+file.copy("tmp/bibtex_mod.bib", "tmp/AADR_v66_2M_compatibility/AADR_v66_2M_compatibility.bib")
+file.copy("tmp/bibtex_mod.bib", "tmp/AADR_v66_HO/AADR_v66_HO.bib")
+file.copy("tmp/bibtex_mod.bib", "tmp/AADR_v66_HO_compatibility/AADR_v66_HO_compatibility.bib")
+
