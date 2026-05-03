@@ -280,8 +280,13 @@ anno2janno (ind, anno) =
 cleanPubKeys :: T.Text -> T.Text
 cleanPubKeys = T.filter (\x -> isAlphaNum x && isAscii x)
 
+isUnpublishedKey :: T.Text -> Bool
+isUnpublishedKey = T.isInfixOf "unpublished" . T.toLower
+
 addAADRPubKeys :: T.Text -> T.Text
-addAADRPubKeys x = x <> ";AADRv660;AADR"
+addAADRPubKeys x
+    | T.null x || isUnpublishedKey x = "AADRv660;AADR"
+    | otherwise = x <> ";AADRv660;AADR"
 
 suffix2ploidy :: T.Text -> T.Text
 suffix2ploidy x | T.isSuffixOf "DG" x = "diploid"

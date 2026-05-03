@@ -18,7 +18,10 @@ j_pub <- j %>%
     doi_url = AADR_Publication_DOI,
     doi = gsub("https://doi.org/", "", AADR_Publication_DOI)
   ) %>%
-  dplyr::distinct()
+  dplyr::distinct() %>%
+  # when there is no key in the AADR (e.g. "unpublished"),
+  # then only the AADR entries are here
+  dplyr::filter(!stringr::str_starts(pubkey, "AADR"))
 
 j_pub_solvable <- j_pub %>% dplyr::filter(grepl("https", doi_url))
 
@@ -44,9 +47,9 @@ system(paste0(
 # load result
 in_references <- bibtex::read.bib(paste0("tmp/bibtex_raw_entries.bib"))
 
-# 1. manual step: add field "journal" to some entries in "mod" version
+# manual step: add field "journal" to some entries in "mod" version
 file.copy("tmp/bibtex_raw_entries.bib", "tmp/bibtex_mod_entries.bib")
-# (some "journal = {bioRxiv}")
+# most common issue: missing "journal = {bioRxiv}"
 
 in_references <- bibtex::read.bib(paste0("tmp/bibtex_mod_entries.bib"))
 
@@ -100,6 +103,14 @@ purrr::walk(
   }
 )
 
-# manual step: add AADR references to References.bib
+# manual step: add missing references to "mod" version
+# can be checked with trident validate in the result packages
+file.copy("tmp/bibtex.bib", "tmp/bibtex_mod.bib")
 # AADRv660: https://doi.org/10.7910/DVN/FFIDCW
 # AADR: http://dx.doi.org/10.1038/s41597-024-03031-7
+# AkbariReichNature2026: https://doi.org/10.1038/s41586-026-10358-1
+# FernandesMegalithicUnpublished: ?
+# AntonioPritchardeLife2024: https://doi.org/10.7554/eLife.79714
+# Unpublished: ?
+# AgelarakisAgelarakisJournalModernHellenism2026: https://reich.hms.harvard.edu/sites/reich.hms.harvard.edu/files/inline-files/014_%2BSt%2BIsidore%2BArticle%2B-Agelarakis_2026_0.pdf
+# MaierReicheLife2023: https://doi.org/10.7554/eLife.85492
