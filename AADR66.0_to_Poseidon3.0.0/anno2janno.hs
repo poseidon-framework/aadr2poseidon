@@ -76,7 +76,10 @@ reportHeaderRenamings nameMap header = do
 
 writeJanno :: FilePath -> Csv.Header -> V.Vector JannoRow -> IO ()
 writeJanno path forwardHeader rows = do
-    let opts = Csv.defaultEncodeOptions { Csv.encDelimiter = fromIntegral (ord '\t') }
+    let opts = Csv.defaultEncodeOptions {
+            Csv.encDelimiter = fromIntegral (ord '\t')
+          , Csv.encUseCrLf   = False
+        }
         fullHeader = Csv.header (jannoHeader ++ V.toList forwardHeader)
         bs = Csv.encodeByNameWith opts fullHeader (V.toList rows)
     BL.writeFile path bs
