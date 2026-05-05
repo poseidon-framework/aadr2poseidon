@@ -281,7 +281,7 @@ anno2janno (ind, anno) =
       , jDateC14UncalBP    = ListColumn $ map (fst . getMeanSD) $ getC14 $ _annoFullDate anno
       , jDateC14UncalBPErr = ListColumn $ map (snd . getMeanSD) $ getC14 $ _annoFullDate anno
       , jDateBCADStart     = fst $ getAgeRange $ _annoFullDate anno
-      , jDateBCADMedian    = bp2bcece $ _annoMeanDate anno
+      , jDateBCADMedian    = getMedianAge (_annoFullDate anno) (_annoMeanDate anno)
       , jDateBCADStop      = snd $ getAgeRange $ _annoFullDate anno
       , jLongitude         = _annoLongitude anno
       , jLatitude          = _annoLatitude anno
@@ -329,6 +329,9 @@ getAgeRange :: FullDate -> (Maybe Int, Int)
 getAgeRange (ArchContextAge (AgeRange start stop)) = (start, stop)
 getAgeRange (C14Age (AgeRange start stop) _) = (start, stop)
 getAgeRange Present = (Just 2000, 2000)
+getMedianAge :: FullDate -> Int -> Int
+getMedianAge Present _ = 2000
+getMedianAge _ annoMeanDate = bp2bcece annoMeanDate
 
 -- #### age parser #### --
 -- full date
