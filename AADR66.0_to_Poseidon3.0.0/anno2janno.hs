@@ -20,8 +20,10 @@ import qualified Data.Vector            as V
 import qualified Text.Parsec            as P
 import qualified Text.Parsec.Combinator as P
 import qualified Text.Parsec.Text       as P
+import qualified Text.Parsec.Error      as P
 import qualified Data.Text.IO as TIO
 import           System.Directory      (createDirectoryIfMissing)
+import Control.Monad (guard)
 
 input  = "v66.1240K.aadr.PUB"
 output = "AADR_v66_1240K"
@@ -375,6 +377,22 @@ rules =
       , "3984-3368 calBCE [(5110±40 BP, Beta-194927), (4690±40 BP, Beta-202619)]")
     , ( "3000-1000 CE"
       , "3000-1000 BCE")
+    , ( "50-250 BCE", "50-250 CE" )
+    , ( "1400-1438 calBCE (520±20 BP)", "1400-1438 calCE (520±20 BP)")
+    , ( "1000-1200 BCE", "1000-1200 CE" )
+    , ( "650-800 BCE", "650-800 CE" )
+    , ( "600-650 BCE", "600-650 CE" )
+    , ( "550-650 BCE", "550-650 CE" )
+    , ( "400-650 BCE", "400-650 CE" )
+    , ( "850-1050 BCE", "850-1050 CE" )
+    , ( "601-758 calBCE (1380±30 BP)", "601-758 calCE (1380±30 BP)" )
+    , ( "591-661 calBCE (1420±30 BP)", "591-661 calCE (1420±30 BP)" )
+    , ( "431-587 calBCE (1550±30 BP)", "431-587 calCE (1550±30 BP)" )
+    , ( "50-200 BCE", "50-200 CE" )
+    , ( "213-361 calBCE (1780±30 BP)", "213-361 calCE (1780±30 BP)" )
+    , ( "950-1050 BCE", "950-1050 CE" )
+    , ( "1682-1936 calBCE", "1682-1936 calCE" )
+    , ( "1528-1799 calBCE", "1528-1799 calCE" )
     ]
 
 parseFullDate :: P.Parser FullDate
@@ -401,20 +419,26 @@ parseAgeRange = do
     start <- parseStart
     _ <- P.many P.space
     stop <- P.optionMaybe parseStop
-    case (start,stop) of
-        -- only one date case
-        ((True ,start',Just BCE), Nothing)          -> return (AgeRange Nothing ((-1)*start'))
-        ((False,start',Just BCE), Nothing)          -> return (AgeRange (Just ((-1)*start')) ((-1)*start'))
-        ((False,start',Just CE ), Nothing)          -> return (AgeRange (Just start') start')
-        ((False,start',Just BP ), Nothing)          -> return (AgeRange (Just $ bp2bcece start') (bp2bcece start'))
-        -- crossing BC/AD case
-        ((False,start',Just BCE), Just (stop',CE))  -> return (AgeRange (Just ((-1)*start')) stop')
-        -- regular range case
-        ((False,start',Nothing),  Just (stop',BCE)) -> return (AgeRange (Just ((-1)*start')) ((-1)*stop'))
-        ((False,start',Nothing),  Just (stop', CE)) -> return (AgeRange (Just start') stop')
-        ((False,start',Nothing),  Just (stop', BP)) -> return (AgeRange (Just $ bp2bcece start') (bp2bcece stop'))
-        -- anything else
-        _ -> error $ show (start,stop)
+    let range@(AgeRange start' stop') = case (start,stop) of
+            -- only one date case
+            ((True ,start',Just BCE), Nothing)          -> AgeRange Nothing ((-1)*start')
+            ((False,start',Just BCE), Nothing)          -> AgeRange (Just ((-1)*start')) ((-1)*start')
+            ((False,start',Just CE ), Nothing)          -> AgeRange (Just start') start'
+            ((False,start',Just BP ), Nothing)          -> AgeRange (Just $ bp2bcece start') (bp2bcece start')
+            -- crossing BC/AD case
+            ((False,start',Just BCE), Just (stop',CE))  -> AgeRange (Just ((-1)*start')) stop'
+            -- regular range case
+            ((False,start',Nothing),  Just (stop',BCE)) -> AgeRange (Just ((-1)*start')) ((-1)*stop')
+            ((False,start',Nothing),  Just (stop', CE)) -> AgeRange (Just start') stop'
+            ((False,start',Nothing),  Just (stop', BP)) -> AgeRange (Just $ bp2bcece start') (bp2bcece stop')
+            -- anything else
+            _ -> error $ show (start,stop)
+    -- logical consistency check: is the start age before the stop age
+    case start' of
+        Nothing -> return range
+        Just start'' -> do
+            guard (start'' <= stop') P.<?> "start before stop, but: " ++ show range
+            return range
 
 bp2bcece :: Int -> Int
 bp2bcece x = ((-1)*x) + 1950
