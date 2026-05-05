@@ -1,7 +1,7 @@
 #!/usr/bin/env stack
 {- stack script
  --resolver lts-22.43
- --package text,cassava,bytestring,vector,unordered-containers,parsec
+ --package text,cassava,bytestring,vector,unordered-containers,parsec,directory
  -}
 
 {-# LANGUAGE OverloadedStrings #-}
@@ -21,6 +21,7 @@ import qualified Text.Parsec            as P
 import qualified Text.Parsec.Combinator as P
 import qualified Text.Parsec.Text       as P
 import qualified Data.Text.IO as TIO
+import           System.Directory      (createDirectoryIfMissing)
 
 input  = "v66.1240K.aadr.PUB"
 output = "AADR_v66_1240K"
@@ -39,7 +40,7 @@ main = do
     nameMap <- readColumnNameMap "aadr_columns_renamed.csv"
     (forwardHeader, anno) <- readAnno nameMap $ "tmp/" ++ input ++ ".anno"
     let janno = V.map anno2janno $ V.zip indFile anno
-    writeJanno ("tmp/" ++  output ++ "/" ++  output ++ ".janno") forwardHeader janno
+    writeJanno ("tmp/" ++  output) (output ++ ".janno") forwardHeader janno
 
 readAnno :: ColumnNameMap -> FilePath -> IO (Csv.Header, V.Vector AnnoRow)
 readAnno nameMap path = do
@@ -74,15 +75,16 @@ reportHeaderRenamings nameMap header = do
         Nothing -> B8.putStrLn $ color red $ "> [UNCHANGED] " <> k
         Just k' -> B8.putStrLn $ color green $ "> " <> k <> " -> " <> k'
 
-writeJanno :: FilePath -> Csv.Header -> V.Vector JannoRow -> IO ()
-writeJanno path forwardHeader rows = do
+writeJanno :: FilePath -> FilePath -> Csv.Header -> V.Vector JannoRow -> IO ()
+writeJanno dir file forwardHeader rows = do
     let opts = Csv.defaultEncodeOptions {
             Csv.encDelimiter = fromIntegral (ord '\t')
           , Csv.encUseCrLf   = False
         }
         fullHeader = Csv.header (jannoHeader ++ V.toList forwardHeader)
         bs = Csv.encodeByNameWith opts fullHeader (V.toList rows)
-    BL.writeFile path bs
+    createDirectoryIfMissing True dir
+    BL.writeFile (dir <> "/" <> file) bs
 
 -- ### .ind file ### --
 data IndFileRow = IndFileRow {
