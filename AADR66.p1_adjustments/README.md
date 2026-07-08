@@ -9,4 +9,8 @@ The AADR v66 included data that was not supposed to be public. As stated in the 
 Here we document the steps undertaken to remove this data from the v66 Poseidon packages.
 
 1. Identify the samples that should be removed from the AADR v66.0 packages with `identify_jacobs_samples.R`. This generates the forge file `remove_jacobs_forgefile.txt`.
-2. 
+2. Create the subset packages with `subset_v66_packages.sh`.
+3. Clean up manually:
+    - Adjust the package description texts to mention the correct version (AADR v66.p1).
+
+We finally retired the v66.0 packages by adding them to the `archive.retired` file in the AADR archive repository.
